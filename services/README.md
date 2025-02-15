@@ -3,12 +3,10 @@
 
 # Project architecture
 
-# Project architecture
-
 > This mini project is organized into 3 Maven projects:
-> - the persistence with a mySQL DB => cambyze-banking-persistence-1.0.0.jar
-> - the services => cambyze-banking-services-1.0.0.jar
-> - the REST APIs => cambyze-banking-api-1.0.0.war
+> - the persistence with a mySQL DB => persistence-0.0.1-SNAPSHOT.jar
+> - the business services => services-0.0.1-SNAPSHOT.jar
+> - the REST APIs => banking-api.war
 >
 
 ## Glossary

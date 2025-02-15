@@ -1,13 +1,23 @@
 package com.cambyze.banking.api;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import javax.ws.rs.core.MediaType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
-class ApiApplicationTests {
+@AutoConfigureMockMvc
+public class ApiApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+  @Autowired
+  private MockMvc mockMvc;
+
+  @Test
+  public void testCreateNewBAN() throws Exception {
+    mockMvc.perform(post("/createBankAccount").contentType(MediaType.APPLICATION_JSON).content(""));
+  }
 
 }

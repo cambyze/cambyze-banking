@@ -2,15 +2,22 @@ package com.cambyze.banking.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.cambyze.banking.persistence.model.BankAccount;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.cambyze.banking.persistence.services.PersistenceServices;
 
 
 /**
  * Services to manage bank accounts
  */
+@Service
 public class BankingServices {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BankingServices.class);
+
+  @Autowired
+  private PersistenceServices persistenceServices;
+
 
 
   /**
@@ -18,10 +25,10 @@ public class BankingServices {
    * 
    * @return its BAN
    */
-  public static String createNewBankAccount() {
-    BankAccount ba = new BankAccount();
-    LOGGER.debug("New Bank account created; ");
-    return "";
+  public String createNewBankAccount() {
+    String ban = persistenceServices.createNewBankAccount();
+    LOGGER.debug("New BAN: " + ban);
+    return ban;
   }
 
 }
