@@ -4,8 +4,8 @@
 
 > This mini project is organized into 3 Maven projects:
 > - the persistence with a mySQL DB => persistence-0.0.1-SNAPSHOT.jar
-> - the services => services-0.0.1-SNAPSHOT.jar
-> - the REST APIs => api-0.0.1-SNAPSHOT.war
+> - the business services => services-0.0.1-SNAPSHOT.jar
+> - the REST APIs => banking-api.war
 >
 
 ## Glossary
