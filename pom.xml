@@ -10,9 +10,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.cambyze.banking</groupId>
-	<artifactId>cambyze-banking</artifactId>
-	<version>1.0.0</version>
-	<name>cambyze-banking</name>
+	<artifactId>banking</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>banking</name>
 	<description>Bank account management</description>
 	<packaging>pom</packaging>
 	<modules>

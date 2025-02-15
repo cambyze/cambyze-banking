@@ -5,12 +5,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.cambyze.banking</groupId>
-		<artifactId>cambyze-banking</artifactId>
-		<version>1.0.0</version>
+		<artifactId>banking</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>cambyze-banking-api</artifactId>
+	<artifactId>api</artifactId>
+	<name>api</name>
 	<packaging>war</packaging>
-	<name>cambyze-banking-api</name>
 	<description>API for the bank account management</description>
 	<dependencies>
 		<dependency>

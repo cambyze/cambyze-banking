@@ -11,6 +11,7 @@ import com.cambyze.banking.persistence.dao.BankAccountRepository;
 import com.cambyze.banking.persistence.model.BankAccount;
 import com.cambyze.banking.persistence.model.Constants;
 
+
 @SpringBootTest
 class PersistenceApplicationTests {
 

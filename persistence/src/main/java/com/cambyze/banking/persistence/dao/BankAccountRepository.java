@@ -3,8 +3,8 @@ package com.cambyze.banking.persistence.dao;
 import org.springframework.data.repository.CrudRepository;
 import com.cambyze.banking.persistence.model.BankAccount;
 
-/*
- * Auto-generated CRUD for the entity Bank Account
+/**
+ * CRUD for the entity Bank Account with auto-generated methods
  */
 public interface BankAccountRepository extends CrudRepository<BankAccount, Long> {
 
