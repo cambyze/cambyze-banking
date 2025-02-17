@@ -21,6 +21,8 @@
 >        "summary" : "Create a bank account",
 >        ...
 >
+> NB: to create the DB structure, do not forget to modify the property "spring.jpa.hibernate.ddl-auto" to "create" in the "application.properties" file
+>
 
 ## Glossary
 

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cambyze.banking.services.BankingServices;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
@@ -77,6 +78,13 @@ public class BankAccountController {
   @Produces("application/json")
   @Operation(summary = "Create a deposit in a bank account",
       description = "Create the deposit in the bank account and return its new balance",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "No request body needed, you have to use the required parameters: ban (the bank account number, ex: CAMBYZEBANK-2) & amount (the deposit amount, ex: 120.26)",
+          required = false),
+      parameters = {
+          @Parameter(required = true, description = "Bank Account Number",
+              example = "CAMBYZEBANK-2"),
+          @Parameter(required = true, description = "Deposit amount", example = "120.26")},
       responses = {@ApiResponse(description = "The new balance",
           content = @Content(mediaType = "BigDecimal"))})
   @Path("/createDeposit")
