@@ -1,15 +1,15 @@
 package com.cambyze.banking.persistence.dao;
 
 import org.springframework.data.repository.CrudRepository;
-import com.cambyze.banking.persistence.model.BankAccount;
+import com.cambyze.banking.persistence.model.Account;
 
 /**
  * CRUD for the entity Bank Account with auto-generated methods
  */
-public interface BankAccountRepository extends CrudRepository<BankAccount, Long> {
+public interface BankAccountRepository extends CrudRepository<Account, Long> {
 
-  BankAccount findById(long id);
+  Account findById(long id);
 
-  BankAccount findByBankAccountNumber(String bankAccountNumber);
+  Account findByBankAccountNumber(String bankAccountNumber);
 
 }

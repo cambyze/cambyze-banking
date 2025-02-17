@@ -7,6 +7,20 @@
 > - the business services => services-0.0.1-SNAPSHOT.jar
 > - the REST APIs => banking-api.war
 >
+> The OPEN API 3.0 documentation is generated automatically with SWAGGER in the folder "api\target\generated-OpenAPI-specification": openapi.json & openapi.yaml:
+>
+> {
+>  "openapi" : "3.0.1",
+>  "info" : {
+>    "title" : "Cambyze banking service",
+>    "description" : "Services to banking accounts",
+>    ...
+>     "paths" : {
+>    "/createBankAccount" : {
+>      "post" : {
+>        "summary" : "Create a bank account",
+>        ...
+>
 
 ## Glossary
 

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.cambyze.banking.persistence.dao.BankAccountRepository;
-import com.cambyze.banking.persistence.model.BankAccount;
+import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
 import com.cambyze.banking.persistence.services.PersistenceServices;
 
@@ -35,7 +35,7 @@ class PersistenceApplicationTests {
     LOGGER.debug("Test DAO");
 
     LOGGER.debug("Find a non existing BAN");
-    BankAccount ba = bankAccountRepository.findByBankAccountNumber("DOES NOT EXIST");
+    Account ba = bankAccountRepository.findByBankAccountNumber("DOES NOT EXIST");
     if (ba == null) {
       LOGGER.debug("The BAN does not exist, it's OK");
     } else {
@@ -43,7 +43,7 @@ class PersistenceApplicationTests {
     }
     assertTrue(ba == null);
 
-    ba = new BankAccount();
+    ba = new Account();
     bankAccountRepository.save(ba);
     LOGGER.debug("New BAN:" + ba.getBankAccountNumber());
     LOGGER.debug("New BA full content:" + ba.toString());
@@ -61,7 +61,7 @@ class PersistenceApplicationTests {
 
 
     // Test the findByBankAccountNumber method
-    BankAccount ba2 = bankAccountRepository.findByBankAccountNumber(ba.getBankAccountNumber());
+    Account ba2 = bankAccountRepository.findByBankAccountNumber(ba.getBankAccountNumber());
     LOGGER.debug("Verify the found BA full content:" + ba2.toString());
     // Both objects must be equal
     assertTrue(ba2.getId().equals(ba.getId()));

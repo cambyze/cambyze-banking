@@ -1,24 +1,33 @@
 package com.cambyze.banking.persistence.model;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostPersist;
+import jakarta.persistence.Table;
 
 /**
  * JPA entity for the bank account
  */
 @Entity
-public class BankAccount {
+@Table(name = "account")
+public class Account {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+  private Long accountId;
   private String bankAccountNumber;
   private int accountType;
   private BigDecimal balanceAmount;
   private BigDecimal overdraftAmount;
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "account", cascade = CascadeType.ALL)
+  private Set<Operation> operations = new LinkedHashSet<Operation>();
 
   /**
    * <p>
@@ -31,7 +40,7 @@ public class BankAccount {
    */
   @PostPersist
   private void postPersist() {
-    this.bankAccountNumber = "CAMBYZEBANK-" + this.id;
+    this.bankAccountNumber = "CAMBYZEBANK-" + this.accountId;
   }
 
 
@@ -39,7 +48,7 @@ public class BankAccount {
    * Create a new bank account as a everyday bank account
    */
 
-  public BankAccount() {
+  public Account() {
     super();
     this.accountType = Constants.ACCOUNT_TYPE_BANK;
     this.balanceAmount = BigDecimal.valueOf(0.0);
@@ -49,13 +58,25 @@ public class BankAccount {
   // Overriding toString() method for a better description
   @Override
   public String toString() {
-    return this.id + " : " + this.bankAccountNumber + " + " + this.accountType + " + "
+    String desc = this.accountId + " : " + this.bankAccountNumber + " + " + this.accountType + " + "
         + this.balanceAmount + " + " + this.overdraftAmount;
+
+    if (operations != null && operations.size() > 0) {
+      desc = desc + " + " + this.operations.size() + " operations";
+    } else {
+      desc = desc + " + no operations";
+    }
+    return desc;
   }
 
   public Long getId() {
-    return id;
+    return accountId;
   }
+
+  public Long getBankAccountId() {
+    return accountId;
+  }
+
 
   public String getBankAccountNumber() {
     return bankAccountNumber;
@@ -71,6 +92,11 @@ public class BankAccount {
 
   public BigDecimal getOverdraftAmount() {
     return overdraftAmount;
+  }
+
+
+  public Set<Operation> getBankingOperations() {
+    return operations;
   }
 
 }

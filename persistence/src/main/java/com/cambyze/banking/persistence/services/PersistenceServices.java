@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.cambyze.banking.persistence.dao.BankAccountRepository;
-import com.cambyze.banking.persistence.model.BankAccount;
+import com.cambyze.banking.persistence.model.Account;
 
 /**
  * DAO services to expose for the business services
@@ -25,7 +25,7 @@ public class PersistenceServices {
    * @return its BAN
    */
   public String createNewBankAccount() {
-    BankAccount ba = new BankAccount();
+    Account ba = new Account();
     bankAccountRepository.save(ba);
     LOGGER.debug("New BAN:" + ba.getBankAccountNumber());
     LOGGER.debug("New BA full content:" + ba.toString());
