@@ -1,12 +1,15 @@
 package com.cambyze.banking.api;
 
+import java.math.BigDecimal;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.cambyze.banking.services.BankingServices;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -50,6 +53,7 @@ public class BankAccountController {
 
   @POST
   @Consumes("application/json")
+  @Produces("application/json")
   @Operation(summary = "Create a bank account",
       description = "Create a bank account and return its bank account number",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -61,10 +65,28 @@ public class BankAccountController {
 
   @Path("/createBankAccount")
   @PostMapping("/createBankAccount")
-  public String calculateRate() {
+  public String createBankAccount() {
     String ban = bankingServices.createNewBankAccount();
     LOGGER.info("New created account: " + ban);
     return ban;
   }
+
+
+  @POST
+  @Consumes("application/json")
+  @Produces("application/json")
+  @Operation(summary = "Create a deposit in a bank account",
+      description = "Create the deposit in the bank account and return its new balance",
+      responses = {@ApiResponse(description = "The new balance",
+          content = @Content(mediaType = "BigDecimal"))})
+  @Path("/createDeposit")
+  @PostMapping("/createDeposit")
+  public BigDecimal createDeposit(@RequestParam(value = "ban") String ban,
+      @RequestParam(value = "amount") String amount) {
+    BigDecimal bigAmount = BigDecimal.valueOf(Double.parseDouble(amount));
+    BigDecimal newBalance = bankingServices.createDeposit(ban, bigAmount);
+    return newBalance;
+  }
+
 
 }

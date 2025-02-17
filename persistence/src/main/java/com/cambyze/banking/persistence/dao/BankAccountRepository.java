@@ -6,7 +6,10 @@ import com.cambyze.banking.persistence.model.Account;
 /**
  * CRUD for the entity Bank Account with auto-generated methods
  */
-public interface BankAccountRepository extends CrudRepository<Account, Long> {
+public interface BankAccountRepository
+    extends CrudRepository<Account, Long>, BaseRepository<Account, Long> {
+
+  Account findWithGraph(Long id, String graphName);
 
   Account findById(long id);
 

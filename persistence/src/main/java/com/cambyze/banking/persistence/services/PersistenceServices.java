@@ -1,11 +1,18 @@
 package com.cambyze.banking.persistence.services;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.cambyze.banking.persistence.dao.BankAccountRepository;
+import com.cambyze.banking.persistence.dao.BankingOperationRepository;
 import com.cambyze.banking.persistence.model.Account;
+import com.cambyze.banking.persistence.model.Constants;
+import com.cambyze.banking.persistence.model.Operation;
 
 /**
  * DAO services to expose for the business services
@@ -18,6 +25,8 @@ public class PersistenceServices {
   @Autowired
   private BankAccountRepository bankAccountRepository;
 
+  @Autowired
+  private BankingOperationRepository bankingOperationRepository;
 
   /**
    * Create a new bank account
@@ -36,5 +45,114 @@ public class PersistenceServices {
     return ba.getBankAccountNumber();
   }
 
+  /**
+   * Find a bank account by its bank account number
+   * 
+   * @param ban bank account number
+   * @return the bank account as entity Account or null if not exists
+   */
+  public Account findBankAccountByBAN(String ban) {
+    Account ba = bankAccountRepository.findByBankAccountNumber(ban);
+    if (ba != null) {
+      return ba;
+    } else {
+      return null;
+    }
+  }
+
+
+  /**
+   * Create a new banking operation
+   * 
+   * @param ba Bank Account of the operation to create
+   * @param opDate Date of the operation
+   * @param opType Type of operation, must be Constants.OPERATION_TYPE_DEPOSIT or
+   *        Constants.OPERATION_TYPE_WITHDRAW
+   * @param opAmount
+   * @return its internal id or -1 in case of error
+   */
+  public Long createNewBankingOperation(Account ba, LocalDate opDate, int opType,
+      BigDecimal opAmount) {
+    if (ba != null && ba.getId() != null && ba.getBankAccountNumber() != null
+        && ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
+      if (opDate != null && !opDate.isBefore(LocalDate.ofYearDay(1990, 1))
+          && !opDate.isAfter(LocalDate.ofYearDay(2500, 1))) {
+        if (opType == Constants.OPERATION_TYPE_DEPOSIT
+            || opType == Constants.OPERATION_TYPE_WITHDRAW) {
+          if (opAmount != null && opAmount.longValue() > 0.0) {
+            Operation op = new Operation(ba, opDate, opType, opAmount);
+            ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
+            bankingOperationRepository.save(op);
+            bankAccountRepository.save(ba);
+
+            LOGGER.debug("New situation of the bank account: " + ba);
+
+            if (op.getId() != null && op.getId() > 0) {
+              LOGGER.debug("Operation created: " + op);
+              return op.getId();
+            } else {
+              LOGGER.error("Operation not created: " + op);
+              return Long.valueOf(-1);
+            } // condition op.getID
+          } else {
+            LOGGER.error("Operation not created because the amount is invalid");
+            return Long.valueOf(-1);
+          } // condition opAmount
+
+        } else {
+          LOGGER.error("Operation not created because the operation type is wrong: " + opType);
+          return Long.valueOf(-1);
+        } // condition opType
+      } else {
+        LOGGER.error("Operation not created because the date is invalid: ");
+        return Long.valueOf(-1);
+      } // condition opDate
+    } else {
+      LOGGER.error("Operation not created because the bank account is invalid");
+      return Long.valueOf(-1);
+    } // condition bank account
+  }
+
+
+  /**
+   * Find banking operation with its id
+   * 
+   * @param id operation id
+   * @return the banking operation as an entity Operation else return null
+   */
+  public Operation findBankingOperationById(Long id) {
+    LOGGER.debug("Try to find an operation by its id: " + id);
+    Optional<Operation> optOperation = bankingOperationRepository.findById(id);
+    LOGGER.debug("Found operation ?: " + optOperation.isPresent());
+    if (optOperation.isPresent()) {
+      LOGGER.debug("Founding operation ?: " + optOperation.get().toString());
+      return optOperation.get();
+    } else {
+      return null;
+    }
+  }
+
+
+
+  /**
+   * 
+   * Returns the list of operations for a bank account
+   * 
+   * @param ban the Bank Account Number
+   * @return the list of operations else null
+   */
+  public Set<Operation> findBankingOperationsOfBankAccount(String ban) {
+    LOGGER.debug("Try to find operations by BAN: " + ban);
+    Account ba = bankAccountRepository.findByBankAccountNumber(ban);
+    ba = bankAccountRepository.findWithGraph(ba.getId(), ba.getGraph());
+    Set<Operation> operations = ba.getBankingOperations();
+    if (operations != null && !operations.isEmpty()) {
+      LOGGER.debug("List of operations for the BAN " + ban + " => " + operations);
+      return operations;
+    } else {
+      LOGGER.debug("List of operations is empty");
+      return null;
+    }
+  }
 
 }

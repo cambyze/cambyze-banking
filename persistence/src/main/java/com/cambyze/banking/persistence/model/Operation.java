@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.Locale;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +22,7 @@ public class Operation {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long operationId;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "account_id", nullable = false)
   private Account account;
   private LocalDate operationDate;

@@ -3,12 +3,13 @@ package com.cambyze.banking.persistence.model;
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import jakarta.persistence.CascadeType;
+import org.hibernate.Hibernate;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
@@ -17,6 +18,8 @@ import jakarta.persistence.Table;
  * JPA entity for the bank account
  */
 @Entity
+@NamedEntityGraph(name = "graph.Account.operations",
+    attributeNodes = @NamedAttributeNode("operations"))
 @Table(name = "account")
 public class Account {
   @Id
@@ -26,8 +29,10 @@ public class Account {
   private int accountType;
   private BigDecimal balanceAmount;
   private BigDecimal overdraftAmount;
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "account", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "account")
   private Set<Operation> operations = new LinkedHashSet<Operation>();
+
+  private final String GRAPH = "graph.Account.operations";
 
   /**
    * <p>
@@ -60,14 +65,14 @@ public class Account {
   public String toString() {
     String desc = this.accountId + " : " + this.bankAccountNumber + " + " + this.accountType + " + "
         + this.balanceAmount + " + " + this.overdraftAmount;
-
-    if (operations != null && operations.size() > 0) {
-      desc = desc + " + " + this.operations.size() + " operations";
-    } else {
-      desc = desc + " + no operations";
-    }
     return desc;
   }
+
+
+  public String getGraph() {
+    return GRAPH;
+  }
+
 
   public Long getId() {
     return accountId;
@@ -86,16 +91,30 @@ public class Account {
     return accountType;
   }
 
+  public void setAccountType(int accountType) {
+    this.accountType = accountType;
+  }
+
+
   public BigDecimal getBalanceAmount() {
     return balanceAmount;
+  }
+
+  public void setBalanceAmount(BigDecimal balanceAmount) {
+    this.balanceAmount = balanceAmount;
   }
 
   public BigDecimal getOverdraftAmount() {
     return overdraftAmount;
   }
 
+  public void setOverdraftAmount(BigDecimal overdraftAmount) {
+    this.overdraftAmount = overdraftAmount;
+  }
+
 
   public Set<Operation> getBankingOperations() {
+    Hibernate.initialize(this);
     return operations;
   }
 
