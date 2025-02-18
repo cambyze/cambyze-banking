@@ -71,4 +71,52 @@ public class BankingServices {
     } // condition on ba
   }
 
+
+  /**
+   * Request for an overdraft
+   * 
+   * @param ban the Bank Account Number
+   * @return the authorized overdraft amount else null and the return code within the object
+   *         AskOverdraftResponse
+   */
+  public AskOverdraftResponse askOverdraft(String ban) {
+    Account ba = persistenceServices.findBankAccountByBAN(ban);
+    if (ba != null && !ba.getBankAccountNumber().isEmpty()) {
+      if (ba.getAccountType() == Constants.ACCOUNT_TYPE_SAVINGS) {
+        LOGGER.error("Overdraft forbidden for saving accounts");
+        return new AskOverdraftResponse(null, Constants.OVERDRAFT_FORBID_SAVINGS_ACC);
+      }
+
+      persistenceServices.createOverdraft(ba);
+      LOGGER.debug("Overdraft OK: " + ba.getOverdraftAmount());
+      return new AskOverdraftResponse(ba.getOverdraftAmount(), Constants.SERVICE_OK);
+
+    } else {
+      LOGGER.error("The bank account does not exist for the BAN: " + ban);
+      return new AskOverdraftResponse(null, Constants.BANK_ACCOUNT_NOT_EXISTS);
+    } // condition on ba
+  }
+
+  /**
+   * Request for savings account
+   * 
+   * @param ban the Bank Account Number
+   * @return the return code
+   */
+  public int AskSavingsAccount(String ban) {
+    Account ba = persistenceServices.findBankAccountByBAN(ban);
+    if (ba != null && !ba.getBankAccountNumber().isEmpty()) {
+      if (ba.getOverdraftAmount().longValue() > 0.0) {
+        LOGGER.error("Saving account forbidden with overdraft amount");
+        return Constants.OVERDRAFT_FORBID_SAVINGS_ACC;
+      }
+      persistenceServices.transformIntoSavings(ba);
+      return Constants.SERVICE_OK;
+    } else {
+      LOGGER.error("The bank account does not exist for the BAN: " + ban);
+      return Constants.BANK_ACCOUNT_NOT_EXISTS;
+    } // condition on ba
+  }
+
+
 }

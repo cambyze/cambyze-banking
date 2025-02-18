@@ -128,5 +128,26 @@ class PersistenceApplicationTests {
     }
   }
 
+  @Test
+  void testOverdraftServices() {
+    // Success
+    LOGGER.debug("Test overdraft Services");
+    String ban = persistenceServices.createNewBankAccount();
+    Account ba = persistenceServices.findBankAccountByBAN(ban);
+    persistenceServices.createOverdraft(ba);
+    assertTrue(ba.getOverdraftAmount().equals(BigDecimal.valueOf(1500.0)));
+
+  }
+
+  @Test
+  void testSavingsServices() {
+    // Success
+    LOGGER.debug("Test savings Services");
+    String ban = persistenceServices.createNewBankAccount();
+    Account ba = persistenceServices.findBankAccountByBAN(ban);
+    persistenceServices.transformIntoSavings(ba);
+    assertTrue(ba.getAccountType() == Constants.ACCOUNT_TYPE_SAVINGS);
+
+  }
 
 }

@@ -158,4 +158,19 @@ public class PersistenceServices {
     }
   }
 
+  public void createOverdraft(Account ba) {
+    ba.setOverdraftAmount(BigDecimal.valueOf(1500.0));
+    bankAccountRepository.save(ba);
+    LOGGER.debug("************************ New overdraft amount :" + ba.getOverdraftAmount()
+        + " for the BAN: " + ba.getBankAccountNumber());
+  }
+
+  public void transformIntoSavings(Account ba) {
+    ba.setAccountType(Constants.ACCOUNT_TYPE_SAVINGS);
+    bankAccountRepository.save(ba);
+    LOGGER.debug(
+        "New account type :" + ba.getAccountType() + " for the BAN: " + ba.getBankAccountNumber());
+  }
+
+
 }

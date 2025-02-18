@@ -17,5 +17,6 @@ public class Constants {
   public static final int INVALID_AMOUNT = -3;
   public static final int INVALID_OPERATION_TYPE = -4;
   public static final int BANK_ACCOUNT_NOT_EXISTS = -5;
+  public static final int OVERDRAFT_FORBID_SAVINGS_ACC = -6;
   public static final int TECHNICAL_ERROR = -99;
 }

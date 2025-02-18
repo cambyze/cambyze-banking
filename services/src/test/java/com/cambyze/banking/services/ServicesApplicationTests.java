@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import com.cambyze.banking.persistence.model.Constants;
 
 @SpringBootTest
 class ServicesApplicationTests {
@@ -35,6 +36,26 @@ class ServicesApplicationTests {
     LOGGER.debug(
         "New balance after the deposit : " + createDepositResponse.getNewBalance().doubleValue());
     assertTrue(createDepositResponse.getNewBalance().doubleValue() == (oldBalance + 100.0));
+
+    // Ask for overdraft
+    AskOverdraftResponse overdraftAmountResp = bankingServices.askOverdraft(ban);
+    LOGGER.debug("Ask Overdraft response: " + overdraftAmountResp + " for BAN " + ban);
+    assertTrue(overdraftAmountResp.getOverdraftAmount().longValue() > 0);
+
+    // Ask for savings account - forbidden because there is an overdraft amount
+    int returnCode = bankingServices.AskSavingsAccount(ban);
+    LOGGER.debug("Transformation forbidden: " + returnCode);
+    assertTrue(returnCode == Constants.OVERDRAFT_FORBID_SAVINGS_ACC);
+
+    // new Bank Account
+    ban = bankingServices.createNewBankAccount();
+    LOGGER.debug("New BAN : " + ban);
+    assertTrue(ban.startsWith("CAMBYZEBANK"));
+    // Ask for savings account - forbidden because there is an overdraft amount
+    returnCode = bankingServices.AskSavingsAccount(ban);
+    LOGGER.debug("Transformation OK " + returnCode);
+    assertTrue(returnCode == Constants.SERVICE_OK);
+
 
   }
 }
