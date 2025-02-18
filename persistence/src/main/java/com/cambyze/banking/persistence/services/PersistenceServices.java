@@ -69,9 +69,12 @@ public class PersistenceServices {
    * @param opType Type of operation, must be Constants.OPERATION_TYPE_DEPOSIT or
    *        Constants.OPERATION_TYPE_WITHDRAW
    * @param opAmount
-   * @return its internal id or -1 in case of error
+   * @return its internal id or negative integer in case of error:
+   *         <p>
+   *         - Constants.INVALID_BANK_ACCOUNT
+   *         </p>
    */
-  public Long createNewBankingOperation(Account ba, LocalDate opDate, int opType,
+  public long createNewBankingOperation(Account ba, LocalDate opDate, int opType,
       BigDecimal opAmount) {
     if (ba != null && ba.getId() != null && ba.getBankAccountNumber() != null
         && ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
@@ -92,24 +95,24 @@ public class PersistenceServices {
               return op.getId();
             } else {
               LOGGER.error("Operation not created: " + op);
-              return Long.valueOf(-1);
+              return Long.valueOf(Constants.TECHNICAL_ERROR);
             } // condition op.getID
           } else {
             LOGGER.error("Operation not created because the amount is invalid");
-            return Long.valueOf(-1);
+            return Long.valueOf(Constants.INVALID_AMOUNT);
           } // condition opAmount
 
         } else {
           LOGGER.error("Operation not created because the operation type is wrong: " + opType);
-          return Long.valueOf(-1);
+          return Long.valueOf(Constants.INVALID_OPERATION_TYPE);
         } // condition opType
       } else {
         LOGGER.error("Operation not created because the date is invalid: ");
-        return Long.valueOf(-1);
+        return Long.valueOf(Constants.INVALID_DATE);
       } // condition opDate
     } else {
       LOGGER.error("Operation not created because the bank account is invalid");
-      return Long.valueOf(-1);
+      return Long.valueOf(Constants.INVALID_BANK_ACCOUNT);
     } // condition bank account
   }
 

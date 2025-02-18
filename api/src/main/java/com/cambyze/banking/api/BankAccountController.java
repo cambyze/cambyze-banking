@@ -11,7 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.cambyze.banking.api.microservice.exceptions.InvalidAmountException;
+import com.cambyze.banking.api.microservice.exceptions.InvalidBANException;
+import com.cambyze.banking.api.microservice.exceptions.InvalidDateException;
+import com.cambyze.banking.api.microservice.exceptions.InvalidOperationTypeException;
+import com.cambyze.banking.api.microservice.exceptions.RecordNotFoundException;
+import com.cambyze.banking.api.microservice.exceptions.TechnicalErrorException;
+import com.cambyze.banking.persistence.model.Constants;
 import com.cambyze.banking.services.BankingServices;
+import com.cambyze.banking.services.CreateDepositResponse;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -68,10 +76,32 @@ public class BankAccountController {
   @PostMapping("/createBankAccount")
   public String createBankAccount() {
     String ban = bankingServices.createNewBankAccount();
-    LOGGER.info("New created account: " + ban);
-    return ban;
+    if (ban != null && !ban.isEmpty()) {
+      LOGGER.info("New created account: " + ban);
+      return ban;
+    } else {
+      String msg = "Technical pb when creating a new bank account";
+      LOGGER.error(msg);
+      throw new TechnicalErrorException(msg);
+    }
   }
 
+  private RuntimeException functionalException(int returnCode) {
+    switch (returnCode) {
+      case Constants.BANK_ACCOUNT_NOT_EXISTS:
+        return new RecordNotFoundException("The bank account does not exist");
+      case Constants.INVALID_AMOUNT:
+        return new InvalidAmountException("The amount is invalid");
+      case Constants.INVALID_BANK_ACCOUNT:
+        return new InvalidBANException("The bank account is invalid");
+      case Constants.INVALID_DATE:
+        return new InvalidDateException("The date is invalid");
+      case Constants.INVALID_OPERATION_TYPE:
+        return new InvalidOperationTypeException("The operation type is invalid");
+      default:
+        return new TechnicalErrorException("Technical error");
+    }
+  }
 
   @POST
   @Consumes("application/json")
@@ -91,10 +121,29 @@ public class BankAccountController {
   @PostMapping("/createDeposit")
   public BigDecimal createDeposit(@RequestParam(value = "ban") String ban,
       @RequestParam(value = "amount") String amount) {
-    BigDecimal bigAmount = BigDecimal.valueOf(Double.parseDouble(amount));
-    BigDecimal newBalance = bankingServices.createDeposit(ban, bigAmount);
-    return newBalance;
-  }
 
+    BigDecimal bigAmount;
+    try {
+      bigAmount = BigDecimal.valueOf(Double.parseDouble(amount));
+    } catch (NumberFormatException e) {
+      String msg = "Invalid amount: " + e.getMessage();
+      LOGGER.error(msg);
+      throw new TechnicalErrorException(msg);
+    }
+
+    CreateDepositResponse createDepositResponse = bankingServices.createDeposit(ban, bigAmount);
+    if (createDepositResponse != null && createDepositResponse.getNewBalance() != null
+        && createDepositResponse.getReturnCode() == Constants.SERVICE_OK) {
+      return createDepositResponse.getNewBalance();
+    } else {
+      if (createDepositResponse == null) {
+        String msg = "Technical pb when creating a new banking operation";
+        LOGGER.error(msg);
+        throw new TechnicalErrorException(msg);
+      } else {
+        throw functionalException(createDepositResponse.getReturnCode());
+      }
+    }
+  }
 
 }

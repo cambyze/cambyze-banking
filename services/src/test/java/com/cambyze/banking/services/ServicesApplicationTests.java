@@ -23,15 +23,18 @@ class ServicesApplicationTests {
     LOGGER.debug("New BAN : " + ban);
     assertTrue(ban.startsWith("CAMBYZEBANK"));
 
-    BigDecimal newBalance = bankingServices.createDeposit(ban, BigDecimal.valueOf(1520.25));
-    LOGGER.debug("New balance after the deposit : " + newBalance.doubleValue());
-    assertTrue(newBalance.doubleValue() > 0.0);
+    CreateDepositResponse createDepositResponse =
+        bankingServices.createDeposit(ban, BigDecimal.valueOf(1520.25));
+    LOGGER.debug(
+        "New balance after the deposit : " + createDepositResponse.getNewBalance().doubleValue());
+    assertTrue(createDepositResponse.getNewBalance().doubleValue() > 0.0);
 
-    double oldBalance = newBalance.doubleValue();
+    double oldBalance = createDepositResponse.getNewBalance().doubleValue();
 
-    newBalance = bankingServices.createDeposit(ban, BigDecimal.valueOf(100.0));
-    LOGGER.debug("New balance after the deposit : " + newBalance.doubleValue());
-    assertTrue(newBalance.doubleValue() == (oldBalance + 100.0));
+    createDepositResponse = bankingServices.createDeposit(ban, BigDecimal.valueOf(100.0));
+    LOGGER.debug(
+        "New balance after the deposit : " + createDepositResponse.getNewBalance().doubleValue());
+    assertTrue(createDepositResponse.getNewBalance().doubleValue() == (oldBalance + 100.0));
 
   }
 }

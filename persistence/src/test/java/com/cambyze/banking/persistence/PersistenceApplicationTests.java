@@ -1,6 +1,5 @@
 package com.cambyze.banking.persistence;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -84,19 +83,19 @@ class PersistenceApplicationTests {
     LOGGER.debug("Test technical error");
     Long opId = persistenceServices.createNewBankingOperation(null, null, 0, null);
     LOGGER.debug("First error with null value then opId:" + opId);
-    assertTrue(opId == -1);
+    assertTrue(opId == Constants.INVALID_BANK_ACCOUNT);
 
     Account ba = null; // Bad idea ;)
     persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
         Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(100.0));
-    LOGGER.debug("Second error with bank account null then opId" + opId);
-    assertTrue(opId == -1);
+    LOGGER.debug("Second error with bank account null then opId:" + opId);
+    assertTrue(opId == Constants.INVALID_BANK_ACCOUNT);
 
     ba = new Account();
     opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
         Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(100.0));
     LOGGER.debug("Third error banking account invalid with Operation id: " + opId);
-    assertTrue(opId == -1);
+    assertTrue(opId == Constants.INVALID_BANK_ACCOUNT);
 
 
     String ban = persistenceServices.createNewBankAccount();
@@ -106,12 +105,12 @@ class PersistenceApplicationTests {
       opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
           Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(-100.0));
       LOGGER.debug("Error with negative amount : " + opId);
-      assertTrue(opId == -1);
+      assertTrue(opId == Constants.INVALID_AMOUNT);
 
       opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
           Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(100.0));
       LOGGER.debug("First success with Operation id: " + opId);
-      assertFalse(opId == -1);
+      assertTrue(opId > 0);
       Operation op = persistenceServices.findBankingOperationById(opId);
       LOGGER.debug("First success with Operation : " + op);
       assertTrue(op.getBankAccount().getBankAccountNumber().equals(ba.getBankAccountNumber()));
@@ -124,10 +123,9 @@ class PersistenceApplicationTests {
       assertTrue(!ops.isEmpty());
 
     } else {
-      LOGGER.debug("Anormal error banking account null ");
-      assertFalse(ba == null);
+      LOGGER.error("Anormal error banking account null ");
+      assertTrue(ba != null);
     }
-
   }
 
 
