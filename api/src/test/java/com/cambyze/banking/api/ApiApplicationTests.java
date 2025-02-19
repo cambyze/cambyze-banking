@@ -1,5 +1,6 @@
 package com.cambyze.banking.api;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import javax.ws.rs.core.MediaType;
@@ -24,10 +25,15 @@ public class ApiApplicationTests {
   public void testCreateNewBAN() throws Exception {
     mockMvc.perform(post("/createBankAccount").contentType(MediaType.APPLICATION_JSON).content(""))
         .andExpect(status().isOk());
+
+    mockMvc
+        .perform(post("/createSavingsAccount").contentType(MediaType.APPLICATION_JSON).content(""))
+        .andExpect(status().isOk());
+
   }
 
   @Test
-  public void testCreateDeposits() throws Exception {
+  public void testOperations() throws Exception {
     // test with bank account creation
     mockMvc.perform(post("/createBankAccount")).andExpect(status().isOk());
 
@@ -62,6 +68,25 @@ public class ApiApplicationTests {
     LOGGER.debug("We assume that at least the BAN " + ban + " exists");
     mockMvc.perform(post("/createDeposit").param("ban", ban).param("amount", amount))
         .andExpect(status().isOk());
+
+    // Successful test - we assume that the BAN "CAMBYZEBANK-1" exists
+    ban = "CAMBYZEBANK-1";
+    amount = "100.0";
+    LOGGER.debug("Withdraw on the BAN " + ban);
+    mockMvc.perform(post("/createWithdraw").param("ban", ban).param("amount", amount))
+        .andExpect(status().isOk());
+
+
+    // Successful test - we assume that the BAN "CAMBYZEBANK-1" exists
+    ban = "CAMBYZEBANK-1";
+    LOGGER.debug("Overdraft for the  " + ban);
+    mockMvc.perform(post("/requestOverdraft").param("ban", ban)).andExpect(status().isOk());
+
+
+    // Successful test - we assume that the BAN "CAMBYZEBANK-1" exists
+    ban = "CAMBYZEBANK-1";
+    LOGGER.debug("Bank statement for the  " + ban);
+    mockMvc.perform(get("/monthlyBankStatement").param("ban", ban)).andExpect(status().isOk());
 
   }
 
