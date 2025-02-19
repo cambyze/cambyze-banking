@@ -134,7 +134,7 @@ class PersistenceApplicationTests {
     LOGGER.debug("Test overdraft Services");
     String ban = persistenceServices.createNewBankAccount();
     Account ba = persistenceServices.findBankAccountByBAN(ban);
-    persistenceServices.createOverdraft(ba);
+    persistenceServices.createOverdraft(ba, BigDecimal.valueOf(1500.0));
     assertTrue(ba.getOverdraftAmount().equals(BigDecimal.valueOf(1500.0)));
 
   }
@@ -143,9 +143,8 @@ class PersistenceApplicationTests {
   void testSavingsServices() {
     // Success
     LOGGER.debug("Test savings Services");
-    String ban = persistenceServices.createNewBankAccount();
+    String ban = persistenceServices.createSavingsAccount();
     Account ba = persistenceServices.findBankAccountByBAN(ban);
-    persistenceServices.transformIntoSavings(ba);
     assertTrue(ba.getAccountType() == Constants.ACCOUNT_TYPE_SAVINGS);
 
   }
