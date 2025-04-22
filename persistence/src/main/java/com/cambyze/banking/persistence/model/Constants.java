@@ -1,5 +1,7 @@
 package com.cambyze.banking.persistence.model;
 
+// TODO: Move the constants to a better place
+
 /**
  * Constants for the project
  */

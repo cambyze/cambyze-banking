@@ -32,7 +32,7 @@ public class Account {
   @OneToMany(mappedBy = "account")
   private Set<Operation> operations = new LinkedHashSet<Operation>();
 
-  private final String GRAPH = "graph.Account.operations";
+  private final static String GRAPH = "graph.Account.operations";
 
   /**
    * <p>
@@ -63,9 +63,7 @@ public class Account {
   // Overriding toString() method for a better description
   @Override
   public String toString() {
-    String desc = this.accountId + " : " + this.bankAccountNumber + " + " + this.accountType + " + "
-        + this.balanceAmount + " + " + this.overdraftAmount;
-    return desc;
+	  return this.accountId + " : " + this.bankAccountNumber + " + " + this.accountType + " + " + this.balanceAmount + " + " + this.overdraftAmount;
   }
 
 
@@ -79,7 +77,7 @@ public class Account {
   }
 
   public Long getBankAccountId() {
-    return accountId;
+    return this.getId();
   }
 
 

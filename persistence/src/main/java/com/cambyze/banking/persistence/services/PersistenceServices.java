@@ -121,7 +121,69 @@ public class PersistenceServices {
     } // condition bank account
   }
 
-
+// TODO: Check if the following code is correct and replace the current one if OK
+//  public long createNewBankingOperation(Account ba, LocalDate opDate, int opType, BigDecimal opAmount) {
+//	  if (!isValidBankAccount(ba)) {
+//	    LOGGER.error("Operation not created because the bank account is invalid");
+//	    return Constants.INVALID_BANK_ACCOUNT;
+//	  }
+//
+//	  if (!isValidDate(opDate)) {
+//	    LOGGER.error("Operation not created because the date is invalid: " + opDate);
+//	    return Constants.INVALID_DATE;
+//	  }
+//
+//	  if (!isValidOperationType(opType)) {
+//	    LOGGER.error("Operation not created because the operation type is wrong: " + opType);
+//	    return Constants.INVALID_OPERATION_TYPE;
+//	  }
+//
+//	  if (!isValidAmount(opAmount)) {
+//	    LOGGER.error("Operation not created because the amount is invalid");
+//	    return Constants.INVALID_AMOUNT;
+//	  }
+//
+//	  Operation op = new Operation(ba, opDate, opType, opAmount);
+//
+//	  if (opType == Constants.OPERATION_TYPE_WITHDRAW) {
+//	    opAmount = opAmount.negate();
+//	  }
+//
+//	  ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
+//	  bankingOperationRepository.save(op);
+//	  bankAccountRepository.save(ba);
+//
+//	  LOGGER.debug("New situation of the bank account: " + ba);
+//
+//	  if (op.getId() != null && op.getId() > 0) {
+//	    LOGGER.debug("Operation created: " + op);
+//	    return op.getId();
+//	  } else {
+//	    LOGGER.error("Operation not created: " + op);
+//	    return Constants.TECHNICAL_ERROR;
+//	  }
+//	}
+//
+//	private boolean isValidBankAccount(Account ba) {
+//	  return ba != null && ba.getId() != null 
+//	      && ba.getBankAccountNumber() != null 
+//	      && ba.getBankAccountNumber().startsWith("CAMBYZEBANK");
+//	}
+//
+//	private boolean isValidDate(LocalDate date) {
+//	  return date != null 
+//	      && !date.isBefore(LocalDate.ofYearDay(1990, 1)) 
+//	      && !date.isAfter(LocalDate.ofYearDay(2500, 1));
+//	}
+//
+//	private boolean isValidOperationType(int opType) {
+//	  return opType == Constants.OPERATION_TYPE_DEPOSIT || opType == Constants.OPERATION_TYPE_WITHDRAW;
+//	}
+//
+//	private boolean isValidAmount(BigDecimal amount) {
+//	  return amount != null && amount.longValue() > 0;
+//	}
+//  
   /**
    * Find banking operation with its id
    * 
