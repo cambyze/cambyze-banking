@@ -2,8 +2,8 @@ package com.cambyze.banking.persistence.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +15,9 @@ import com.cambyze.banking.persistence.model.Constants;
 import com.cambyze.banking.persistence.model.Operation;
 
 /**
- * DAO services to expose for the business services
+ * Services to expose for the business services
  */
 @Service
-// @ComponentScan
 public class PersistenceServices {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceServices.class);
@@ -27,6 +26,8 @@ public class PersistenceServices {
   private BankAccountRepository bankAccountRepository;
   @Autowired
   private BankingOperationRepository bankingOperationRepository;
+  @Autowired
+  private SequenceGeneratorService sequenceGeneratorService;
 
   /**
    * Create a new bank account
@@ -35,30 +36,37 @@ public class PersistenceServices {
    */
   public String createNewBankAccount() {
     Account ba = new Account();
-    String externalRef = "CAMBYZEBANK-BANK0005";
+    long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
+    String externalRef = String.format("CAMBYZEBANK-%08d", seq);
     ba.setBankAccountNumber(externalRef);
     bankAccountRepository.save(ba);
     return ba.getBankAccountNumber();
   }
 
   /**
+   * <p>
    * Find a bank account by its bank account number
+   * </p>
+   * <p>
+   * It is a lazy mode service then the list of operations is empty
+   * </p>
    * 
-   * @param ban bank account number
+   * @param ban Bank Account Number
    * @return the bank account as entity Account or null if not exists
    */
   public Account findBankAccountByBAN(String ban) {
-    // Account ba = bankAccountRepository.findAll().stream().findFirst().orElse(null);
+    // Lazy mode
     Account ba = bankAccountRepository.findAll().stream()
-        .filter(findOp -> findOp.getBankAccountNumber().equals(ban)).findFirst().orElse(null);
+        .filter(p -> p.getBankAccountNumber().equalsIgnoreCase(ban)).findFirst().orElse(null);
     if (ba != null) {
+      LOGGER.debug("Retrieve account: " + ba.toString());
       return ba;
     } else {
+      LOGGER.debug("No account for the ban: " + ban);
       return null;
     }
 
   }
-
 
   /**
    * Create a new banking operation
@@ -82,7 +90,7 @@ public class PersistenceServices {
         if (opType == Constants.OPERATION_TYPE_DEPOSIT
             || opType == Constants.OPERATION_TYPE_WITHDRAW) {
           if (opAmount != null && opAmount.longValue() > 0.0) {
-            Operation op = new Operation(ba, opDate, opType, opAmount);
+            Operation op = new Operation(ba.getAccountId(), opDate, opType, opAmount);
             if (opType == Constants.OPERATION_TYPE_DEPOSIT) {
               ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
             } else {
@@ -120,91 +128,6 @@ public class PersistenceServices {
     } // condition bank account
   }
 
-  // TODO: Check if the following code is correct and replace the current one if OK
-  // public long createNewBankingOperation(Account ba, LocalDate opDate, int opType, BigDecimal
-  // opAmount) {
-  // if (!isValidBankAccount(ba)) {
-  // LOGGER.error("Operation not created because the bank account is invalid");
-  // return Constants.INVALID_BANK_ACCOUNT;
-  // }
-  //
-  // if (!isValidDate(opDate)) {
-  // LOGGER.error("Operation not created because the date is invalid: " + opDate);
-  // return Constants.INVALID_DATE;
-  // }
-  //
-  // if (!isValidOperationType(opType)) {
-  // LOGGER.error("Operation not created because the operation type is wrong: " + opType);
-  // return Constants.INVALID_OPERATION_TYPE;
-  // }
-  //
-  // if (!isValidAmount(opAmount)) {
-  // LOGGER.error("Operation not created because the amount is invalid");
-  // return Constants.INVALID_AMOUNT;
-  // }
-  //
-  // Operation op = new Operation(ba, opDate, opType, opAmount);
-  //
-  // if (opType == Constants.OPERATION_TYPE_WITHDRAW) {
-  // opAmount = opAmount.negate();
-  // }
-  //
-  // ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
-  // bankingOperationRepository.save(op);
-  // bankAccountRepository.save(ba);
-  //
-  // LOGGER.debug("New situation of the bank account: " + ba);
-  //
-  // if (op.getId() != null && op.getId() > 0) {
-  // LOGGER.debug("Operation created: " + op);
-  // return op.getId();
-  // } else {
-  // LOGGER.error("Operation not created: " + op);
-  // return Constants.TECHNICAL_ERROR;
-  // }
-  // }
-  //
-  // private boolean isValidBankAccount(Account ba) {
-  // return ba != null && ba.getId() != null
-  // && ba.getBankAccountNumber() != null
-  // && ba.getBankAccountNumber().startsWith("CAMBYZEBANK");
-  // }
-  //
-  // private boolean isValidDate(LocalDate date) {
-  // return date != null
-  // && !date.isBefore(LocalDate.ofYearDay(1990, 1))
-  // && !date.isAfter(LocalDate.ofYearDay(2500, 1));
-  // }
-  //
-  // private boolean isValidOperationType(int opType) {
-  // return opType == Constants.OPERATION_TYPE_DEPOSIT || opType ==
-  // Constants.OPERATION_TYPE_WITHDRAW;
-  // }
-  //
-  // private boolean isValidAmount(BigDecimal amount) {
-  // return amount != null && amount.longValue() > 0;
-  // }
-  //
-  /**
-   * Find banking operation with its id
-   * 
-   * @param id operation id
-   * @return the banking operation as an entity Operation else return null
-   */
-  public Operation findBankingOperationById(String id) {
-    LOGGER.debug("Try to find an operation by its id: " + id);
-    Optional<Operation> optOperation = bankingOperationRepository.findById(id);
-    LOGGER.debug("Found operation ?: " + optOperation.isPresent());
-    if (optOperation.isPresent()) {
-      LOGGER.debug("Founding operation ?: " + optOperation.get().toString());
-      return optOperation.get();
-    } else {
-      return null;
-    }
-  }
-
-
-
   /**
    * 
    * Returns the list of operations for a bank account
@@ -213,26 +136,25 @@ public class PersistenceServices {
    * @return the list of operations else null
    */
   public List<Operation> findBankingOperationsOfBankAccount(String ban) {
-    LOGGER.debug("-----------findBankingOperationsOfBankAccount: [" + ban + "]------------------");
-    // Account ba = bankAccountRepository.findByBankAccountNumber(ban);
-    Account ba = bankAccountRepository.findAll().stream()
-        .filter(findOp -> findOp.getBankAccountNumber().equals(ban)).findFirst().orElse(null);
-
-    LOGGER.debug("------| Test : " + bankAccountRepository.findAll().stream()
-        .filter(findOp -> findOp.getBankAccountNumber().equals(ban)).findFirst().orElse(null));
-
-
-    LOGGER.debug("=== Try to find operations by BAN: [" + ba + "]");
-    List<Operation> operations = ba.getBankingOperations();
-    LOGGER.debug("FIND BA bankAccoutRepository find with graph 22: {}", operations);
-    if (operations != null && !operations.isEmpty()) {
-      LOGGER.debug("List of operations for the BAN " + ban + " => " + operations);
-      return operations;
-    } else {
-      LOGGER.debug("List of operations is empty");
-      return null;
+    // Lazy mode
+    Account lazyBa = findBankAccountByBAN(ban);
+    if (lazyBa != null && lazyBa.getAccountId() != null) {
+      LOGGER.debug("[findBankingOperationsOfBankAccount] Found account with the id; "
+          + lazyBa.getAccountId());
+      List<Operation> operations =
+          bankingOperationRepository.findByAccountId(lazyBa.getAccountId());
+      if (operations != null && !operations.isEmpty()) {
+        LOGGER.debug("[findBankingOperationsOfBankAccount] Nb of operations for the account " + ban
+            + " = " + operations.size());
+        return operations;
+      }
     }
+    LOGGER
+        .debug("[findBankingOperationsOfBankAccount] List of operations is empty for the account + "
+            + ban);
+    return Collections.emptyList();
   }
+
 
   public void createOverdraft(Account ba, BigDecimal overDraftAmount) {
     ba.setOverdraftAmount(overDraftAmount);
@@ -243,20 +165,14 @@ public class PersistenceServices {
 
   public String createSavingsAccount() {
     Account ba = new Account();
-    ba.setAccountType(Constants.ACCOUNT_TYPE_SAVINGS);
-    // long seq = sequenceService.getNextSequence("bankAccountNumber");
-    // String externalRef = String.format("BANK-%08d", seq);
-    String externalRef = "CAMBYZEBANK-BANK0005";
+    long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
+    String externalRef = String.format("CAMBYZEBANK-%08d", seq);
     ba.setBankAccountNumber(externalRef);
     ba.setAccountType(Constants.ACCOUNT_TYPE_SAVINGS);
     bankAccountRepository.save(ba);
-    LOGGER.debug("New BAN:" + ba.getBankAccountNumber());
-    LOGGER.debug("New BA full content:" + ba.toString());
-    bankAccountRepository.save(ba);
-    LOGGER.debug(
-        "New account type :" + ba.getAccountType() + " for the BAN: " + ba.getBankAccountNumber());
+    LOGGER.debug("New savings account :" + ba.getAccountType() + " for the BAN: "
+        + ba.getBankAccountNumber());
     return ba.getBankAccountNumber();
   }
-
 
 }

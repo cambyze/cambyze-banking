@@ -15,12 +15,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Operation {
   @Id
   private String operationId;
-
-  private Account account;
+  // foreign key to Account
+  private String accountId;
   private LocalDate operationDate;
   private String operationType;
   private BigDecimal amount;
-
 
   private static final Locale LOCALE = new Locale("en", "US");
   private static final NumberFormat CURRENCY_FORMATTER = NumberFormat.getCurrencyInstance(LOCALE);
@@ -29,15 +28,14 @@ public class Operation {
   // Overriding toString() method for a better description
   @Override
   public String toString() {
-    return this.operationId + " : " + this.account.getBankAccountNumber() + " / "
-        + this.operationType + " / " + this.operationDate + " / "
-        + CURRENCY_FORMATTER.format(this.amount);
+    return this.operationId + " : " + this.accountId + " / " + this.operationType + " / "
+        + this.operationDate + " / " + CURRENCY_FORMATTER.format(this.amount);
   }
 
-  public Operation(Account account, LocalDate operationDate, String operationType,
+  public Operation(String accountId, LocalDate operationDate, String operationType,
       BigDecimal amount) {
     super();
-    this.account = account;
+    this.accountId = accountId;
     this.operationDate = operationDate;
     this.operationType = operationType;
     this.amount = amount;
@@ -50,14 +48,6 @@ public class Operation {
 
   public void setOperationId(String operationId) {
     this.operationId = operationId;
-  }
-
-  public Account getAccount() {
-    return account;
-  }
-
-  public void setAccount(Account account) {
-    this.account = account;
   }
 
   public LocalDate getOperationDate() {
@@ -82,6 +72,14 @@ public class Operation {
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
+  }
+
+  public String getAccountId() {
+    return accountId;
+  }
+
+  public void setAccountId(String accountId) {
+    this.accountId = accountId;
   }
 
 
