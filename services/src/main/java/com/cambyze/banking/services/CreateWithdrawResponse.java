@@ -8,19 +8,19 @@ import java.math.BigDecimal;
 public class CreateWithdrawResponse {
 
   private BigDecimal newBalance;
-  private int returnCode;
+  private String returnCode;
 
-  public CreateWithdrawResponse(BigDecimal newBalance, int error) {
+  public CreateWithdrawResponse(BigDecimal newBalance, String opId) {
     super();
     this.newBalance = newBalance;
-    this.returnCode = error;
+    this.returnCode = opId;
   }
 
   public BigDecimal getNewBalance() {
     return newBalance;
   }
 
-  public int getReturnCode() {
+  public String getReturnCode() {
     return returnCode;
   }
 

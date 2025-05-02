@@ -94,7 +94,7 @@ public class BankAccountController {
     }
   }
 
-  private RuntimeException functionalException(int returnCode) {
+  private RuntimeException functionalException(String returnCode) {
     switch (returnCode) {
       case Constants.BANK_ACCOUNT_NOT_EXISTS:
         return new RecordNotFoundException("The bank account does not exist");

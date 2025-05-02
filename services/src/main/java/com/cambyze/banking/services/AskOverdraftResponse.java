@@ -8,12 +8,12 @@ import java.math.BigDecimal;
 public class AskOverdraftResponse {
 
   private BigDecimal overdraftAmount;
-  private int returnCode;
+  private String returnCode;
 
-  public AskOverdraftResponse(BigDecimal overdraftAmount, int returnCode) {
+  public AskOverdraftResponse(BigDecimal overdraftAmount, String overdraftForbidSavingsAcc) {
     super();
     this.overdraftAmount = overdraftAmount;
-    this.returnCode = returnCode;
+    this.returnCode = overdraftForbidSavingsAcc;
   }
 
   // Overriding toString() method for a better description
@@ -28,7 +28,7 @@ public class AskOverdraftResponse {
     return overdraftAmount;
   }
 
-  public int getReturnCode() {
+  public String getReturnCode() {
     return returnCode;
   }
 

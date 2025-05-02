@@ -1,6 +1,5 @@
 package com.cambyze.banking.api.microservice;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 
@@ -11,7 +10,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
  */
 @NoRepositoryBean
-public interface PersistEntityDao<T extends PersistEntity> extends JpaRepository<T, Long> {
+public interface PersistEntityDao<T extends PersistEntity> {
 
   /**
    * find a persistence entity with its reference

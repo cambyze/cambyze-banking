@@ -8,19 +8,19 @@ import java.math.BigDecimal;
 public class CreateDepositResponse {
 
   private BigDecimal newBalance;
-  private int returnCode;
+  private String returnCode;
 
-  public CreateDepositResponse(BigDecimal newBalance, int error) {
+  public CreateDepositResponse(BigDecimal newBalance, String savingsLimitReached) {
     super();
     this.newBalance = newBalance;
-    this.returnCode = error;
+    this.returnCode = savingsLimitReached;
   }
 
   public BigDecimal getNewBalance() {
     return newBalance;
   }
 
-  public int getReturnCode() {
+  public String getReturnCode() {
     return returnCode;
   }
 

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,16 +68,15 @@ public class BankingServices {
         return new CreateDepositResponse(null, Constants.SAVINGS_LIMIT_REACHED);
 
       }
-      long opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
+      String opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
           Constants.OPERATION_TYPE_DEPOSIT, amount);
-      if (opId > 0) {
+      if (!opId.isEmpty()) {
         LOGGER.debug("The deposit is ok for the BAN: " + ban + " and the new balance is "
             + ba.getBalanceAmount());
         ba = persistenceServices.findBankAccountByBAN(ban);
         return new CreateDepositResponse(ba.getBalanceAmount(), Constants.SERVICE_OK);
       } else {
-        int intOpId = (int) opId;
-        return new CreateDepositResponse(null, intOpId);
+        return new CreateDepositResponse(null, opId);
       } // condition on opid
     } else {
       LOGGER.error("The bank account does not exist for the BAN: " + ban);
@@ -133,21 +131,20 @@ public class BankingServices {
       double newCalculatedBalance = ba.getBalanceAmount().doubleValue()
           + ba.getOverdraftAmount().doubleValue() - amount.doubleValue();
       if (newCalculatedBalance < 0.0) {
-        LOGGER.error("Not enough money available for the withdraw for the BAN: " + ban);
+        LOGGER.error("Not enough money available for the withdraw for the BAN: {}", ban);
         return new CreateWithdrawResponse(null, Constants.INSUFFICIENT_BALANCE);
 
       } else {
-        long opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
+        String opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
             Constants.OPERATION_TYPE_WITHDRAW, amount);
 
-        if (opId > 0) {
-          LOGGER.debug("The withdraw is ok for the BAN: " + ban + " and the new balance is "
-              + ba.getBalanceAmount());
+        if (!opId.isEmpty()) {
+          LOGGER.debug("The withdraw is ok for the BAN: {} and the new balance is {}", ban,
+              ba.getBalanceAmount());
           ba = persistenceServices.findBankAccountByBAN(ban);
           return new CreateWithdrawResponse(ba.getBalanceAmount(), Constants.SERVICE_OK);
         } else {
-          int intOpId = (int) opId;
-          return new CreateWithdrawResponse(null, intOpId);
+          return new CreateWithdrawResponse(null, opId);
         } // condition on opid
       } // condition on newCalculatedBalance
     } else {
@@ -162,15 +159,15 @@ public class BankingServices {
     // Add all the operations between now and one month before
     LocalDate limDate = LocalDate.now().minusMonths(1);
     List<MonthlyBankStatementOperation> bkops = new ArrayList<MonthlyBankStatementOperation>();
-    Set<Operation> ops = persistenceServices.findBankingOperationsOfBankAccount(ban);
+    List<Operation> ops = persistenceServices.findBankingOperationsOfBankAccount(ban);
     if (ops != null) {
-      LOGGER.debug("Number of operations before :" + ops.size());
+      LOGGER.debug("Number of operations before: {}", ops.size());
       for (Operation op : ops) {
         if (op.getOperationDate().isAfter(limDate)) {
           bkops.add(new MonthlyBankStatementOperation(op));
         }
       }
-      LOGGER.debug("Number of operations after :" + bkops.size());
+      LOGGER.debug("Number of operations after: {}", bkops.size());
     }
 
     // Sort the list by date
@@ -179,16 +176,16 @@ public class BankingServices {
     };
     Collections.sort(bkops, reverseComparator);
 
-    LOGGER.debug("List of bank statement operations : " + bkops);
+    LOGGER.debug("List of bank statement operations: {}", bkops);
 
     // Find information about the bank account
     Account ba = persistenceServices.findBankAccountByBAN(ban);
     if (ba != null && !ba.getBankAccountNumber().isEmpty()) {
       MonthlyBankStatement bk = new MonthlyBankStatement(ba, bkops);
-      LOGGER.debug("Generated bank statement : " + bk);
+      LOGGER.debug("Generated bank statement : {}", bk);
       return bk;
     } else {
-      LOGGER.error("Error when searching the BAN : " + ban);
+      LOGGER.error("Error when searching the BAN: {}", ban);
       return null;
     }
   }
@@ -211,7 +208,7 @@ public class BankingServices {
 
       // Create several operations for Junit Test of the bank statement
 
-      long opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now().minusYears(1),
+      String opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now().minusYears(1),
           Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(150.25));
 
       opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now().minusMonths(10),
@@ -244,17 +241,16 @@ public class BankingServices {
       opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
           Constants.OPERATION_TYPE_WITHDRAW, BigDecimal.valueOf(1150.25));
 
-      if (opId > 0) {
-        LOGGER.debug("The deposit is ok for the BAN: " + ban + " and the new balance is "
-            + ba.getBalanceAmount());
+      if (!opId.isEmpty()) {
+        LOGGER.debug("The deposit is ok for the BAN: {} and the new balance is {}", ban,
+            ba.getBalanceAmount());
         ba = persistenceServices.findBankAccountByBAN(ban);
         return new CreateDepositResponse(ba.getBalanceAmount(), Constants.SERVICE_OK);
       } else {
-        int intOpId = (int) opId;
-        return new CreateDepositResponse(null, intOpId);
+        return new CreateDepositResponse(null, opId);
       } // condition on opid
     } else {
-      LOGGER.error("The bank account does not exist for the BAN: " + ban);
+      LOGGER.error("The bank account does not exist for the BAN: {}", ban);
       return new CreateDepositResponse(null, Constants.BANK_ACCOUNT_NOT_EXISTS);
     } // condition on ba
   }
