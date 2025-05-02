@@ -4,29 +4,21 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.Locale;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 
 /**
- * JPA entity for the banking operations
+ * Entity for the banking operations
  */
-@Entity
-@Table(name = "operation")
+@Document(collection = "operations")
 public class Operation {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long operationId;
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "account_id", nullable = false)
+  private String operationId;
+
   private Account account;
   private LocalDate operationDate;
-  private int operationType;
+  private String operationType;
   private BigDecimal amount;
 
 
@@ -42,42 +34,55 @@ public class Operation {
         + CURRENCY_FORMATTER.format(this.amount);
   }
 
-  public Operation() {
-    super();
-  }
-
-  public Operation(Account bankAccount, LocalDate operationDate, int operationType,
+  public Operation(Account account, LocalDate operationDate, String operationType,
       BigDecimal amount) {
     super();
-    this.account = bankAccount;
+    this.account = account;
     this.operationDate = operationDate;
     this.operationType = operationType;
     this.amount = amount;
   }
 
-  public Long getId() {
+  public String getId() {
+
     return operationId;
   }
 
-  public Long getBankingOperationId() {
-    return operationId;
+  public void setOperationId(String operationId) {
+    this.operationId = operationId;
   }
 
-
-  public Account getBankAccount() {
+  public Account getAccount() {
     return account;
+  }
+
+  public void setAccount(Account account) {
+    this.account = account;
   }
 
   public LocalDate getOperationDate() {
     return operationDate;
   }
 
-  public int getOperationType() {
+  public void setOperationDate(LocalDate operationDate) {
+    this.operationDate = operationDate;
+  }
+
+  public String getOperationType() {
     return operationType;
+  }
+
+  public void setOperationType(String operationType) {
+    this.operationType = operationType;
   }
 
   public BigDecimal getAmount() {
     return amount;
   }
+
+  public void setAmount(BigDecimal amount) {
+    this.amount = amount;
+  }
+
 
 }
