@@ -1,11 +1,18 @@
 package com.cambyze.banking.persistence.model;
 
-// TODO: Move the constants to a better place
+import java.time.LocalDate;
+
+// TODO: Move the constants to a dedicated maven project
 
 /**
  * Constants for the project
  */
 public class Constants {
+
+  private Constants() {
+    throw new IllegalStateException("Constants class");
+  }
+
   // Attributes of a bank account
   public static final String ACCOUNT_TYPE_BANK = "1";
   public static final String ACCOUNT_TYPE_SAVINGS = "2";
@@ -27,4 +34,8 @@ public class Constants {
   public static final String INSUFFICIENT_BALANCE = "-7";
   public static final String SAVINGS_LIMIT_REACHED = "-8";
   public static final String TECHNICAL_ERROR = "-99";
+
+  // Date limits
+  public static final LocalDate MIN_OPERATION_DATE = LocalDate.of(1990, 1, 1);
+  public static final LocalDate MAX_OPERATION_DATE = LocalDate.of(2500, 1, 1);
 }

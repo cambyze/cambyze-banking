@@ -56,8 +56,7 @@ public class PersistenceServices {
    */
   public Account findBankAccountByBAN(String ban) {
     // Lazy mode
-    Account ba = bankAccountRepository.findAll().stream()
-        .filter(p -> p.getBankAccountNumber().equalsIgnoreCase(ban)).findFirst().orElse(null);
+    Account ba = bankAccountRepository.findByBankAccountNumberIgnoreCase(ban);
     if (ba != null) {
       LOGGER.debug("Retrieve account: " + ba.toString());
       return ba;
@@ -85,8 +84,8 @@ public class PersistenceServices {
       BigDecimal opAmount) {
     if (ba != null && ba.getId() != null && ba.getBankAccountNumber() != null
         && ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
-      if (opDate != null && !opDate.isBefore(LocalDate.ofYearDay(1990, 1))
-          && !opDate.isAfter(LocalDate.ofYearDay(2500, 1))) {
+      if (opDate != null && !opDate.isBefore(Constants.MIN_OPERATION_DATE)
+          && !opDate.isAfter(Constants.MAX_OPERATION_DATE)) {
         if (opType == Constants.OPERATION_TYPE_DEPOSIT
             || opType == Constants.OPERATION_TYPE_WITHDRAW) {
           if (opAmount != null && opAmount.longValue() > 0.0) {
@@ -119,7 +118,7 @@ public class PersistenceServices {
           return Constants.INVALID_OPERATION_TYPE;
         } // condition opType
       } else {
-        LOGGER.error("Operation not created because the date is invalid: ");
+        LOGGER.error("Operation not created because the date is invalid: {}", opDate);
         return Constants.INVALID_DATE;
       } // condition opDate
     } else {
