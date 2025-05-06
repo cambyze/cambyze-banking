@@ -25,7 +25,6 @@ public class BankingServices {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BankingServices.class);
 
-  // @Autowired
   private PersistenceServices persistenceServices;
 
   public BankingServices(PersistenceServices persistenceServices) {
@@ -57,7 +56,6 @@ public class BankingServices {
    *         </p>
    */
   public CreateDepositResponse createDeposit(String ban, BigDecimal amount) {
-    LOGGER.debug("___| CREATEDeposit |__");
     Account ba = persistenceServices.findBankAccountByBAN(ban);
     LOGGER.debug(" ban : {}, amount: {}", ban, amount);
     if (ba != null && !ba.getBankAccountNumber().isEmpty()) {

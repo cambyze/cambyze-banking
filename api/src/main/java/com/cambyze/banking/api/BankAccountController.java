@@ -161,36 +161,27 @@ public class BankAccountController {
   @PostMapping("/createDeposit")
   public BigDecimal createDeposit(@RequestParam(value = "ban") String ban,
       @RequestParam(value = "amount") String amount) {
-    LOGGER.debug("-------------|CreateDeposit|---------------");
     BigDecimal bigAmount;
     try {
-      LOGGER.debug("___|TRY PASSE|____");
       bigAmount = BigDecimal.valueOf(Double.parseDouble(amount));
-      LOGGER.debug("__Ammount[{}]___", bigAmount);
     } catch (NumberFormatException e) {
       String msg = "Invalid amount: " + e.getMessage();
       LOGGER.error(msg);
       throw new TechnicalErrorException(msg);
     }
 
-    LOGGER.debug("___|TRY PASSE 2|____");
     CreateDepositResponse createDepositResponse = bankingServices.createDeposit(ban, bigAmount);
-    LOGGER.debug("--try Depository response [{}]--", createDepositResponse);
     if (createDepositResponse != null && createDepositResponse.getNewBalance() != null
         && createDepositResponse.getReturnCode().equals(Constants.SERVICE_OK)) {
-      LOGGER.debug("___|TRY PASSE 3|____");
       LOGGER.debug("createDepositResponse.getNewBalance() : {}",
           createDepositResponse.getNewBalance());
       return createDepositResponse.getNewBalance();
     } else {
-      LOGGER.debug("___|TRY PASSE 4|____");
       if (createDepositResponse == null) {
-        LOGGER.debug("___|TRY PASSE 5|____");
         String msg = "Technical pb when creating a new banking operation";
         LOGGER.error(msg);
         throw new TechnicalErrorException(msg);
       } else {
-        LOGGER.debug("___|TRY PASSE 6|____");
         throw functionalException(createDepositResponse.getReturnCode());
       }
     }

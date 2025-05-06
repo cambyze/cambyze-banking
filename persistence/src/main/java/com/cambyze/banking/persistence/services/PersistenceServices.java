@@ -89,55 +89,6 @@ public class PersistenceServices {
    *         - Constants.INVALID_BANK_ACCOUNT
    *         </p>
    */
-  // public String createNewBankingOperation(Account ba, LocalDate opDate, String opType,
-  // BigDecimal opAmount) {
-  // LOGGER.debug("+++ ba: {} opDate: {} opType: {} opAmount: {} ", ba, opDate, opType, opAmount);
-  // if (ba != null && ba.getId() != null && ba.getBankAccountNumber() != null
-  // && ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
-  // if (opDate != null && !opDate.isBefore(Constants.MIN_OPERATION_DATE)
-  // && !opDate.isAfter(Constants.MAX_OPERATION_DATE)) {
-  // if (Constants.OPERATION_TYPE_DEPOSIT.equals(opType)
-  // || Constants.OPERATION_TYPE_WITHDRAW.equals(opType)) {
-  // if (opAmount != null && opAmount.longValue() > 0.0) {
-  // Operation op = new Operation(ba.getAccountId(), opDate, opType, opAmount);
-  // if (Constants.OPERATION_TYPE_DEPOSIT.equals(opType)) {
-  // ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
-  // } else {
-  // opAmount = opAmount.negate();
-  // ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
-  // }
-  // bankingOperationRepository.save(op);
-  // bankAccountRepository.save(ba);
-  //
-  // LOGGER.debug("New situation of the bank account: {}", ba);
-  // LOGGER.debug("op.getID(): {} op.getId().isEmpty(): {}", op.getId(),
-  // op.getId().isEmpty());
-  // if (op.getId() != null && !op.getId().isEmpty()) {
-  // LOGGER.debug("Operation created: {}", op);
-  // return op.getId();
-  // } else {
-  // LOGGER.error("Operation not created: {}", op);
-  // return Constants.TECHNICAL_ERROR;
-  // } // condition op.getID
-  // } else {
-  // LOGGER.error("Operation not created because the amount is invalid");
-  // return Constants.INVALID_AMOUNT;
-  // } // condition opAmount
-  //
-  // } else {
-  // LOGGER.error("Operation not created because the operation type is wrong: {}", opType);
-  // return Constants.INVALID_OPERATION_TYPE;
-  // } // condition opType
-  // } else {
-  // LOGGER.error("Operation not created because the date is invalid: {}", opDate);
-  // return Constants.INVALID_DATE;
-  // } // condition opDate
-  // } else {
-  // LOGGER.error("Operation not created because the bank account is invalid");
-  // return Constants.INVALID_BANK_ACCOUNT;
-  // } // condition bank account
-  // }
-
   public String createNewBankingOperation(Account ba, LocalDate opDate, String opType,
       BigDecimal opAmount) {
     Operation op;

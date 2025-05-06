@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-/* public */ class ApiApplicationTests {
+class ApiApplicationTests {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ApiApplicationTests.class);
 
@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
   private MockMvc mockMvc;
 
   @Test
-  /* public */ void testCreateNewBAN() throws Exception {
+  void testCreateNewBAN() throws Exception {
     mockMvc.perform(post("/createBankAccount").contentType(MediaType.APPLICATION_JSON).content(""))
         .andExpect(status().isOk());
 
@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
   }
 
   @Test
-  /* public */ void testOperations() throws Exception {
+  void testOperations() throws Exception {
     // test with bank account creation
     mockMvc.perform(post("/createBankAccount")).andExpect(status().isOk());
 
@@ -63,10 +63,7 @@ import org.springframework.test.web.servlet.MockMvc;
     mockMvc.perform(post("/createDeposit").param("ban", ban).param("amount", amount))
         .andExpect(status().isBadRequest());
 
-    mockMvc.perform(post("/createDeposit").param("ban", ban).param("amount", amount));
-
-
-    // Successful test - we assume that the BAN "CAMBYZEBANK-1" exists
+    // Successful test - we assume that the BAN "CAMBYZEBANK-00000001" exists
     ban = "CAMBYZEBANK-00000001";
     amount = "120.0";
     LOGGER.debug("We assume that at least the BAN {} exists ", ban);
@@ -74,9 +71,7 @@ import org.springframework.test.web.servlet.MockMvc;
     mockMvc.perform(post("/createDeposit").param("ban", ban).param("amount", amount))
         .andExpect(status().isOk());
 
-    mockMvc.perform(post("/createDeposit").param("ban", ban).param("amount", amount));
-
-    // Successful test - we assume that the BAN "CAMBYZEBANK-1" exists
+    // Successful test - we assume that the BAN "CAMBYZEBANK-00000001" exists
     ban = "CAMBYZEBANK-00000001";
     amount = "100.0";
     LOGGER.debug("Withdraw on the BAN {}", ban);
@@ -84,23 +79,18 @@ import org.springframework.test.web.servlet.MockMvc;
     mockMvc.perform(post("/createDeposit").param("ban", ban).param("amount", amount))
         .andExpect(status().isOk());
 
-    mockMvc.perform(post("/createDeposit").param("ban", ban).param("amount", amount));
-
-    // Successful test - we assume that the BAN "CAMBYZEBANK-1" exists
+    // Successful test - we assume that the BAN "CAMBYZEBANK-00000001" exists
     ban = "CAMBYZEBANK-00000001";
     LOGGER.debug("Overdraft for the {} ", ban);
 
     mockMvc.perform(post("/requestOverdraft").param("ban", ban)).andExpect(status().isOk());
 
-    mockMvc.perform(post("/requestOverdraft").param("ban", ban));
 
-    // Successful test - we assume that the BAN "CAMBYZEBANK-1" exists
+    // Successful test - we assume that the BAN "CAMBYZEBANK-00000001" exists
     ban = "CAMBYZEBANK-00000001";
     LOGGER.debug("Bank statement for the  {}", ban);
 
     mockMvc.perform(get("/monthlyBankStatement").param("ban", ban)).andExpect(status().isOk());
-
-    mockMvc.perform(get("/monthlyBankStatement").param("ban", ban));
 
   }
 
