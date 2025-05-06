@@ -18,7 +18,7 @@ public abstract class PersistEntity {
   /**
    * Generic constructor to override in inherited classes
    */
-  public PersistEntity(String reference) {
+  protected PersistEntity(String reference) {
     super();
     this.setReference(reference);
   }
@@ -26,7 +26,7 @@ public abstract class PersistEntity {
   /**
    * Generic constructor to override in inherited classes
    */
-  public PersistEntity() {
+  protected PersistEntity() {
     super();
   }
 

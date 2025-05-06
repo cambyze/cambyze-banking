@@ -22,12 +22,21 @@ public class PersistenceServices {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceServices.class);
 
-  @Autowired
+
   private BankAccountRepository bankAccountRepository;
-  @Autowired
+
   private BankingOperationRepository bankingOperationRepository;
-  @Autowired
+
   private SequenceGeneratorService sequenceGeneratorService;
+
+  @Autowired
+  public PersistenceServices(BankAccountRepository bankAccountRepository,
+      BankingOperationRepository bankingOperationRepository,
+      SequenceGeneratorService sequenceGeneratorService) {
+    this.bankAccountRepository = bankAccountRepository;
+    this.bankingOperationRepository = bankingOperationRepository;
+    this.sequenceGeneratorService = sequenceGeneratorService;
+  }
 
   /**
    * Create a new bank account
@@ -58,10 +67,10 @@ public class PersistenceServices {
     // Lazy mode
     Account ba = bankAccountRepository.findByBankAccountNumberIgnoreCase(ban);
     if (ba != null) {
-      LOGGER.debug("Retrieve account: " + ba.toString());
+      LOGGER.debug("Retrieve account: {}", ba);
       return ba;
     } else {
-      LOGGER.debug("No account for the ban: " + ban);
+      LOGGER.debug("No account for the ban: {}", ban);
       return null;
     }
 
@@ -80,51 +89,102 @@ public class PersistenceServices {
    *         - Constants.INVALID_BANK_ACCOUNT
    *         </p>
    */
+  // public String createNewBankingOperation(Account ba, LocalDate opDate, String opType,
+  // BigDecimal opAmount) {
+  // LOGGER.debug("+++ ba: {} opDate: {} opType: {} opAmount: {} ", ba, opDate, opType, opAmount);
+  // if (ba != null && ba.getId() != null && ba.getBankAccountNumber() != null
+  // && ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
+  // if (opDate != null && !opDate.isBefore(Constants.MIN_OPERATION_DATE)
+  // && !opDate.isAfter(Constants.MAX_OPERATION_DATE)) {
+  // if (Constants.OPERATION_TYPE_DEPOSIT.equals(opType)
+  // || Constants.OPERATION_TYPE_WITHDRAW.equals(opType)) {
+  // if (opAmount != null && opAmount.longValue() > 0.0) {
+  // Operation op = new Operation(ba.getAccountId(), opDate, opType, opAmount);
+  // if (Constants.OPERATION_TYPE_DEPOSIT.equals(opType)) {
+  // ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
+  // } else {
+  // opAmount = opAmount.negate();
+  // ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
+  // }
+  // bankingOperationRepository.save(op);
+  // bankAccountRepository.save(ba);
+  //
+  // LOGGER.debug("New situation of the bank account: {}", ba);
+  // LOGGER.debug("op.getID(): {} op.getId().isEmpty(): {}", op.getId(),
+  // op.getId().isEmpty());
+  // if (op.getId() != null && !op.getId().isEmpty()) {
+  // LOGGER.debug("Operation created: {}", op);
+  // return op.getId();
+  // } else {
+  // LOGGER.error("Operation not created: {}", op);
+  // return Constants.TECHNICAL_ERROR;
+  // } // condition op.getID
+  // } else {
+  // LOGGER.error("Operation not created because the amount is invalid");
+  // return Constants.INVALID_AMOUNT;
+  // } // condition opAmount
+  //
+  // } else {
+  // LOGGER.error("Operation not created because the operation type is wrong: {}", opType);
+  // return Constants.INVALID_OPERATION_TYPE;
+  // } // condition opType
+  // } else {
+  // LOGGER.error("Operation not created because the date is invalid: {}", opDate);
+  // return Constants.INVALID_DATE;
+  // } // condition opDate
+  // } else {
+  // LOGGER.error("Operation not created because the bank account is invalid");
+  // return Constants.INVALID_BANK_ACCOUNT;
+  // } // condition bank account
+  // }
+
   public String createNewBankingOperation(Account ba, LocalDate opDate, String opType,
       BigDecimal opAmount) {
-    if (ba != null && ba.getId() != null && ba.getBankAccountNumber() != null
-        && ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
-      if (opDate != null && !opDate.isBefore(Constants.MIN_OPERATION_DATE)
-          && !opDate.isAfter(Constants.MAX_OPERATION_DATE)) {
-        if (opType == Constants.OPERATION_TYPE_DEPOSIT
-            || opType == Constants.OPERATION_TYPE_WITHDRAW) {
-          if (opAmount != null && opAmount.longValue() > 0.0) {
-            Operation op = new Operation(ba.getAccountId(), opDate, opType, opAmount);
-            if (opType == Constants.OPERATION_TYPE_DEPOSIT) {
-              ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
-            } else {
-              opAmount = opAmount.negate();
-              ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
-            }
-            bankingOperationRepository.save(op);
-            bankAccountRepository.save(ba);
-
-            LOGGER.debug("New situation of the bank account: " + ba);
-
-            if (op.getId() != null && op.getId().length() > 0) {
-              LOGGER.debug("Operation created: " + op);
-              return op.getId();
-            } else {
-              LOGGER.error("Operation not created: " + op);
-              return Constants.TECHNICAL_ERROR;
-            } // condition op.getID
-          } else {
-            LOGGER.error("Operation not created because the amount is invalid");
-            return Constants.INVALID_AMOUNT;
-          } // condition opAmount
-
-        } else {
-          LOGGER.error("Operation not created because the operation type is wrong: " + opType);
-          return Constants.INVALID_OPERATION_TYPE;
-        } // condition opType
-      } else {
-        LOGGER.error("Operation not created because the date is invalid: {}", opDate);
-        return Constants.INVALID_DATE;
-      } // condition opDate
-    } else {
+    Operation op;
+    LOGGER.debug("+++ ba: {}  opDate: {}  opType: {}  opAmount: {} ", ba, opDate, opType, opAmount);
+    if (ba == null || ba.getId() == null || ba.getBankAccountNumber() == null
+        || !ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
       LOGGER.error("Operation not created because the bank account is invalid");
       return Constants.INVALID_BANK_ACCOUNT;
     } // condition bank account
+
+    if (opDate == null || opDate.isBefore(Constants.MIN_OPERATION_DATE)
+        || opDate.isAfter(Constants.MAX_OPERATION_DATE)) {
+      LOGGER.error("Operation not created because the date is invalid: {}", opDate);
+      return Constants.INVALID_DATE;
+    } // condition opDate
+
+
+    if (!Constants.OPERATION_TYPE_DEPOSIT.equals(opType)
+        && !Constants.OPERATION_TYPE_WITHDRAW.equals(opType)) {
+      LOGGER.error("Operation not created because the operation type is wrong: {}", opType);
+      return Constants.INVALID_OPERATION_TYPE;
+    } // condition opType
+
+    if (opAmount != null && opAmount.longValue() > 0.0) {
+      op = new Operation(ba.getAccountId(), opDate, opType, opAmount);
+    } else {
+      LOGGER.error("Operation not created because the amount is invalid");
+      return Constants.INVALID_AMOUNT;
+    } // condition opAmount
+    if (Constants.OPERATION_TYPE_DEPOSIT.equals(opType)) {
+      ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
+    } else {
+      opAmount = opAmount.negate();
+      ba.setBalanceAmount(ba.getBalanceAmount().add(opAmount));
+    }
+    bankingOperationRepository.save(op);
+    bankAccountRepository.save(ba);
+
+    LOGGER.debug("New situation of the bank account: {}", ba);
+    LOGGER.debug("op.getID(): {} op.getId().isEmpty(): {}", op.getId(), op.getId().isEmpty());
+    if (op.getId() != null && !op.getId().isEmpty()) {
+      LOGGER.debug("Operation created: {}", op);
+      return op.getId();
+    } else {
+      LOGGER.error("Operation not created: {}", op);
+      return Constants.TECHNICAL_ERROR;
+    } // condition op.getID
   }
 
   /**
@@ -138,19 +198,20 @@ public class PersistenceServices {
     // Lazy mode
     Account lazyBa = findBankAccountByBAN(ban);
     if (lazyBa != null && lazyBa.getAccountId() != null) {
-      LOGGER.debug("[findBankingOperationsOfBankAccount] Found account with the id; "
-          + lazyBa.getAccountId());
+      LOGGER.debug("[findBankingOperationsOfBankAccount] Found account with the id; {}",
+          lazyBa.getAccountId());
       List<Operation> operations =
           bankingOperationRepository.findByAccountId(lazyBa.getAccountId());
       if (operations != null && !operations.isEmpty()) {
-        LOGGER.debug("[findBankingOperationsOfBankAccount] Nb of operations for the account " + ban
-            + " = " + operations.size());
+        LOGGER.debug(
+            "[findBankingOperationsOfBankAccount] Nb of operations for the account {} = {}", ban,
+            operations.size());
         return operations;
       }
     }
-    LOGGER
-        .debug("[findBankingOperationsOfBankAccount] List of operations is empty for the account + "
-            + ban);
+    LOGGER.debug(
+        "[findBankingOperationsOfBankAccount] List of operations is empty for the account + {}",
+        ban);
     return Collections.emptyList();
   }
 
@@ -158,8 +219,8 @@ public class PersistenceServices {
   public void createOverdraft(Account ba, BigDecimal overDraftAmount) {
     ba.setOverdraftAmount(overDraftAmount);
     bankAccountRepository.save(ba);
-    LOGGER.debug("New overdraft amount :" + ba.getOverdraftAmount() + " for the BAN: "
-        + ba.getBankAccountNumber());
+    LOGGER.debug("New overdraft amount : {} for the BAN: {}", ba.getOverdraftAmount(),
+        ba.getBankAccountNumber());
   }
 
   public String createSavingsAccount() {
@@ -169,8 +230,8 @@ public class PersistenceServices {
     ba.setBankAccountNumber(externalRef);
     ba.setAccountType(Constants.ACCOUNT_TYPE_SAVINGS);
     bankAccountRepository.save(ba);
-    LOGGER.debug("New savings account :" + ba.getAccountType() + " for the BAN: "
-        + ba.getBankAccountNumber());
+    LOGGER.debug("New savings account : {} for the BAN: {}", ba.getAccountType(),
+        ba.getBankAccountNumber());
     return ba.getBankAccountNumber();
   }
 

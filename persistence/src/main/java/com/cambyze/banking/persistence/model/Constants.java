@@ -38,4 +38,7 @@ public class Constants {
   // Date limits
   public static final LocalDate MIN_OPERATION_DATE = LocalDate.of(1990, 1, 1);
   public static final LocalDate MAX_OPERATION_DATE = LocalDate.of(2500, 1, 1);
+
+  // Text logger
+  public static final String ACCOUNT_NOT_EXIST = "The bank account does not exist for the BAN: {}";
 }

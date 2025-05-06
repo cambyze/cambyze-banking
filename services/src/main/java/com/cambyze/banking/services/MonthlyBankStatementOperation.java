@@ -16,7 +16,7 @@ public class MonthlyBankStatementOperation {
   public MonthlyBankStatementOperation(Operation op) {
     super();
     this.operationDate = op.getOperationDate().toString();
-    if (op.getOperationType() == Constants.OPERATION_TYPE_DEPOSIT) {
+    if (Constants.OPERATION_TYPE_DEPOSIT.equals(op.getOperationType())) {
       this.operationType = "Deposit";
       this.amount = op.getAmount().doubleValue();
     } else {
@@ -30,9 +30,8 @@ public class MonthlyBankStatementOperation {
   // Overriding toString() method for a better description
   @Override
   public String toString() {
-    String desc = "Operation date: " + this.operationDate + " + type: " + this.operationType
+    return "Operation date: " + this.operationDate + " + type: " + this.operationType
         + " + amount: " + this.amount;
-    return desc;
   }
 
 

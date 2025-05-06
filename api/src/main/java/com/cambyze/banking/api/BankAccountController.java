@@ -8,7 +8,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -61,11 +60,12 @@ public class BankAccountController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountController.class);
 
-  public BankAccountController() {
+  public BankAccountController(BankingServices bankingServices) {
     super();
+    this.bankingServices = bankingServices;
   }
 
-  @Autowired
+  // @Autowired
   private BankingServices bankingServices;
 
   @POST
@@ -85,7 +85,7 @@ public class BankAccountController {
   public String createBankAccount() {
     String ban = bankingServices.createNewBankAccount();
     if (ban != null && !ban.isEmpty()) {
-      LOGGER.info("New created account: " + ban);
+      LOGGER.info("New created account: {}", ban);
       return ban;
     } else {
       String msg = "Technical pb when creating a new bank account";
@@ -134,7 +134,7 @@ public class BankAccountController {
   public String createSavingsAccount() {
     String ban = bankingServices.createNewSavingsAccount();
     if (ban != null && !ban.isEmpty()) {
-      LOGGER.info("New created savings account: " + ban);
+      LOGGER.info("New created savings account: {} ", ban);
       return ban;
     } else {
       String msg = "Technical pb when creating a new savings account";
@@ -157,30 +157,40 @@ public class BankAccountController {
           @Parameter(required = true, description = "Deposit amount", example = "120.26")},
       responses = {@ApiResponse(description = "The new balance",
           content = @Content(mediaType = "BigDecimal"))})
-  @Path("/createDeposit")
+
   @PostMapping("/createDeposit")
   public BigDecimal createDeposit(@RequestParam(value = "ban") String ban,
       @RequestParam(value = "amount") String amount) {
-
+    LOGGER.debug("-------------|CreateDeposit|---------------");
     BigDecimal bigAmount;
     try {
+      LOGGER.debug("___|TRY PASSE|____");
       bigAmount = BigDecimal.valueOf(Double.parseDouble(amount));
+      LOGGER.debug("__Ammount[{}]___", bigAmount);
     } catch (NumberFormatException e) {
       String msg = "Invalid amount: " + e.getMessage();
       LOGGER.error(msg);
       throw new TechnicalErrorException(msg);
     }
 
+    LOGGER.debug("___|TRY PASSE 2|____");
     CreateDepositResponse createDepositResponse = bankingServices.createDeposit(ban, bigAmount);
+    LOGGER.debug("--try Depository response [{}]--", createDepositResponse);
     if (createDepositResponse != null && createDepositResponse.getNewBalance() != null
-        && createDepositResponse.getReturnCode() == Constants.SERVICE_OK) {
+        && createDepositResponse.getReturnCode().equals(Constants.SERVICE_OK)) {
+      LOGGER.debug("___|TRY PASSE 3|____");
+      LOGGER.debug("createDepositResponse.getNewBalance() : {}",
+          createDepositResponse.getNewBalance());
       return createDepositResponse.getNewBalance();
     } else {
+      LOGGER.debug("___|TRY PASSE 4|____");
       if (createDepositResponse == null) {
+        LOGGER.debug("___|TRY PASSE 5|____");
         String msg = "Technical pb when creating a new banking operation";
         LOGGER.error(msg);
         throw new TechnicalErrorException(msg);
       } else {
+        LOGGER.debug("___|TRY PASSE 6|____");
         throw functionalException(createDepositResponse.getReturnCode());
       }
     }
@@ -217,7 +227,7 @@ public class BankAccountController {
 
     CreateWithdrawResponse createWithdrawResponse = bankingServices.createWithdraw(ban, bigAmount);
     if (createWithdrawResponse != null && createWithdrawResponse.getNewBalance() != null
-        && createWithdrawResponse.getReturnCode() == Constants.SERVICE_OK) {
+        && createWithdrawResponse.getReturnCode().equals(Constants.SERVICE_OK)) {
       return createWithdrawResponse.getNewBalance();
     } else {
       if (createWithdrawResponse == null) {
@@ -248,7 +258,7 @@ public class BankAccountController {
 
     AskOverdraftResponse askOverdraftResponse = bankingServices.askOverdraft(ban);
     if (askOverdraftResponse != null && askOverdraftResponse.getOverdraftAmount() != null
-        && askOverdraftResponse.getReturnCode() == Constants.SERVICE_OK) {
+        && askOverdraftResponse.getReturnCode().equals(Constants.SERVICE_OK)) {
       return askOverdraftResponse.getOverdraftAmount();
     } else {
       if (askOverdraftResponse == null) {

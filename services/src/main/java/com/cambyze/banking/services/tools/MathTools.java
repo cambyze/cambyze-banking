@@ -28,12 +28,18 @@ public class MathTools {
    * @param decimals number of decimals used to round the number
    * @return rounded number
    */
+  private MathTools() {
+    throw new UnsupportedOperationException("Utility class");
+  }
+
   public static Double roundWithDecimals(Double number, int decimals) {
     if (number != null && decimals > 0) {
-      String decPattern = "";
+      StringBuilder decPatternBuilder = new StringBuilder();
+
       for (int i = 0; i < decimals; i++) {
-        decPattern += '0';
+        decPatternBuilder.append('0');
       }
+      String decPattern = decPatternBuilder.toString();
       // locale ENGLISH to force the number format to allow the Double.valueof() at the end
       DecimalFormat df =
           new DecimalFormat("0." + decPattern, new DecimalFormatSymbols(Locale.ENGLISH));

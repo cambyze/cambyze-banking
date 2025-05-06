@@ -20,7 +20,7 @@ public class MonthlyBankStatement {
   public MonthlyBankStatement(Account ba, List<MonthlyBankStatementOperation> operations) {
     super();
     this.bankAccountNumber = ba.getBankAccountNumber();
-    if (ba.getAccountType() == Constants.ACCOUNT_TYPE_BANK) {
+    if (Constants.ACCOUNT_TYPE_BANK.equals(ba.getAccountType())) {
       this.accountType = "Regular bank account";
     } else {
       this.accountType = "Savings account";
@@ -35,10 +35,9 @@ public class MonthlyBankStatement {
   // Overriding toString() method for a better description
   @Override
   public String toString() {
-    String desc = "Statement for the BAN: " + this.bankAccountNumber + " + type: "
-        + this.accountType + " + balance" + this.balanceAmount + " + overdraft : "
-        + this.overdraftAmount + " + operations: " + this.operations;
-    return desc;
+    return "Statement for the BAN: " + this.bankAccountNumber + " + type: " + this.accountType
+        + " + balance" + this.balanceAmount + " + overdraft : " + this.overdraftAmount
+        + " + operations: " + this.operations;
   }
 
 
