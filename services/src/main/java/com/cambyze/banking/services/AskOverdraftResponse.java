@@ -19,9 +19,7 @@ public class AskOverdraftResponse {
   // Overriding toString() method for a better description
   @Override
   public String toString() {
-    String desc =
-        "Overdraft amount+ " + this.overdraftAmount + " + return code: " + this.returnCode;
-    return desc;
+    return "Overdraft amount+ " + this.overdraftAmount + " + return code: " + this.returnCode;
   }
 
   public BigDecimal getOverdraftAmount() {

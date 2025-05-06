@@ -2,6 +2,7 @@ package com.cambyze.banking.api.microservice;
 
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
+import com.cambyze.banking.api.microservice.exceptions.EntityPreparationException;
 
 
 /**
@@ -63,7 +64,7 @@ public interface MicroserviceControllerService {
    * @param searchEntity entity used to build messages and to provide the reference
    * @throws RuntimeException
    */
-  public void prepareSearchingEntity(PersistEntity searchEntity) throws RuntimeException;
+  public void prepareSearchingEntity(PersistEntity searchEntity) throws EntityPreparationException;
 
   /**
    * Prepare found entity before sending it
@@ -73,7 +74,7 @@ public interface MicroserviceControllerService {
    * @throws RuntimeException
    */
   public void prepareSendingEntity(PersistEntity entity, PersistEntity searchEntity)
-      throws RuntimeException;
+      throws EntityPreparationException;
 
   /**
    * Initiates an URI

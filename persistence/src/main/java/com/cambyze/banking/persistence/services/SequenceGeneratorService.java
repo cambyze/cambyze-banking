@@ -21,6 +21,10 @@ public class SequenceGeneratorService {
     Counter counter = mongoTemplate.findAndModify(Query.query(Criteria.where("_id").is(key)),
         new Update().inc("seq", 1), FindAndModifyOptions.options().returnNew(true).upsert(true),
         Counter.class);
+
+    if (counter == null) {
+      throw new IllegalStateException("Failed to generate sequence for key: " + key);
+    }
     return counter.getSeq();
   }
 }
