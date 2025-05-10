@@ -10,13 +10,12 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  */
 @SpringBootApplication(scanBasePackages = {"com.cambyze.banking"})
 public class ApiApplication extends SpringBootServletInitializer {
-
-  @Override
-  protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-    return application.sources(ApiApplication.class);
-  }
-
   public static void main(String[] args) {
     SpringApplication.run(ApiApplication.class, args);
+  }
+
+  @Override
+  protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+    return builder.sources(ApiApplication.class);
   }
 }

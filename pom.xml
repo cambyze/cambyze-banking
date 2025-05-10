@@ -18,7 +18,7 @@
 	<modules>
 		<module>persistence</module>
 		<module>services</module>
-		<module>api</module>
+		<module>api/backend</module>
 	</modules>
 	<properties>
 		<java.version>17</java.version>

@@ -15,7 +15,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>banking-api</name>
 	<packaging>war</packaging>
-	<description>REST API for banking accounts</description>
+	<description>REST API and web site for banking accounts management</description>
 
 	<dependencies>
 		<dependency>
@@ -30,6 +30,17 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope> <!-- <- mandatory for WAR -->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -65,67 +76,85 @@
 
 	<build>
 		<finalName>banking</finalName>
-		<pluginManagement>
-			<plugins>
+		<plugins>
+			<!-- Run npm install and build -->
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.14.1</version>
+				<executions>
+					<!-- Install Node and NPM -->
+					<execution>
+						<id>install-node-and-npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>v18.17.1</nodeVersion>
+							<npmVersion>9.8.1</npmVersion>
+							<workingDirectory>${project.basedir}/../frontend</workingDirectory>
+						</configuration>
+					</execution>
+					<!-- npm install -->
+					<execution>
+						<id>npm-install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>install</arguments>
+							<workingDirectory>${project.basedir}/../frontend</workingDirectory>
+						</configuration>
+					</execution>
+					<!-- npm run build -->
+					<execution>
+						<id>npm-run-build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>run build</arguments>
+							<workingDirectory>${project.basedir}/../frontend</workingDirectory>
+						</configuration>
+					</execution>
+
+				</executions>
+			</plugin>
 
 
-				    <!-- Run npm install and build -->
-    <plugin>
-      <groupId>com.github.eirslett</groupId>
-      <artifactId>frontend-maven-plugin</artifactId>
-      <version>1.14.1</version>
-      <executions>
-        <execution>
-          <id>install node and npm</id>
-          <goals><goal>install-node-and-npm</goal></goals>
-          <configuration>
-            <nodeVersion>v18.18.0</nodeVersion>
-            <npmVersion>9.8.1</npmVersion>
-          </configuration>
-        </execution>
-        <execution>
-          <id>npm install</id>
-          <goals><goal>npm</goal></goals>
-          <configuration><arguments>install</arguments></configuration>
-        </execution>
-        <execution>
-          <id>npm run build</id>
-          <goals><goal>npm</goal></goals>
-          <configuration><arguments>run build</arguments></configuration>
-        </execution>
-      </executions>
-      <configuration>
-        <workingDirectory>${project.basedir}/../frontend</workingDirectory>
-      </configuration>
-    </plugin>
+			<!-- Copy built frontend to Spring Boot static resources -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>copy-frontend-to-public</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}/public</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/../frontend/dist</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
-    <!-- Copy built frontend to Spring Boot static resources -->
-    <plugin>
-      <artifactId>maven-resources-plugin</artifactId>
-      <executions>
-        <execution>
-          <id>copy-frontend</id>
-          <phase>process-resources</phase>
-          <goals><goal>copy-resources</goal></goals>
-          <configuration>
-            <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
-            <resources>
-              <resource>
-                <directory>${project.basedir}/../frontend/dist</directory>
-                <filtering>false</filtering>
-              </resource>
-            </resources>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
-					<plugin>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
-					<configuration>
-						<parameters>true</parameters>
-					</configuration>
-				</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<parameters>true</parameters>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>io.swagger.core.v3</groupId>
@@ -150,12 +179,7 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			</plugins>
-		</pluginManagement>
-
-
-
-</build>
+		</plugins>
+	</build>
 
 </project>
