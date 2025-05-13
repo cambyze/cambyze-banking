@@ -33,7 +33,7 @@ public class PersistenceServices {
   private SequenceGeneratorService sequenceGeneratorService;
 
   private PersonRepository personRepository;
-@Autowired
+  @Autowired
   private PersonAccountRepository personAcountRepository;
 
 
@@ -57,15 +57,13 @@ public class PersistenceServices {
         email);
     Person per = new Person();
     long seq = sequenceGeneratorService.getNextSequence("person");
-    String externalRef = String.format("User-%08d", seq);
+    String externalRef = String.format("CLI-%08d", seq);
     per.setId(externalRef);
     per.setName(name);
     per.setFirstName(firstName);
     per.setEmail(email);
     personRepository.save(per);
     LOGGER.debug("New person created: {}", per);
-
-    createNewBankAccount(externalRef);
     return per.getId();
   }
 
@@ -74,12 +72,12 @@ public class PersistenceServices {
    * 
    */
   public Person findPersonByMail(String mail) {
-    Person per = personRepository.findByIdIgnoreCase(mail);
-    if (per != null) {
-      LOGGER.debug("Retrieve Person: {}", per);
-      return per;
+    List<Person> pers = personRepository.findByEmail(mail);
+    if (pers != null && pers.size() == 1) {
+      LOGGER.debug("Retrieve Person: {}", pers.get(0));
+      return pers.get(0);
     } else {
-      LOGGER.debug("No Person for the mail: {}", per);
+      LOGGER.debug("No Person or several persons for the mail: {}", mail);
       return null;
     }
   }
@@ -89,8 +87,8 @@ public class PersistenceServices {
    * 
    */
   public Person findPersonByid(String id) {
-    Person per = personRepository.findByIdIgnoreCase(id);
-    LOGGER.debug("id: {} findById, {} , per: {}", id, personRepository.findByIdIgnoreCase(id), per);
+    Person per = personRepository.findByPersonIdIgnoreCase(id);
+    LOGGER.debug("id: {} , per: {}", id, per);
     if (per != null) {
       LOGGER.debug("Retrieve Person: {}", per);
       return per;
@@ -102,31 +100,30 @@ public class PersistenceServices {
 
   /**
    * 
-   * Returns the list of operations for a bank account
+   * Returns the list of accounts for a person
    * 
-   * @param ban the id Person
-   * @return the list of operations else null
+   * @param PersonId the id Person
+   * @return the list of accounts else an empty list
    */
-  public List<Account> findBanOfPerson(String id) {
+  public List<Account> findBankAccountsByPerson(String personId) {
     // Lazy mode
-    LOGGER.debug("[findBanOfPerson] id: {} START", id);
-    Person lazyAc = findPersonByid(id);
-    if (lazyAc != null && lazyAc.getId() != null) {
-      LOGGER.debug("[findBankAccount] Found account with the id; {}, original id: {}", lazyAc.getId(), id);
-      List<Account> ac = personAcountRepository.findByPersonId(lazyAc.getId());
-      if (ac != null && !ac.isEmpty()) {
-        LOGGER.debug(
-            "[findBankAccount1] Nb of  account {} = {}", id,
-            ac.size());
-        return ac;
+    LOGGER.debug("[findBankAccountsByPerson] id: {} START", personId);
+    Person lazyPer = findPersonByid(personId);
+    if (lazyPer != null && lazyPer.getId() != null) {
+      LOGGER.debug("[findBankAccount] Found person {} with the id {}", lazyPer.getName(), personId);
+      List<Account> acs = personAcountRepository.findByPersonId(lazyPer.getId());
+      if (acs != null && !acs.isEmpty()) {
+        LOGGER.debug("[findBankAccount1] Nb of accounts for the person {} = {}", lazyPer.getName(),
+            acs.size());
+        return acs;
+      } else {
+        LOGGER.debug("[findBankAccount2] Not accounts found for the person: {}", lazyPer.getName());
+        return Collections.emptyList();
       }
-    }else {
-      LOGGER.debug("[findBankAccount2] Person not found for the id: {}", id);
+    } else {
+      LOGGER.error("The person with the id {} doesn't exist", personId);
+      return Collections.emptyList();
     }
-    LOGGER.debug(
-        "[findBankAccount3] List of Account is empty for the account + {}",
-        id);
-    return Collections.emptyList();
   }
 
   /**
@@ -134,15 +131,21 @@ public class PersistenceServices {
    * 
    * @return its BAN
    */
-  public String createNewBankAccount(String id) {
-    LOGGER.debug("Create New Bank Account for the person id: {}", id);
-    Account ba = new Account( id);
-    //Account ba = new Account("User-00000001");
-    long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
-    String externalRef = String.format("CAMBYZEBANK-%08d", seq);
-    ba.setBankAccountNumber(externalRef);
-    bankAccountRepository.save(ba);
-    return ba.getBankAccountNumber();
+  public String createNewBankAccount(String personId) {
+    LOGGER.debug("Create New Bank Account for the person id: {}", personId);
+    // Lazy mode
+    LOGGER.debug("[findBankAccountsByPerson] id: {} START", personId);
+    Person lazyPer = findPersonByid(personId);
+    if (lazyPer != null && lazyPer.getId() != null) {
+      Account ba = new Account(lazyPer.getId());
+      long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
+      String externalRef = String.format("CAMBYZEBANK-%08d", seq);
+      ba.setBankAccountNumber(externalRef);
+      bankAccountRepository.save(ba);
+      return ba.getBankAccountNumber();
+    } else {
+      return "";
+    }
   }
 
 
@@ -189,7 +192,7 @@ public class PersistenceServices {
 
     LOGGER.debug("+++ ba: ({})  opDate: ({})  opType: ({})  opAmount: ({}) ", ba, opDate, opType,
         opAmount);
-    if (ba == null || ba.getId() == null || ba.getBankAccountNumber() == null
+    if (ba == null || ba.getAccountId() == null || ba.getBankAccountNumber() == null
         || !ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
       LOGGER.error("Operation not created because the bank account is invalid");
 
@@ -248,7 +251,8 @@ public class PersistenceServices {
     if (lazyBa != null && lazyBa.getAccountId() != null) {
       LOGGER.debug("[findBankingOperationsOfBankAccount] Found account with the id; {}",
           lazyBa.getAccountId());
-      List<Operation> operations = bankingOperationRepository.findByAccountId(lazyBa.getId());
+      List<Operation> operations =
+          bankingOperationRepository.findByAccountId(lazyBa.getAccountId());
       if (operations != null && !operations.isEmpty()) {
         LOGGER.debug(
             "[findBankingOperationsOfBankAccount] Nb of operations for the account {} = {}", ban,
@@ -271,7 +275,7 @@ public class PersistenceServices {
   }
 
   public String createSavingsAccount(String id) {
-    //Account ba = new Account("User-00000001");
+    // Account ba = new Account("User-00000001");
     // on assume que User-00000001 existe
     Account ba = new Account(id);
     long seq = sequenceGeneratorService.getNextSequence("bank_account_number");

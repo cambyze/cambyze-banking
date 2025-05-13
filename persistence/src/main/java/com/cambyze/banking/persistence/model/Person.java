@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "persons")
 public class Person {
   @Id
-  private String id;
+  private String personId;
   private String name;
   private String firstName;
   private String email;
@@ -15,17 +15,26 @@ public class Person {
     super();
   }
 
-    @Override
+  // Overriding toString() method for a better description
+  @Override
   public String toString() {
-    return this.id + " : " + this.name + " + " + this.firstName + " + "
-        + this.email;
-  }
-  public String getId() {
-    return id;
+    return this.personId + " : " + this.name + " + " + this.firstName + " + " + this.email;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public String getId() {
+    return this.getPersonId();
+  }
+
+  public void setId(String personId) {
+    this.setPersonId(personId);
+  }
+
+  public String getPersonId() {
+    return personId;
+  }
+
+  public void setPersonId(String personId) {
+    this.personId = personId;
   }
 
   public String getName() {

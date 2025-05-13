@@ -12,7 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Account {
   @Id
   private String accountId;
-  private String personId; // BUG ICI
+  // foreign key to Person
+  private String personId;
   private String bankAccountNumber;
   private String accountType;
   private BigDecimal balanceAmount;
@@ -35,24 +36,24 @@ public class Account {
   // Overriding toString() method for a better description
   @Override
   public String toString() {
-    return this.accountId + " : " + this.bankAccountNumber + " + " + this.accountType + " + "
-        + this.balanceAmount + " + " + this.overdraftAmount;
-  }
-
-  public String getId() {
-    return accountId;
+    return this.personId + " + " + this.accountId + " : " + this.bankAccountNumber + " + "
+        + this.accountType + " + " + this.balanceAmount + " + " + this.overdraftAmount;
   }
 
   public String getAccountId() {
-    return this.getId();
-  }
-
-  public void setId(String id) {
-    this.accountId = id;
+    return accountId;
   }
 
   public void setAccountId(String accountId) {
     this.accountId = accountId;
+  }
+
+  public String getPersonId() {
+    return personId;
+  }
+
+  public void setPersonId(String personId) {
+    this.personId = personId;
   }
 
   public String getBankAccountNumber() {
@@ -85,10 +86,6 @@ public class Account {
 
   public void setOverdraftAmount(BigDecimal overdraftAmount) {
     this.overdraftAmount = overdraftAmount;
-  }
-
-  public String getPersoneId() {
-    return personId;
   }
 
 }
