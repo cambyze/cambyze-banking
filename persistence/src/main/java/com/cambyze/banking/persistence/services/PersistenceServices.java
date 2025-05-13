@@ -10,9 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.cambyze.banking.persistence.dao.BankAccountRepository;
 import com.cambyze.banking.persistence.dao.BankingOperationRepository;
+import com.cambyze.banking.persistence.dao.PersonAccountRepository;
+import com.cambyze.banking.persistence.dao.PersonRepository;
 import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
 import com.cambyze.banking.persistence.model.Operation;
+import com.cambyze.banking.persistence.model.Person;
 
 /**
  * Services to expose for the business services
@@ -29,13 +32,101 @@ public class PersistenceServices {
 
   private SequenceGeneratorService sequenceGeneratorService;
 
+  private PersonRepository personRepository;
+@Autowired
+  private PersonAccountRepository personAcountRepository;
+
+
   @Autowired
   public PersistenceServices(BankAccountRepository bankAccountRepository,
       BankingOperationRepository bankingOperationRepository,
-      SequenceGeneratorService sequenceGeneratorService) {
+      SequenceGeneratorService sequenceGeneratorService, PersonRepository personRepository) {
     this.bankAccountRepository = bankAccountRepository;
     this.bankingOperationRepository = bankingOperationRepository;
     this.sequenceGeneratorService = sequenceGeneratorService;
+    this.personRepository = personRepository;
+  }
+
+  /*
+   * create a new Person
+   * 
+   * @return userId
+   */
+  public String createNewPerson(String name, String firstName, String email) {
+    LOGGER.debug("Create New Person with name: {}, firstName: {}, email: {}", name, firstName,
+        email);
+    Person per = new Person();
+    long seq = sequenceGeneratorService.getNextSequence("person");
+    String externalRef = String.format("User-%08d", seq);
+    per.setId(externalRef);
+    per.setName(name);
+    per.setFirstName(firstName);
+    per.setEmail(email);
+    personRepository.save(per);
+    LOGGER.debug("New person created: {}", per);
+
+    createNewBankAccount(externalRef);
+    return per.getId();
+  }
+
+  /*
+   * Find a Person by its by his mail
+   * 
+   */
+  public Person findPersonByMail(String mail) {
+    Person per = personRepository.findByIdIgnoreCase(mail);
+    if (per != null) {
+      LOGGER.debug("Retrieve Person: {}", per);
+      return per;
+    } else {
+      LOGGER.debug("No Person for the mail: {}", per);
+      return null;
+    }
+  }
+
+  /*
+   * Find a Person by its by his id
+   * 
+   */
+  public Person findPersonByid(String id) {
+    Person per = personRepository.findByIdIgnoreCase(id);
+    LOGGER.debug("id: {} findById, {} , per: {}", id, personRepository.findByIdIgnoreCase(id), per);
+    if (per != null) {
+      LOGGER.debug("Retrieve Person: {}", per);
+      return per;
+    } else {
+      LOGGER.debug("No Person found for the ID: {}", id);
+      return null;
+    }
+  }
+
+  /**
+   * 
+   * Returns the list of operations for a bank account
+   * 
+   * @param ban the id Person
+   * @return the list of operations else null
+   */
+  public List<Account> findBanOfPerson(String id) {
+    // Lazy mode
+    LOGGER.debug("[findBanOfPerson] id: {} START", id);
+    Person lazyAc = findPersonByid(id);
+    if (lazyAc != null && lazyAc.getId() != null) {
+      LOGGER.debug("[findBankAccount] Found account with the id; {}, original id: {}", lazyAc.getId(), id);
+      List<Account> ac = personAcountRepository.findByPersonId(lazyAc.getId());
+      if (ac != null && !ac.isEmpty()) {
+        LOGGER.debug(
+            "[findBankAccount1] Nb of  account {} = {}", id,
+            ac.size());
+        return ac;
+      }
+    }else {
+      LOGGER.debug("[findBankAccount2] Person not found for the id: {}", id);
+    }
+    LOGGER.debug(
+        "[findBankAccount3] List of Account is empty for the account + {}",
+        id);
+    return Collections.emptyList();
   }
 
   /**
@@ -43,14 +134,17 @@ public class PersistenceServices {
    * 
    * @return its BAN
    */
-  public String createNewBankAccount() {
-    Account ba = new Account();
+  public String createNewBankAccount(String id) {
+    LOGGER.debug("Create New Bank Account for the person id: {}", id);
+    Account ba = new Account( id);
+    //Account ba = new Account("User-00000001");
     long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
     String externalRef = String.format("CAMBYZEBANK-%08d", seq);
     ba.setBankAccountNumber(externalRef);
     bankAccountRepository.save(ba);
     return ba.getBankAccountNumber();
   }
+
 
   /**
    * <p>
@@ -92,10 +186,13 @@ public class PersistenceServices {
   public String createNewBankingOperation(Account ba, LocalDate opDate, String opType,
       BigDecimal opAmount) {
     Operation op;
-    LOGGER.debug("+++ ba: {}  opDate: {}  opType: {}  opAmount: {} ", ba, opDate, opType, opAmount);
+
+    LOGGER.debug("+++ ba: ({})  opDate: ({})  opType: ({})  opAmount: ({}) ", ba, opDate, opType,
+        opAmount);
     if (ba == null || ba.getId() == null || ba.getBankAccountNumber() == null
         || !ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
       LOGGER.error("Operation not created because the bank account is invalid");
+
       return Constants.INVALID_BANK_ACCOUNT;
     } // condition bank account
 
@@ -151,8 +248,7 @@ public class PersistenceServices {
     if (lazyBa != null && lazyBa.getAccountId() != null) {
       LOGGER.debug("[findBankingOperationsOfBankAccount] Found account with the id; {}",
           lazyBa.getAccountId());
-      List<Operation> operations =
-          bankingOperationRepository.findByAccountId(lazyBa.getAccountId());
+      List<Operation> operations = bankingOperationRepository.findByAccountId(lazyBa.getId());
       if (operations != null && !operations.isEmpty()) {
         LOGGER.debug(
             "[findBankingOperationsOfBankAccount] Nb of operations for the account {} = {}", ban,
@@ -174,8 +270,10 @@ public class PersistenceServices {
         ba.getBankAccountNumber());
   }
 
-  public String createSavingsAccount() {
-    Account ba = new Account();
+  public String createSavingsAccount(String id) {
+    //Account ba = new Account("User-00000001");
+    // on assume que User-00000001 existe
+    Account ba = new Account(id);
     long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
     String externalRef = String.format("CAMBYZEBANK-%08d", seq);
     ba.setBankAccountNumber(externalRef);
@@ -185,5 +283,7 @@ public class PersistenceServices {
         ba.getBankAccountNumber());
     return ba.getBankAccountNumber();
   }
+
+
 
 }
