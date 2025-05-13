@@ -1,6 +1,5 @@
 package com.cambyze.banking.persistence.dao;
 
-import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import com.cambyze.banking.persistence.model.Person;
 
@@ -9,7 +8,4 @@ import com.cambyze.banking.persistence.model.Person;
  */
 public interface PersonRepository extends MongoRepository<Person, String> {
   Person findByIdIgnoreCase(String id);
-
-  List<Person> findByPersonId(String personId);
 }
-

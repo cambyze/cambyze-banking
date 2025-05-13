@@ -11,6 +11,15 @@ public class Person {
   private String firstName;
   private String email;
 
+  public Person() {
+    super();
+  }
+
+    @Override
+  public String toString() {
+    return this.id + " : " + this.name + " + " + this.firstName + " + "
+        + this.email;
+  }
   public String getId() {
     return id;
   }
