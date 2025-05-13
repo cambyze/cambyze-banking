@@ -2,7 +2,6 @@ package com.cambyze.banking.persistence.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
 import com.cambyze.banking.persistence.model.Operation;
 import com.cambyze.banking.persistence.model.Person;
-import com.cambyze.banking.services.PersonAllAccount;
 
 /**
  * Services to expose for the business services
@@ -248,25 +246,6 @@ public class PersistenceServices {
     LOGGER.debug("New savings account : {} for the BAN: {}", ba.getAccountType(),
         ba.getBankAccountNumber());
     return ba.getBankAccountNumber();
-  }
-
-  public PersonRepository personAllAccount(String id) {
-    List<Person> persons = persistenceServices.findByPersonId(id);
-
-    if (persons == null || persons.isEmpty()) {
-      LOGGER.warn("No persons found with personId: {}", id);
-      return new PersonRepository(id, new ArrayList<>());
-    }
-
-    List<String> allAccounts = new ArrayList<>();
-
-    for (Person per : persons) {
-      if (per.getAccountIds() != null) {
-        allAccounts.addAll(per.getAccountIds());
-      }
-    }
-
-    return new PersonAllAccount(id, allAccounts);
   }
 
 
