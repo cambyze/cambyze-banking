@@ -1,0 +1,47 @@
+# Dependency directories
+node_modules
+node
+dist
+docs
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# jest
+/**/coverage
+/jest-html-reporters-attach
+jest_html_reporters.html
+
+# Maven target directory
+target
+
+# Maven build output
+*.log
+*.class
+
+# Eclipse project files
+.project
+.classpath
+.settings/
+
+# Eclipse working directories
+bin/
+tmp/
+
+# IntelliJ IDEA (in case you or your team uses it too)
+.idea/
+*.iml
+*.iws
+out/
+
+# VSCode (just in case)
+.vscode/
+
+# Logs
+*.log
+
+# Backup files
+*.bak
+*.swp
+*~
