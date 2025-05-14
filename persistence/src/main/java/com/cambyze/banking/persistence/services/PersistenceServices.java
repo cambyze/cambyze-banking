@@ -67,28 +67,31 @@ public class PersistenceServices {
     return per.getId();
   }
 
-  /*
-   * Find a Person by its by his mail
+  /**
+   * Find the persons by their mail
    * 
+   * @param mail
+   * @return list of persons with the mail else an empty list
    */
-  public Person findPersonByMail(String mail) {
+  public List<Person> findPersonByMail(String mail) {
     List<Person> pers = personRepository.findByEmail(mail);
-    if (pers != null && pers.size() == 1) {
-      LOGGER.debug("Retrieve Person: {}", pers.get(0));
-      return pers.get(0);
+    if (pers != null && pers.size() > 1) {
+      LOGGER.debug("Retrieve {} persons with the mail {}", pers.size(), mail);
+      return pers;
     } else {
-      LOGGER.debug("No Person or several persons for the mail: {}", mail);
-      return null;
+      LOGGER.debug("No Person for the mail: {}", mail);
+      return Collections.emptyList();
     }
   }
 
-  /*
-   * Find a Person by its by his id
+  /**
+   * Find a person with its id
    * 
+   * @param id
+   * @return the person with this id else return null
    */
   public Person findPersonByid(String id) {
     Person per = personRepository.findByPersonIdIgnoreCase(id);
-    LOGGER.debug("id: {} , per: {}", id, per);
     if (per != null) {
       LOGGER.debug("Retrieve Person: {}", per);
       return per;
@@ -99,10 +102,44 @@ public class PersistenceServices {
   }
 
   /**
+   * TODO
+   * 
+   * @param ba
+   * @return
+   */
+  public String accountToString(Account ba) {
+    Person per = findPersonByid(ba.getPersonId());
+    if (per != null && per.getPersonId() != null) {
+      return "Client: " + per.getPersonId() + " BAN: " + ba.getBankAccountNumber() + " / "
+          + ba.getAccountType() + " / " + ba.getBalanceAmount() + " / " + ba.getOverdraftAmount();
+    }
+    return "****** ERROR ********** : " + ba.getPersonId();
+  }
+
+  /**
+   * TODO
+   * 
+   * @param op
+   * @return
+   */
+  public String operationToString(Operation op) {
+    return bankAccountRepository.findById(op.getAccountId()).map(account -> {
+      Person per = findPersonByid(account.getPersonId());
+      if (per != null && per.getPersonId() != null) {
+        return "Client: " + per.getPersonId() + " BAN: " + account.getBankAccountNumber() + " / "
+            + account.getAccountType() + " / " + account.getBalanceAmount() + " / "
+            + account.getOverdraftAmount();
+      }
+      return null;
+    }).orElse(null);
+  }
+
+
+  /**
    * 
    * Returns the list of accounts for a person
    * 
-   * @param PersonId the id Person
+   * @param personId
    * @return the list of accounts else an empty list
    */
   public List<Account> findBankAccountsByPerson(String personId) {
@@ -127,9 +164,10 @@ public class PersistenceServices {
   }
 
   /**
-   * Create a new bank account
+   * Create a new bank account for a person
    * 
-   * @return its BAN
+   * @param personId
+   * @return the created BAN
    */
   public String createNewBankAccount(String personId) {
     LOGGER.debug("Create New Bank Account for the person id: {}", personId);
@@ -164,7 +202,7 @@ public class PersistenceServices {
     // Lazy mode
     Account ba = bankAccountRepository.findByBankAccountNumberIgnoreCase(ban);
     if (ba != null) {
-      LOGGER.debug("Retrieve account: {}", ba);
+      LOGGER.debug("Retrieve account: {}", accountToString(ba));
       return ba;
     } else {
       LOGGER.debug("No account for the ban: {}", ban);
@@ -172,6 +210,9 @@ public class PersistenceServices {
     }
 
   }
+
+
+  // TODO: Add the complete list of errors in Javadoc: Constants.xxxx
 
   /**
    * Create a new banking operation
@@ -182,16 +223,14 @@ public class PersistenceServices {
    *        Constants.OPERATION_TYPE_WITHDRAW
    * @param opAmount
    * @return its internal id or negative integer in case of error:
-   *         <p>
-   *         - Constants.INVALID_BANK_ACCOUNT
-   *         </p>
+   *         <ul>
+   *         <li>Constants.INVALID_BANK_ACCOUNT</li>
+   *         <li>Constants.INVALID_OPERATION_TYPE</li>
+   *         <ul>
    */
   public String createNewBankingOperation(Account ba, LocalDate opDate, String opType,
       BigDecimal opAmount) {
     Operation op;
-
-    LOGGER.debug("+++ ba: ({})  opDate: ({})  opType: ({})  opAmount: ({}) ", ba, opDate, opType,
-        opAmount);
     if (ba == null || ba.getAccountId() == null || ba.getBankAccountNumber() == null
         || !ba.getBankAccountNumber().startsWith("CAMBYZEBANK")) {
       LOGGER.error("Operation not created because the bank account is invalid");
@@ -227,13 +266,10 @@ public class PersistenceServices {
     bankingOperationRepository.save(op);
     bankAccountRepository.save(ba);
 
-    LOGGER.debug("New situation of the bank account: {}", ba);
-    LOGGER.debug("op.getID(): {} op.getId().isEmpty(): {}", op.getId(), op.getId().isEmpty());
+    LOGGER.debug("New situation of the bank account: {}", accountToString(ba));
     if (op.getId() != null && !op.getId().isEmpty()) {
-      LOGGER.debug("Operation created: {}", op);
       return op.getId();
     } else {
-      LOGGER.error("Operation not created: {}", op);
       return Constants.TECHNICAL_ERROR;
     } // condition op.getID
   }
@@ -249,8 +285,8 @@ public class PersistenceServices {
     // Lazy mode
     Account lazyBa = findBankAccountByBAN(ban);
     if (lazyBa != null && lazyBa.getAccountId() != null) {
-      LOGGER.debug("[findBankingOperationsOfBankAccount] Found account with the id; {}",
-          lazyBa.getAccountId());
+      LOGGER.debug("[findBankingOperationsOfBankAccount] Found account with the id: {}",
+          lazyBa.getBankAccountNumber());
       List<Operation> operations =
           bankingOperationRepository.findByAccountId(lazyBa.getAccountId());
       if (operations != null && !operations.isEmpty()) {
@@ -266,7 +302,12 @@ public class PersistenceServices {
     return Collections.emptyList();
   }
 
-
+  /**
+   * TODO
+   * 
+   * @param ba
+   * @param overDraftAmount
+   */
   public void createOverdraft(Account ba, BigDecimal overDraftAmount) {
     ba.setOverdraftAmount(overDraftAmount);
     bankAccountRepository.save(ba);
@@ -274,9 +315,13 @@ public class PersistenceServices {
         ba.getBankAccountNumber());
   }
 
+  /**
+   * TODO
+   * 
+   * @param id
+   * @return
+   */
   public String createSavingsAccount(String id) {
-    // Account ba = new Account("User-00000001");
-    // on assume que User-00000001 existe
     Account ba = new Account(id);
     long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
     String externalRef = String.format("CAMBYZEBANK-%08d", seq);

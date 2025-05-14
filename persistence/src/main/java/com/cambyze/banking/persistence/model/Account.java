@@ -33,19 +33,20 @@ public class Account {
     this.personId = personId;
   }
 
-  // Overriding toString() method for a better description
-  @Override
-  public String toString() {
-    return this.personId + " + " + this.accountId + " : " + this.bankAccountNumber + " + "
-        + this.accountType + " + " + this.balanceAmount + " + " + this.overdraftAmount;
-  }
-
   public String getAccountId() {
     return accountId;
   }
 
   public void setAccountId(String accountId) {
     this.accountId = accountId;
+  }
+
+  public String getId() {
+    return this.getAccountId();
+  }
+
+  public void setId(String id) {
+    this.setAccountId(id);
   }
 
   public String getPersonId() {
