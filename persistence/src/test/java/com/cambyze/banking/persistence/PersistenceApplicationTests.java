@@ -38,6 +38,9 @@ class PersistenceApplicationTests {
     assertNotNull(per);
     per = persistenceServices.findPersonByid("0");
     assertNull(per);
+    List<Person> lPer = persistenceServices.findPersonByMail("john.doe@gmail.com");
+    LOGGER.debug("Find person by personID: {} : {}", "john.doe@gmail.com", lPer);
+    assertNotNull(lPer);
   }
 
   @Test
