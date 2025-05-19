@@ -20,23 +20,48 @@ class ApiApplicationTests {
 
   @Autowired
   private MockMvc mockMvc;
-
+  
   @Test
-  void testCreateNewBAN() throws Exception {
-    mockMvc.perform(post("/createBankAccount").contentType(MediaType.APPLICATION_JSON).content(""))
-        .andExpect(status().isOk());
+    public void testCreatePerson() throws Exception {
+    String name = "Jack";
+    String firstName = "Onils";
+    String mail = "Jack.Onils@mail.com";
+    LOGGER.debug("--|Person|--");
+    // test creation of new "person"
+    mockMvc.perform(post("/createPerson")
+            .param("name", name)
+            .param("firstName", firstName)
+            .param("mail", mail))
+            .andExpect(status().isOk());
 
+    String personId = "CLI-00000001";
+
+    // test creation of a saving account
     mockMvc
-        .perform(post("/createSavingsAccount").contentType(MediaType.APPLICATION_JSON).content(""))
-        .andExpect(status().isOk());
-
+    .perform(post("/createSavingsAccount").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
+    .andExpect(status().isOk());
+    // test cretation of new banck Account
+    mockMvc.perform(post("/createBankAccount").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
+    .andExpect(status().isOk());
+    // test Login
+    mockMvc.perform(post("/login").param("mail", mail).contentType(MediaType.APPLICATION_JSON).content(""))
+    .andExpect(status().isOk());
+    
+    mockMvc.perform(post("/login").param("mail", "falseMail").contentType(MediaType.APPLICATION_JSON).content(""))
+    .andExpect(status().isOk());
+    // test return all ban
+    mockMvc.perform(get("/findBanByPerson").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
+    .andExpect(status().isOk());
+    mockMvc.perform(get("/findBanByPerson").param("personId", "falseID").contentType(MediaType.APPLICATION_JSON).content(""))
+    .andExpect(status().isOk());
   }
 
   @Test
   void testOperations() throws Exception {
     // test with bank account creation
-    mockMvc.perform(post("/createBankAccount")).andExpect(status().isOk());
-
+    String id = "CLI-00000001";
+    mockMvc.perform(post("/createBankAccount").param("personId", id))
+    .andExpect(status().isOk());
     // Test createDeposit without parameters
     String ban = "";
     String amount = "";
@@ -85,13 +110,15 @@ class ApiApplicationTests {
 
     mockMvc.perform(post("/requestOverdraft").param("ban", ban)).andExpect(status().isOk());
 
-
     // Successful test - we assume that the BAN "CAMBYZEBANK-00000001" exists
     ban = "CAMBYZEBANK-00000001";
     LOGGER.debug("Bank statement for the  {}", ban);
 
     mockMvc.perform(get("/monthlyBankStatement").param("ban", ban)).andExpect(status().isOk());
-
+    
+    
+    String personId = "CLI-00000001";
+    mockMvc.perform(get("/findBanByPerson").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
+    .andExpect(status().isOk());
   }
-
 }
