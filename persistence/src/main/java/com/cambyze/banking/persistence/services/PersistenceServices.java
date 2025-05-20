@@ -64,7 +64,7 @@ public class PersistenceServices {
     per.setEmail(email);
     personRepository.save(per);
     LOGGER.debug("New person created: {}", per);
-    return per.getId();
+    return per.getPersonId();
   }
 
   /**
@@ -75,7 +75,7 @@ public class PersistenceServices {
    */
   public List<Person> findPersonByMail(String mail) {
     List<Person> pers = personRepository.findByEmail(mail);
-    if (pers != null && pers.size() > 1) {
+    if (pers != null && !pers.isEmpty()) {
       LOGGER.debug("Retrieve {} persons with the mail {}", pers.size(), mail);
       return pers;
     } else {
@@ -102,10 +102,10 @@ public class PersistenceServices {
   }
 
   /**
-   * TODO
+   * generate a String who resume Account
    * 
    * @param ba
-   * @return
+   * @return String to display personId, AccountNumber, AccountType, OverdraftAmount
    */
   public String accountToString(Account ba) {
     Person per = findPersonByid(ba.getPersonId());
@@ -117,10 +117,11 @@ public class PersistenceServices {
   }
 
   /**
-   * TODO
+   * 
+   * generate a String who resume the operations
    * 
    * @param op
-   * @return
+   * @return String to display personId, banNumber, overdraftAmount
    */
   public String operationToString(Operation op) {
     return bankAccountRepository.findById(op.getAccountId()).map(account -> {
@@ -147,11 +148,12 @@ public class PersistenceServices {
     LOGGER.debug("[findBankAccountsByPerson] id: {} START", personId);
     Person lazyPer = findPersonByid(personId);
     if (lazyPer != null && lazyPer.getId() != null) {
-      LOGGER.debug("[findBankAccount] Found person {} with the id {}", lazyPer.getName(), personId);
+      LOGGER.debug("[findBankAccount] Found person ({}) with the id ({}) and person ID: ({})",
+          lazyPer.getName(), personId, lazyPer.getId());
       List<Account> acs = personAcountRepository.findByPersonId(lazyPer.getId());
       if (acs != null && !acs.isEmpty()) {
-        LOGGER.debug("[findBankAccount1] Nb of accounts for the person {} = {}", lazyPer.getName(),
-            acs.size());
+        LOGGER.debug("[findBankAccount1] Nb of accounts for the person ({}) = ({}) ",
+            lazyPer.getName(), acs.size());
         return acs;
       } else {
         LOGGER.debug("[findBankAccount2] Not accounts found for the person: {}", lazyPer.getName());
@@ -211,9 +213,6 @@ public class PersistenceServices {
 
   }
 
-
-  // TODO: Add the complete list of errors in Javadoc: Constants.xxxx
-
   /**
    * Create a new banking operation
    * 
@@ -226,6 +225,8 @@ public class PersistenceServices {
    *         <ul>
    *         <li>Constants.INVALID_BANK_ACCOUNT</li>
    *         <li>Constants.INVALID_OPERATION_TYPE</li>
+   *         <li>Constants.INVALID_BANK_ACCOUNT</li>
+   *         <li>Constants.INVALID_DATE</li>
    *         <ul>
    */
   public String createNewBankingOperation(Account ba, LocalDate opDate, String opType,
@@ -303,7 +304,8 @@ public class PersistenceServices {
   }
 
   /**
-   * TODO
+   * 
+   * Create a new Overdraft
    * 
    * @param ba
    * @param overDraftAmount
@@ -316,13 +318,13 @@ public class PersistenceServices {
   }
 
   /**
-   * TODO
+   * Create a new saving account for a person
    * 
-   * @param id
-   * @return
+   * @param personId
+   * @return the created BAN
    */
-  public String createSavingsAccount(String id) {
-    Account ba = new Account(id);
+  public String createSavingsAccount(String personId) {
+    Account ba = new Account(personId);
     long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
     String externalRef = String.format("CAMBYZEBANK-%08d", seq);
     ba.setBankAccountNumber(externalRef);

@@ -37,7 +37,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
-
+import com.cambyze.banking.persistence.model.Account;
+import java.util.List;
+import java.util.Collections;
 /**
  * REST API controller for the management of the bank accounts
  * 
@@ -64,6 +66,7 @@ public class BankAccountController {
     super();
     this.bankingServices = bankingServices;
   }
+  
 
   // @Autowired
   private BankingServices bankingServices;
@@ -73,17 +76,22 @@ public class BankAccountController {
   @Produces("application/json")
   @Operation(summary = "Create a bank account",
       description = "Create a bank account and return its bank account number",
+      
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           description = "No request body needed", required = false,
           content = @Content(mediaType = "application/json",
               contentSchema = @Schema(implementation = String.class))),
+      parameters = {
+          @Parameter(required = true, description = "Person id", example = "CLI-00000001")
+      },
       responses = {@ApiResponse(description = "The new bank account number",
           content = @Content(mediaType = "String"))})
 
+  
   @Path("/createBankAccount")
   @PostMapping("/createBankAccount")
-  public String createBankAccount() {
-    String ban = bankingServices.createNewBankAccount();
+  public String createBankAccount(@RequestParam(value = "personId") String personId) {   
+    String ban = bankingServices.createNewBankAccount(personId);
     if (ban != null && !ban.isEmpty()) {
       LOGGER.info("New created account: {}", ban);
       return ban;
@@ -126,13 +134,16 @@ public class BankAccountController {
           description = "No request body needed", required = false,
           content = @Content(mediaType = "application/json",
               contentSchema = @Schema(implementation = String.class))),
+      parameters = {
+              @Parameter(required = true, description = "Person id", example = "CLI-00000001")
+      },
       responses = {@ApiResponse(description = "The new bank account number",
           content = @Content(mediaType = "String"))})
 
-  @Path("/createSavingsAccount")
   @PostMapping("/createSavingsAccount")
-  public String createSavingsAccount() {
-    String ban = bankingServices.createNewSavingsAccount();
+  public String createSavingsAccount(@RequestParam("personId") String personId) {
+
+    String ban = bankingServices.createNewSavingsAccount(personId);
     if (ban != null && !ban.isEmpty()) {
       LOGGER.info("New created savings account: {} ", ban);
       return ban;
@@ -202,7 +213,7 @@ public class BankAccountController {
           @Parameter(required = true, description = "Withdraw amount", example = "120.26")},
       responses = {@ApiResponse(description = "The new balance",
           content = @Content(mediaType = "BigDecimal"))})
-  @Path("/createWithdraw")
+  //@Path("/createWithdraw")
   @PostMapping("/createWithdraw")
   public BigDecimal createWithdraw(@RequestParam(value = "ban") String ban,
       @RequestParam(value = "amount") String amount) {
@@ -243,7 +254,7 @@ public class BankAccountController {
           example = "CAMBYZEBANK-2")},
       responses = {@ApiResponse(description = "The overdraft amount",
           content = @Content(mediaType = "BigDecimal"))})
-  @Path("/requestOverdraft")
+  //@Path("/requestOverdraft")
   @PostMapping("/requestOverdraft")
   public BigDecimal requestOverdraft(@RequestParam(value = "ban") String ban) {
 
@@ -286,6 +297,95 @@ public class BankAccountController {
       LOGGER.error(msg);
       throw new TechnicalErrorException(msg);
     }
+  }
+  
+  
+  @POST
+  @Consumes("application/json")
+  @Operation(summary = "Create a new Person",
+      description = "Create a new person ",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "No request body needed, you have to use the required parameters: name, firstName, mail",
+          required = false),
+          parameters = {
+              @Parameter(name = "name", required = true, description = "Last name of the person", example = "Doe"),
+              @Parameter(name = "firstName", required = true, description = "First name of the person", example = "John"),
+              @Parameter(name = "mail", required = true, description = "Email address of the person", example = "john.doe@example.com")
+          },
+          example = "Louis", "Defunes", "Louis.Defunes@mail.com")},
+      responses = {@ApiResponse(description = "boolean",
+          content = @Content(mediaType = "boolean"))})
+  
+  @Produces("application/json")
+  @Path("/createPerson")
+  @PostMapping("/createPerson")
+  public String createPerson(@RequestParam(value = "name") String name,
+      @RequestParam(value = "firstName") String firstName, @RequestParam(value = "mail") String mail) {
+    String per = bankingServices.createPerson(name, firstName, mail);
+    if (per != null && !per.isEmpty()) {
+      LOGGER.info("New created Person: {}", per);
+      return per;
+    } else {
+      String msg = "Technical pb when creating a new Person";
+      LOGGER.error(msg);
+      throw new TechnicalErrorException(msg);
+    }
+  }
+
+  
+  @POST
+  @Consumes("application/json")
+  @Operation(summary = "Send if the user is logged",
+      description = "Send the monthly bank statement for the date of today",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "No request body needed, you have to use the required parameters: mail",
+          required = false),
+      parameters = {@Parameter(required = true, description = "login mail",
+          example = "user.mail")},
+      responses = {@ApiResponse(description = "boolean",
+          content = @Content(mediaType = "boolean"))})
+
+  @Produces("application/json")
+  @PostMapping("/login")
+  public boolean login(
+      @RequestParam(value = "mail") String mail) {
+      if(mail == null || mail.isEmpty()) {
+        String msg = "mail field was empty";
+        LOGGER.error("MSG : {}", msg);
+        return false;
+       }
+       boolean login = bankingServices.login(mail);
+       return login;
+  }
+
+  
+  
+  @Get
+  @Consumes("application/json")
+  @Operation(summary = "send all account for a Person",
+      description = "Send a list of all account linked to Person by personId",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "No request body needed, you have to use the required parameters: personId",
+          required = false),
+      parameters = {@Parameter(required = true, description = "List<Account>",
+          example = "CLI-00000000")},
+      responses = {@ApiResponse(description = "List<Account>",
+          content = @Content(mediaType = "List<Account>"))})
+
+  @Produces("application/json")
+  @GetMapping("/findBanByPerson")
+  public List<Account> findBanByPerson(@RequestParam(value = "personId") String personId) {
+      if (personId == null || personId.isEmpty()) {
+          LOGGER.debug("LIST ACCOUNT IS EMPTY");
+          return Collections.emptyList();
+      }
+
+      List<Account> laccount = bankingServices.findBanByPerson(personId);
+      if (laccount.isEmpty()) {
+          LOGGER.debug("Find Account List is empty");
+          return Collections.emptyList();
+      }
+      return laccount;
   }
 
 }

@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
 import com.cambyze.banking.persistence.model.Operation;
+import com.cambyze.banking.persistence.model.Person;
 import com.cambyze.banking.persistence.services.PersistenceServices;
 import com.cambyze.banking.services.tools.MathTools;
 
@@ -36,8 +38,8 @@ public class BankingServices {
    * 
    * @return its BAN
    */
-  public String createNewBankAccount() {
-    String ban = persistenceServices.createNewBankAccount();
+  public String createNewBankAccount(String personId) {
+    String ban = persistenceServices.createNewBankAccount(personId);
     LOGGER.debug("New BAN: {}", ban);
     return ban;
   }
@@ -119,8 +121,8 @@ public class BankingServices {
    * @param ban the Bank Account Number
    * @return the return code
    */
-  public String createNewSavingsAccount() {
-    String ban = persistenceServices.createSavingsAccount();
+  public String createNewSavingsAccount(String personId) {
+    String ban = persistenceServices.createSavingsAccount(personId);
     LOGGER.debug("New BAN for the savings account: {}", ban);
     return ban;
   }
@@ -259,4 +261,117 @@ public class BankingServices {
   }
 
 
+  /**
+   * check if string is a mail
+   * 
+   * @param email
+   * @return boolean
+   */
+  public static boolean isValidEmail(String email) {
+    String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+    return Pattern.matches(emailRegex, email);
+  }
+
+  /**
+   * Create a new user (person)
+   * 
+   * @param name
+   * @param firstName
+   * @param email
+   * @return
+   */
+
+  public String createPerson(String name, String firstName, String email) {
+    if (name == null && firstName == null && email == null) {
+      LOGGER.debug("all fields must be completed, and email valdid");
+      return null;
+    }
+    if (!isValidEmail(email)) {
+      LOGGER.debug("EMAIL IS NOT VALIDE");
+      return null;
+    }
+    List<Person> pers = persistenceServices.findPersonByMail(email);
+    if (pers != null && !pers.isEmpty()) {
+      LOGGER.debug("this mail is already in use: {}  {}  {}", email, name, firstName);
+      return null;
+    }
+    String per = persistenceServices.createNewPerson(name, firstName, email);
+    LOGGER.debug("new Person id : ({})", per);
+    String ban = this.createNewBankAccount(per);
+    LOGGER.debug("new bank account created ban: {}", ban);
+    return per;
+  }
+
+
+  /**
+   * function for return a string to create a better display
+   * 
+   * @param ba
+   * @return String
+   */
+  public String accountToString(Account ba) {
+    Person per = persistenceServices.findPersonByid(ba.getPersonId());
+    if (per != null && per.getPersonId() != null) {
+      return "Client: " + per.getPersonId() + " BAN: " + ba.getBankAccountNumber() + " / "
+          + ba.getAccountType() + " / " + ba.getBalanceAmount() + " / " + ba.getOverdraftAmount();
+    }
+    return "****** ERROR ********** : " + ba.getPersonId();
+  }
+
+
+  /**
+   * return a list of accounts for a person
+   * 
+   * @param the user id
+   * @return list of Account
+   * 
+   */
+  public List<Account> findBanByPerson(String personId) {
+    if (personId == null || personId.isEmpty()) {
+      LOGGER.debug("LIST ACCOUNT IS EMPTY");
+      return Collections.emptyList();
+    }
+    List<Account> lAccount = persistenceServices.findBankAccountsByPerson(personId);
+    if (lAccount.isEmpty()) {
+      LOGGER.debug("Find Account List is empty");
+      return Collections.emptyList();
+    }
+    if (LOGGER.isDebugEnabled()) {
+      StringBuilder accountDetails = new StringBuilder();
+      for (Account account : lAccount) {
+        accountDetails.append("\n  - ").append(accountToString(account));
+      }
+      LOGGER.debug("List accounts for person ({}): ({})", personId, accountDetails);
+    }
+    return lAccount;
+  }
+
+
+  /**
+   * check if the mail in parameter exist
+   * 
+   * @param mail
+   * @return Boolean
+   */
+
+  public boolean login(String mail) {
+    if (mail == null) {
+      LOGGER.error("connection fails, no mail, enter your mail to connect");
+      return false;
+    }
+    List<Person> pers = persistenceServices.findPersonByMail(mail);
+    if (pers == null || pers.size() < 1) {
+      LOGGER.error("connection error mail is invalid 1: {} per: {}", mail, pers);
+      return false;
+    }
+    LOGGER.debug("boolean ::: [{}] [{}]", pers, pers.get(0).getEmail());
+    if (!pers.get(0).getEmail().equals(mail)) {
+      LOGGER.error("connection error mail is invalid 2: {} != {}", mail, pers.get(0).getEmail());
+      return false;
+    }
+    LOGGER.debug("Connected");
+    return true;
+  }
+
 }
+

@@ -3,11 +3,13 @@ package com.cambyze.banking.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
 
 @SpringBootTest
@@ -21,9 +23,62 @@ class ServicesApplicationTests {
   @Test
   void testServices() {
     LOGGER.debug("Test services");
-    String ban = bankingServices.createNewBankAccount();
+
+
+    boolean isOk = bankingServices.isValidEmail("testmail.com");
+    LOGGER.debug("mail is ok : {}", isOk);
+    assertTrue(!isOk);
+
+    String perId = bankingServices.createPerson("christof", "colomb", "ccolomb");
+    assertTrue(perId == null);
+    LOGGER.debug("Test value not ok: ({})", perId);
+
+
+    perId = bankingServices.createPerson("christof", "colomb", "ccolomb@mail.com");
+    LOGGER.debug("NEW Person Created : {}", perId);
+    assertTrue(perId != null);
+
+    String perId2;
+
+    perId2 = bankingServices.createPerson("christ", "Jesus", "ccolomb@mail.com");
+    LOGGER.debug("Mails allready use TEST: {}", perId2);
+    assertTrue(perId2 == null);
+
+    perId2 = bankingServices.createPerson("Marie", "Curie", "Mcurie@mail.com");
+    LOGGER.debug("Mails Test2: {}", perId2);
+    assertTrue(perId != null);
+
+    LOGGER.debug("test mail {} is valid : {}", "ccolomb@mail.com",
+        bankingServices.login("ccolomb@mail.com"));
+
+    LOGGER.debug("TEST LOGIN");
+    boolean log = bankingServices.login("ccolomb@mail.com");
+    LOGGER.debug("mail exist {} : {}", "ccolomb@mail.com");
+    assertTrue(log == true);
+
+    log = bankingServices.login("test@mail.com");
+    LOGGER.debug("mail d'ont exist {} : {}", "test@mail.com", log);
+    assertTrue(log == false);
+
+    String ban = bankingServices.createNewBankAccount(perId);
     LOGGER.debug("New BAN : {}", ban);
     assertTrue(ban.startsWith("CAMBYZEBANK"));
+
+    // try to see all account for an user
+    List<Account> la = bankingServices.findBanByPerson(perId);
+    if (LOGGER.isDebugEnabled()) {
+      StringBuilder accountDetails = new StringBuilder();
+      for (Account account : la) {
+        accountDetails.append("\n  - ").append(bankingServices.accountToString(account));
+      }
+      LOGGER.debug("Test List accounts for person ({}): ({})", perId, accountDetails);
+    }
+    assertTrue(la != null);
+    assertTrue(la.size() > 1);
+
+    // String ban = bankingServices.createNewBankAccount(perId);
+    // LOGGER.debug("New BAN : {}", ban);
+    // assertTrue(ban.startsWith("CAMBYZEBANK"));
 
     CreateDepositResponse createDepositResponse =
         bankingServices.createDeposit(ban, BigDecimal.valueOf(1520.25));
@@ -44,7 +99,7 @@ class ServicesApplicationTests {
     assertTrue(overdraftAmountResp.getOverdraftAmount().longValue() > 0);
 
     // Ask for savings account
-    ban = bankingServices.createNewSavingsAccount();
+    ban = bankingServices.createNewSavingsAccount(perId);
     oldBalance = 0.0;
     LOGGER.debug("New savings account BAN : {}", ban);
     assertTrue(ban.startsWith("CAMBYZEBANK"));
@@ -68,7 +123,7 @@ class ServicesApplicationTests {
 
 
     // new Regular Bank Account
-    ban = bankingServices.createNewBankAccount();
+    ban = bankingServices.createNewBankAccount(perId);
     oldBalance = 0.0;
     LOGGER.debug("New BAN : {}", ban);
     assertTrue(ban.startsWith("CAMBYZEBANK"));
@@ -99,7 +154,7 @@ class ServicesApplicationTests {
 
 
     // new Bank Account
-    ban = bankingServices.createNewBankAccount();
+    ban = bankingServices.createNewBankAccount(perId);
     oldBalance = 0.0;
     LOGGER.debug("New BAN : {}", ban);
     assertTrue(ban.startsWith("CAMBYZEBANK"));
@@ -129,7 +184,7 @@ class ServicesApplicationTests {
 
 
     // Test a long term account
-    ban = bankingServices.createNewBankAccount();
+    ban = bankingServices.createNewBankAccount(perId);
     CreateDepositResponse cdr = bankingServices.createSampleOperations(ban);
     LOGGER.debug("Return code after creation of a sample of operations : {}", cdr.getReturnCode());
     assertEquals(Constants.SERVICE_OK, cdr.getReturnCode());
