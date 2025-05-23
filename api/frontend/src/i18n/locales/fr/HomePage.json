@@ -1,0 +1,28 @@
+{
+    "carousel": {
+      "what_new":"Quoi de neuf?",
+       "availability_Title": "Disponibilité",
+       "availability_Desc": "Nous sommes disponibles du lundi au samedi de 8h à 20h.",
+       "new_Service_Title": "Nouveau service",
+       "new_Service_Desc": "Découvrez notre application mobile améliorée.",
+       "support_Title": "Support client",
+       "support_Desc": "Support client réactif et personnalisé.",
+       "security_Title": "Sécurité",
+       "security_Desc": "Vos données sont protégées avec les dernières technologies.",
+       "special_Offer_Title": "Offre spéciale",
+       "special_Offer_Desc": "Ouvrez un compte et bénéficiez d’un bonus de bienvenue !"
+     },
+    "Get_New_Account":"Obtenir un nouveau compte bancaire",
+    "cards": {
+      "our_Services":"Nos prestations",
+      "bank_account":"Compte bancaire",
+      "bank_account_desc":"Effectuer des dépôts et des retraits",
+      "bank_account_desc_2":"Demander un découvert",
+      "Savings_Account":"Compte d'épargne",
+      "Savings_Account_desc":"économisez votre argent",
+      "Monthtly_statement":"Relevé mensuel",
+      "Monthtly_statement_desc":"Vérifiez vos opérations mensuelles"
+    },
+    "abbout_us":"À propos de nous",
+    "abbout_us_desc":"Cambyze Bank est là pour vous accompagner dans vos projets."
+}

@@ -1,0 +1,22 @@
+{
+    "Banking":"courant",
+    "Saving":"Épargne",
+    "Set_Error_Loading_Account":"Impossible de charger vos comptes. Veuillez réessayer plus tard.",
+    "Set_Error_Missing_User_Id":"Identifiant utilisateur manquant.",
+    "Set_Error_Account_Creation":"Impossible de créer le compte {{type}}. Veuillez réessayer.",
+    "Not_Connected_Title":"Non connecté",
+    "Not_Connected_desc":"Veuillez vous connecter pour accéder à votre compte.",
+    "Logout_Button":"Déconnexion",
+    "Welcome_desc":"Bienvenue dans votre page personnelle",
+    "Manage_Your_Account":"Gérer votre compte",
+    "Error_Msg":"Erreur: ",
+    "Your_Account":"Vos comptes",
+    "Overdraft_Allowed": "Découvert autorisé :",
+    "No_Accounts": "Vous n'avez pas encore de comptes.",
+    "New_Account": "Nouveau compte",
+    "Open_New_Account": "Ouvrir un nouveau compte bancaire ou épargne",
+    "Create_New_Account": "Créer un nouveau compte",
+    "Savings_Account": "Compte Épargne (Saving)",
+    "Checking_Account": "Compte Courant (Banking)",
+    "Cancel": "Annuler"
+}

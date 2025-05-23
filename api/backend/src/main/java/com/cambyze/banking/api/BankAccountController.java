@@ -40,6 +40,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import com.cambyze.banking.persistence.model.Account;
 import java.util.List;
 import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
+import com.cambyze.banking.persistence.model.Person;
 /**
  * REST API controller for the management of the bank accounts
  * 
@@ -299,40 +302,37 @@ public class BankAccountController {
     }
   }
   
-  
   @POST
   @Consumes("application/json")
   @Operation(summary = "Create a new Person",
-      description = "Create a new person ",
+      description = "Create a new person",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           description = "No request body needed, you have to use the required parameters: name, firstName, mail",
           required = false),
-          parameters = {
-              @Parameter(name = "name", required = true, description = "Last name of the person", example = "Doe"),
-              @Parameter(name = "firstName", required = true, description = "First name of the person", example = "John"),
-              @Parameter(name = "mail", required = true, description = "Email address of the person", example = "john.doe@example.com")
-          },
-          example = "Louis", "Defunes", "Louis.Defunes@mail.com")},
-      responses = {@ApiResponse(description = "boolean",
-          content = @Content(mediaType = "boolean"))})
-  
+      parameters = {
+          @Parameter(name = "name", required = true, description = "Last name of the person", example = "Doe"),
+          @Parameter(name = "firstName", required = true, description = "First name of the person", example = "John"),
+          @Parameter(name = "mail", required = true, description = "Email address of the person", example = "john.doe@example.com")
+      },
+      responses = {@ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))}
+  )
   @Produces("application/json")
   @Path("/createPerson")
   @PostMapping("/createPerson")
   public String createPerson(@RequestParam(value = "name") String name,
-      @RequestParam(value = "firstName") String firstName, @RequestParam(value = "mail") String mail) {
-    String per = bankingServices.createPerson(name, firstName, mail);
-    if (per != null && !per.isEmpty()) {
-      LOGGER.info("New created Person: {}", per);
-      return per;
-    } else {
-      String msg = "Technical pb when creating a new Person";
-      LOGGER.error(msg);
-      throw new TechnicalErrorException(msg);
-    }
+                             @RequestParam(value = "firstName") String firstName,
+                             @RequestParam(value = "mail") String mail) {
+      String per = bankingServices.createPerson(name, firstName, mail);
+      if (per != null && !per.isEmpty()) {
+          LOGGER.info("New created Person: {}", per);
+          return per;
+      } else {
+          String msg = "Technical pb when creating a new Person";
+          LOGGER.error(msg);
+          throw new TechnicalErrorException(msg);
+      }
   }
 
-  
   @POST
   @Consumes("application/json")
   @Operation(summary = "Send if the user is logged",
@@ -358,9 +358,6 @@ public class BankAccountController {
        return login;
   }
 
-  
-  
-  @Get
   @Consumes("application/json")
   @Operation(summary = "send all account for a Person",
       description = "Send a list of all account linked to Person by personId",
@@ -387,5 +384,38 @@ public class BankAccountController {
       }
       return laccount;
   }
+
+  @Produces("application/json")
+  @PostMapping("/login2")
+  public Map<String, Object> login2(@RequestParam(value = "mail") String mail) {
+      Map<String, Object> response = new HashMap<>();
+      try {
+          if (mail == null || mail.isEmpty()) {
+              response.put("authenticated", false);
+              response.put("error", "Mail is empty");
+              return response;
+          }
+          // Vérifie si le mail existe et récupère la personne
+          Person person = bankingServices.findPersonByMail(mail);
+          if (person != null) {
+              response.put("authenticated", true);
+              response.put("personId", person.getId());
+              response.put("firstName", person.getFirstName());
+              response.put("lastName", person.getName());
+              response.put("email", person.getEmail());
+              return response;
+          } else {
+              response.put("authenticated", false);
+              return response;
+          }
+      } catch (Exception e) {
+          LOGGER.error("Error during login process: {}", e.getMessage());
+          response.put("authenticated", false);
+          response.put("error", e.getMessage());
+          return response;
+      }
+  }
+
+
 
 }

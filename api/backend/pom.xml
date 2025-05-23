@@ -179,6 +179,17 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.8.1</version>
+    <configuration>
+        <compilerArgs>
+            <arg>-parameters</arg>
+        </compilerArgs>
+        <source>17</source> <!-- or your Java version -->
+        <target>17</target>
+    </configuration>
+</plugin>
 		</plugins>
 	</build>
 

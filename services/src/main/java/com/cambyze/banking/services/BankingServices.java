@@ -373,5 +373,32 @@ public class BankingServices {
     return true;
   }
 
+  /**
+   * Find a person by email
+   * 
+   * @param mail Email to search
+   * @return PersonDto if found, null otherwise
+   */
+  public Person findPersonByMail(String mail) {
+    try {
+      List<Person> pers = persistenceServices.findPersonByMail(mail);
+      String user = null;
+      LOGGER.debug("==|person|==");
+      for (Person person : pers) {
+        LOGGER.debug("==|{} || {} |==", pers, person);
+        if (person != null)
+          return person;
+      }
+      LOGGER.debug("==|person FIN|==");
+      if (user == null) {
+        return null;
+      }
+    } catch (Exception e) {
+      LOGGER.error("Error finding person by email: {}", e.getMessage());
+      return null;
+    }
+    return null;
+  }
+
 }
 

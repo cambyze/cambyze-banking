@@ -120,5 +120,9 @@ class ApiApplicationTests {
     String personId = "CLI-00000001";
     mockMvc.perform(get("/findBanByPerson").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
     .andExpect(status().isOk());
+    
+    
+    mockMvc.perform(post("/login2").param("mail", "Jack.Onils@mail.com").contentType(MediaType.APPLICATION_JSON).content(""))
+    .andExpect(status().isOk());
   }
 }

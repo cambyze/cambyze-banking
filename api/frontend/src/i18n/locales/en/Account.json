@@ -1,0 +1,20 @@
+{
+    "Set_Error_Loading_Account":"Unable to load your accounts. Please try again later.",
+    "Set_Error_Missing_User_Id":"Missing user ID.",
+    "Set_Error_Account_Creation":"Unable to create account {{type}}. Please try again.",
+    "Not_Connected_Title":"Not connected",
+    "Not_Connected_desc":"Please log in to access your account.",
+    "Logout_Button":"Logout",
+    "Welcome_desc":"Welcome to your personal page",
+    "Manage_Your_Account":"Manage your account",
+    "Error_Msg":"error: ",
+    "Your_Account":"Your accounts",
+    "Overdraft_Allowed": "Authorized overdraft:",
+    "No_Accounts": "You don't have any accounts yet.",
+    "New_Account": "New account",
+    "Open_New_Account": "Open a new bank or savings account",
+    "Create_New_Account": "Create a new account",
+    "Savings_Account": "Savings Account (Saving)",
+    "Checking_Account": "Current account (Banking)",
+    "Cancel": "Cancel"
+}

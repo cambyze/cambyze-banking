@@ -1,0 +1,26 @@
+{
+    "Login_Title": "Connectez-vous à votre espace sécurisé.",
+    "Register_Title": "Créez votre compte Cambyze en quelques secondes.",
+    "Register_Button":"Inscription",
+    "Login_Button":"Connection",
+    "Login_Form_Email":"Email",
+    "Login_Form_Password":"Mot de passe",
+    "Login_Form_Forget_Password":"Mot de passe oublié ?",
+    "Login_Form_Button_Status_pending":"Connexion en cours...",
+    "Login_Form_Button_Status_Connecting":"Se connecter",
+    "Connection_Failed":"Échec de la connexion. Veuillez vérifier votre adresse e-mail et votre mot de passe.",
+    "Register_Form_Family_Name":"Nom de famille",
+    "Register_Form_First_Name":"Prénom",
+    "Register_Form_Email":"Email",
+    "Register_Form_Password":"Mot de passe",
+    "Register_Form_Confirm_Password":"Confirmez le mot de passe",
+    "Register_Form_Button_Status_pending":"Inscription en cours...",
+    "Register_Form_Button_Status_Connecting":"S'inscrire",
+    "Inscription_Failed":"L'inscription a échoué. Veuillez réessayer.",
+    "Condition_Of_Use":{
+        "prefix": "En cliquant sur \"Login\" ou \"Register\", vous acceptez nos",
+        "terms": "Conditions d'utilisation",
+        "and": "et notre",
+        "privacy": "Politique de confidentialité"
+    }
+}

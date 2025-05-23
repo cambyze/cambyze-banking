@@ -1,0 +1,26 @@
+{
+    "Login_Title": "Log in to your secure area.",
+    "Register_Title": "Create your Cambyze account in seconds.",
+    "Register_Button":"Register",
+    "Login_Button":"Login",
+    "Login_Form_Email":"Email",
+    "Login_Form_Password":"Password",
+    "Login_Form_Forget_Password":"Forgot password?",
+    "Login_Form_Button_Status_pending":"Connection in progress...",
+    "Login_Form_Button_Status_Connecting":"Login",
+    "Connection_Failed":"Login failed. Please check your email and password.",
+    "Register_Form_Family_Name":"Family name",
+    "Register_Form_First_Name":"First name",
+    "Register_Form_Email":"Email",
+    "Register_Form_Password":"Password",
+    "Register_Form_Confirm_Password":"Confirm password",
+    "Register_Form_Button_Status_pending":"Registration in progress...",
+    "Register_Form_Button_Status_Connecting":"Register",
+    "Inscription_Failed":"Registration failed. Please try again.",
+    "Condition_Of_Use":{
+        "prefix": "By clicking on \"Login\" or \"Register\", you agree to our",
+        "terms": "Terms of Use",
+        "and": "and our",
+        "privacy": "Privacy Policy"
+    }
+}

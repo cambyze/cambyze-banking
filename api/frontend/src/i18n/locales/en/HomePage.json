@@ -1,0 +1,28 @@
+{
+  "carousel": {
+    "what_new":"What's New?",
+    "availability_Title": "Availability",
+    "availability_Desc": "We are available Monday to Saturday from 8am to 8pm.",
+    "newService_Title": "New service",
+    "newService_Desc": "Discover our improved mobile app.",
+    "support_Title": "Customer support",
+    "support_Desc": "Responsive and personalized customer support.",
+    "security_Title": "Security",
+    "security_Desc": "Your data is protected with the latest technologies.",
+    "special_Offer_Title": "Special offer",
+    "special_Offer_Desc": "Open an account and get a welcome bonus!"
+     },
+    "Get_New_Account":"Get a new bank account",
+    "cards": {
+      "our_Services":"Our services",
+      "bank_account":"Bank account",
+      "bank_account_desc":"Perform deposits and withdraws",
+      "bank_account_desc_2":"Ask for an overdraft",
+      "Savings_Account":"Savings account",
+      "Savings_Account_desc":"save your money",
+      "Monthtly_statement":"Monthly statement",
+      "Monthtly_statement_desc":"Check your monthly operations"
+    },
+    "abbout_us":"About us",
+    "abbout_us_desc":"Cambyze Bank is here to support you in your projects."
+}

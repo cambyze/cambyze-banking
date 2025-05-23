@@ -196,5 +196,7 @@ class ServicesApplicationTests {
         bk.getOperations().size());
     assertEquals(6, bk.getOperations().size());
 
+    bankingServices.findPersonByMail("ccolomb@mail.com");
+
   }
 }

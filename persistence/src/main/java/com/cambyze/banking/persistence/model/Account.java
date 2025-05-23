@@ -33,6 +33,13 @@ public class Account {
     this.personId = personId;
   }
 
+  @Override
+public String toString() {
+    return "Account{accountId='" + accountId + "', personId='" + personId + "', bankAccountNumber='" + bankAccountNumber
+        + "', accountType='" + accountType + "', balanceAmount=" + balanceAmount
+        + ", overdraftAmount=" + overdraftAmount + "}";
+}
+
   public String getAccountId() {
     return accountId;
   }
