@@ -2,10 +2,13 @@ package com.cambyze.banking.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +19,6 @@ import com.cambyze.banking.persistence.model.Operation;
 import com.cambyze.banking.persistence.model.Person;
 import com.cambyze.banking.persistence.services.PersistenceServices;
 import com.cambyze.banking.services.tools.MathTools;
-
 
 
 /**
@@ -281,8 +283,9 @@ public class BankingServices {
    * @return
    */
 
-  public String createPerson(String name, String firstName, String email) {
-    if (name == null && firstName == null && email == null) {
+  public String createPerson(String name, String firstName, String email, String psw,
+      String adress) {
+    if (name == null && firstName == null && email == null && psw == null) {
       LOGGER.debug("all fields must be completed, and email valdid");
       return null;
     }
@@ -295,7 +298,7 @@ public class BankingServices {
       LOGGER.debug("this mail is already in use: {}  {}  {}", email, name, firstName);
       return null;
     }
-    String per = persistenceServices.createNewPerson(name, firstName, email);
+    String per = persistenceServices.createNewPerson(name, firstName, email, psw, adress);
     LOGGER.debug("new Person id : ({})", per);
     String ban = this.createNewBankAccount(per);
     LOGGER.debug("new bank account created ban: {}", ban);
@@ -400,5 +403,69 @@ public class BankingServices {
     return null;
   }
 
+  /**
+   * forgotten password Update
+   * 
+   * @param mail
+   * @return Boolean
+   */
+  private final Map<String, ResetCodeData> codes = new ConcurrentHashMap<>();
+
+  // public boolean forgottenPsw(String mail) {
+  //
+  // if (mail == null) {
+  // LOGGER.error("Error, no mail, enter your mail to connect");
+  // return false;
+  // }
+  // List<Person> pers = persistenceServices.findPersonByMail(mail);
+  // if (pers == null || pers.size() < 1) {
+  // LOGGER.error("error mail is invalid 1: {} per: {}", mail, pers);
+  // return false;
+  // }
+  //
+  // // String code = UUID.randomUUID().toString().substring(0, 6); // Exemple de code
+  // // Person user = pers.get(0);
+  // // ici generer le code et l'envoyer
+  // return true;
+  // }
+
+  public void generateAndSendCode(String mail) {
+    List<Person> pers = persistenceServices.findPersonByMail(mail);
+    if (pers == null || pers.size() < 1) {
+      LOGGER.error("connection error mail is invalid 1: {} per: {}", mail, pers);
+      return;
+    }
+    String code = String.valueOf((int) (Math.random() * 900000) + 100000); // 6 chiffres
+    codes.put(mail, new ResetCodeData(code, LocalDateTime.now().plusMinutes(10)));
+
+    // Envoi de mail (factice ou JavaMail)
+
+    System.out.println("Code envoyé à " + mail + " : " + code);
+  }
+
+  public boolean verifyCode(String email, String code) {
+    ResetCodeData data = codes.get(email);
+    if (data == null || data.expiresAt.isBefore(LocalDateTime.now()))
+      return false;
+    return data.code.equals(code);
+  }
+
+  public void clearCode(String email) {
+    codes.remove(email);
+  }
+
+  private static class ResetCodeData {
+    String code;
+    LocalDateTime expiresAt;
+
+    ResetCodeData(String code, LocalDateTime expiresAt) {
+      this.code = code;
+      this.expiresAt = expiresAt;
+    }
+  }
+
+
+
 }
+
 

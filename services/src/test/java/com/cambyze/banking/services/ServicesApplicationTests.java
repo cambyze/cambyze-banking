@@ -29,22 +29,23 @@ class ServicesApplicationTests {
     LOGGER.debug("mail is ok : {}", isOk);
     assertTrue(!isOk);
 
-    String perId = bankingServices.createPerson("christof", "colomb", "ccolomb");
+    String perId = bankingServices.createPerson("christof", "colomb", "ccolomb", "psw", "adress0");
     assertTrue(perId == null);
     LOGGER.debug("Test value not ok: ({})", perId);
 
 
-    perId = bankingServices.createPerson("christof", "colomb", "ccolomb@mail.com");
+    perId =
+        bankingServices.createPerson("christof", "colomb", "ccolomb@mail.com", "psw", "adress1");
     LOGGER.debug("NEW Person Created : {}", perId);
     assertTrue(perId != null);
 
     String perId2;
 
-    perId2 = bankingServices.createPerson("christ", "Jesus", "ccolomb@mail.com");
+    perId2 = bankingServices.createPerson("christ", "Jesus", "ccolomb@mail.com", "psw", "adress2");
     LOGGER.debug("Mails allready use TEST: {}", perId2);
     assertTrue(perId2 == null);
 
-    perId2 = bankingServices.createPerson("Marie", "Curie", "Mcurie@mail.com");
+    perId2 = bankingServices.createPerson("Marie", "Curie", "Mcurie@mail.com", "psw", "adress3");
     LOGGER.debug("Mails Test2: {}", perId2);
     assertTrue(perId != null);
 

@@ -17,6 +17,7 @@
     "Register_Form_Button_Status_pending":"Registration in progress...",
     "Register_Form_Button_Status_Connecting":"Register",
     "Inscription_Failed":"Registration failed. Please try again.",
+    "Register_Form_Address":"Address",
     "Condition_Of_Use":{
         "prefix": "By clicking on \"Login\" or \"Register\", you agree to our",
         "terms": "Terms of Use",

@@ -20,48 +20,49 @@ class ApiApplicationTests {
 
   @Autowired
   private MockMvc mockMvc;
-  
+
   @Test
-    public void testCreatePerson() throws Exception {
+  public void testCreatePerson() throws Exception {
     String name = "Jack";
     String firstName = "Onils";
     String mail = "Jack.Onils@mail.com";
+    String psw = "psw";
+    String adress = "2 Pl. du Champ de Foire, 87160 Arnac-la-Poste";
     LOGGER.debug("--|Person|--");
     // test creation of new "person"
-    mockMvc.perform(post("/createPerson")
-            .param("name", name)
-            .param("firstName", firstName)
-            .param("mail", mail))
-            .andExpect(status().isOk());
+    mockMvc
+        .perform(post("/createPerson").param("name", name).param("firstName", firstName)
+            .param("mail", mail).param("psw", psw).param("adress", adress))
+        .andExpect(status().isOk());
 
     String personId = "CLI-00000001";
 
     // test creation of a saving account
-    mockMvc
-    .perform(post("/createSavingsAccount").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
-    .andExpect(status().isOk());
+    mockMvc.perform(post("/createSavingsAccount").param("personId", personId)
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
     // test cretation of new banck Account
-    mockMvc.perform(post("/createBankAccount").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
-    .andExpect(status().isOk());
+    mockMvc.perform(post("/createBankAccount").param("personId", personId)
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
     // test Login
-    mockMvc.perform(post("/login").param("mail", mail).contentType(MediaType.APPLICATION_JSON).content(""))
-    .andExpect(status().isOk());
-    
-    mockMvc.perform(post("/login").param("mail", "falseMail").contentType(MediaType.APPLICATION_JSON).content(""))
-    .andExpect(status().isOk());
+    mockMvc
+        .perform(
+            post("/login").param("mail", mail).contentType(MediaType.APPLICATION_JSON).content(""))
+        .andExpect(status().isOk());
+
+    mockMvc.perform(post("/login").param("mail", "falseMail")
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
     // test return all ban
-    mockMvc.perform(get("/findBanByPerson").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
-    .andExpect(status().isOk());
-    mockMvc.perform(get("/findBanByPerson").param("personId", "falseID").contentType(MediaType.APPLICATION_JSON).content(""))
-    .andExpect(status().isOk());
+    mockMvc.perform(get("/findBanByPerson").param("personId", personId)
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
+    mockMvc.perform(get("/findBanByPerson").param("personId", "falseID")
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
   }
 
   @Test
   void testOperations() throws Exception {
     // test with bank account creation
     String id = "CLI-00000001";
-    mockMvc.perform(post("/createBankAccount").param("personId", id))
-    .andExpect(status().isOk());
+    mockMvc.perform(post("/createBankAccount").param("personId", id)).andExpect(status().isOk());
     // Test createDeposit without parameters
     String ban = "";
     String amount = "";
@@ -115,14 +116,14 @@ class ApiApplicationTests {
     LOGGER.debug("Bank statement for the  {}", ban);
 
     mockMvc.perform(get("/monthlyBankStatement").param("ban", ban)).andExpect(status().isOk());
-    
-    
+
+
     String personId = "CLI-00000001";
-    mockMvc.perform(get("/findBanByPerson").param("personId", personId).contentType(MediaType.APPLICATION_JSON).content(""))
-    .andExpect(status().isOk());
-    
-    
-    mockMvc.perform(post("/login2").param("mail", "Jack.Onils@mail.com").contentType(MediaType.APPLICATION_JSON).content(""))
-    .andExpect(status().isOk());
+    mockMvc.perform(get("/findBanByPerson").param("personId", personId)
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
+
+
+    mockMvc.perform(post("/login2").param("mail", "Jack.Onils@mail.com").param("psw", "psw")
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
   }
 }

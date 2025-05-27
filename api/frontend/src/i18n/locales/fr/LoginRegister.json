@@ -17,6 +17,7 @@
     "Register_Form_Button_Status_pending":"Inscription en cours...",
     "Register_Form_Button_Status_Connecting":"S'inscrire",
     "Inscription_Failed":"L'inscription a échoué. Veuillez réessayer.",
+    "Register_Form_Address":"Addresse",
     "Condition_Of_Use":{
         "prefix": "En cliquant sur \"Login\" ou \"Register\", vous acceptez nos",
         "terms": "Conditions d'utilisation",

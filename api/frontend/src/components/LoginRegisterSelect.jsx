@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from "../App";
 import i18n from "../i18n";
 import { useTranslation } from 'react-i18next';
+import AddressModal from './OpenStreetMap';
 
 export default function LoginRegisterSelect() {
     const [selected, setSelected] = useState("register");
@@ -10,7 +11,9 @@ export default function LoginRegisterSelect() {
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
     const { t } = useTranslation();
-
+    const [passwordError, setPasswordError] = useState("");
+    const [addressModalOpen, setAddressModalOpen] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState(null);
 
     const handleSubmitLogin = async (e) => {
       e.preventDefault();
@@ -18,12 +21,13 @@ export default function LoginRegisterSelect() {
       const form = e.target;
       const formData = new FormData(form);
       const email = formData.get("email");
+      const password = formData.get("password");
       
       try {
         const res = await fetch("/login2", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({ mail: email }).toString(),
+          body: new URLSearchParams({ mail: email, psw: password }).toString(),
         });
         console.log(res);
         if (res.ok === true) {
@@ -56,21 +60,40 @@ export default function LoginRegisterSelect() {
     const handleSubmitRegister = async (e) => {
       e.preventDefault();
       setStatus("registering");
+      setPasswordError("");
       const form = e.target;
       const formData = new FormData(form);
       const firstName = formData.get("Name"); 
       const lastName = formData.get("FamilyName"); 
       const email = formData.get("email");
       const password = formData.get("password"); 
-        
+      const checkPassword = formData.get("CheckPassword");
+      const address = selectedAddress ? selectedAddress.address : "";
+
+      if (password !== checkPassword) {
+         setPasswordError(t('LoginRegister.Passwords_Do_Not_Match'));
+         setStatus("idle");
+         return;
+       }
+
+      if (!firstName || !lastName || !email || !password || !checkPassword) {
+        setPasswordError(t('LoginRegister.All_Fields_Are_Required'));
+        setStatus("idle");
+        return;
+      }
+
+
       try {
+        console.log("adresse: ", address);
         const res = await fetch("/createPerson", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({ 
             firstName: firstName, 
             name: lastName,
-            mail: email 
+            mail: email,
+            psw: password,
+            adress: address,
           }).toString(),
         });
         
@@ -99,19 +122,14 @@ export default function LoginRegisterSelect() {
         setStatus("error");
       }
     };
-
-    // Définir les couleurs selon le bouton sélectionné
     const bgGradient =
         selected === "login"
             ?  "from-[#f7e3fc] via-[#f8f5ff] to-[#e3c9f7]"
             : "from-[#e3eafc] via-[#f5f8ff] to-[#c9d6f7]";
 
-
-    // detect the language of the browser 
-
     return (
         <div className={`min-h-screen flex flex-col bg-gradient-to-br ${bgGradient} text-gray-800 font-sans transition-colors duration-500`}>
-            {/* Section principale */}
+            {/* Main section */}
             <section className="flex-1 flex items-center justify-center px-4 py-12">
                 <div className="text-center max-w-xl mx-auto bg-white/90 rounded-2xl shadow-xl p-8 border border-[#e3eafc]">
                     <h2 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight text-[#4A6FA5] drop-shadow">{t('Aplication.Entreprise_Name')}</h2>
@@ -121,7 +139,7 @@ export default function LoginRegisterSelect() {
                             : t('LoginRegister.Register_Title')}
                     </p>
 
-                    {/* Boutons de sélection */}
+                    {/* button for select the form */}
                     <div className="flex flex-row justify-center gap-2 mb-6">
                         <button
                             type="button"
@@ -147,13 +165,14 @@ export default function LoginRegisterSelect() {
                         </button>
                     </div>
 
-                    {/* Formulaire selon le bouton sélectionné */}
+                    {/* Display the form based on the selected button*/}
                     {selected === "login" ? (
-                        <form className="space-y-4 animate-fade-in" onSubmit={handleSubmitLogin}>
+                        <div>
+                          <form className="space-y-4 animate-fade-in" onSubmit={handleSubmitLogin}>
                             <input
                                 type="email"
                                 name="email"
-                                placeholder={t('LoginRegister.Login_Form_Email')}
+                                placeholder={t('LoginRegister.Login_Form_Email') + ' *'}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#a54aa5] outline-none text-sm"
                                 autoComplete="username"
                                 required
@@ -161,9 +180,8 @@ export default function LoginRegisterSelect() {
                             <input
                                 type="password"
                                 name="password"
-                                placeholder={t('LoginRegister.Login_Form_Email')}
+                                placeholder={t('LoginRegister.Login_Form_Password') + ' *'}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#a54aa5] outline-none text-sm"
-                                //className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#4A6FA5] outline-none text-sm"
                                 autoComplete="current-password"
                                 required
                             />
@@ -184,12 +202,20 @@ export default function LoginRegisterSelect() {
                                 </p>
                             )}
                         </form>
+                        <button
+                            type="button"
+                            className="w-full text-xs text-[#a54aa5] hover:underline mt-2"
+                            onClick={() => navigate("/ForgotPsw")}
+                        >
+                            {t('LoginRegister.Login_Form_Forget_Password')}
+                        </button>
+                      </div>
                     ) : (
                         <form className="space-y-4 animate-fade-in" onSubmit={handleSubmitRegister}>
                             <input
                                 type="text"
                                 name="FamilyName"
-                                placeholder={t('LoginRegister.Register_Form_Family_Name')}
+                                placeholder={t('LoginRegister.Register_Form_Family_Name') + ' *'}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#4A6FA5] outline-none text-sm"
                                 autoComplete="family-name"
                                 required
@@ -197,27 +223,57 @@ export default function LoginRegisterSelect() {
                             <input
                                 type="text"
                                 name="Name"
-                                placeholder={t('LoginRegister.Register_Form_First_Name')}
+                                placeholder={t('LoginRegister.Register_Form_First_Name') + ' *'}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#4A6FA5] outline-none text-sm"
                                 autoComplete="given-name"
                                 required
                             />
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={() => setAddressModalOpen(true)}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-left text-sm focus:ring-2 focus:ring-[#4A6FA5] outline-none"
+                                >
+                                    {selectedAddress ? selectedAddress.address : t('LoginRegister.Register_Form_Address') }
+                                </button>
+                                {addressModalOpen && (
+                                    <AddressModal
+                                        isOpen={addressModalOpen}
+                                        onRequestClose={() => setAddressModalOpen(false)}
+                                        onAddressSelected={(data) => {
+                                            setSelectedAddress(data);
+                                            setAddressModalOpen(false);
+                                        }}
+                                    />
+                                )}
+                            </div>
                             <input
                                 type="email"
                                 name="email"
-                                placeholder={t('LoginRegister.Register_Form_Email')}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#4A6FA5] outline-none text-sm"
+                                placeholder={t('LoginRegister.Register_Form_Email') + ' *'}
+                                className={'w-full px-3 py-2 rounded-lg border  border-gray-200 focus:ring-2 focus:ring-[#4A6FA5] outline-none text-sm '}
                                 autoComplete="username"
                                 required
                             />
                             <input
                                 type="password"
                                 name="password"
-                                placeholder={t('LoginRegister.Register_Form_Password')}
+                                placeholder={t('LoginRegister.Register_Form_Password') + ' *'}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#4A6FA5] outline-none text-sm"
                                 autoComplete="new-password"
                                 required
                             />
+                            <input
+                                type="password"
+                                name="CheckPassword"
+                                placeholder={t('LoginRegister.Register_Form_Password') + ' *'}
+                                className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#4A6FA5] outline-none text-sm"
+                                autoComplete="new-password"
+                                required
+                            />
+                            {passwordError && (
+                                <p className="text-red-500 text-sm text-center">{passwordError}</p>
+                            )}
                             <button
                                 type="submit"
                                 disabled={status === "registering"}
