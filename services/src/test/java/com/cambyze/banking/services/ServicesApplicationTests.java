@@ -1,6 +1,7 @@
 package com.cambyze.banking.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
@@ -199,5 +200,95 @@ class ServicesApplicationTests {
 
     bankingServices.findPersonByMail("ccolomb@mail.com");
 
+    // TODO : fix PSW
+    // // PSW
+    // ResetCodeService resetCodeService = new ResetCodeService();
+    // String email = "test@mail.com";
+    // resetCodeService.generateAndSendCode(email);
+    //
+    // Field codesField = ResetCodeService.class.getDeclaredField("codes");
+    // codesField.setAccessible(true);
+    // @SuppressWarnings("unchecked")
+    // Map<String, Object> codes = (Map<String, Object>) codesField.get(resetCodeService);
+    // assertNotNull(codes.get(email), "L'entrée de code généré doit exister");
+    //
+    // Object resetCodeData = codes.get(email);
+    // Field codeField = resetCodeData.getClass().getDeclaredField("code");
+    // codeField.setAccessible(true);
+    // String code = (String) codeField.get(resetCodeData);
+    //
+    // assertTrue(resetCodeService.verifyCode(email, code), "Le code devrait être validé avec
+    // succès");
+    //
+    // assertFalse(resetCodeService.verifyCode(email, "000000"),
+    // "Un code erroné ne doit pas être validé");
+    //
+    // resetCodeService.clearCode(email);
+    // assertFalse(resetCodeService.verifyCode(email, code),
+    // "Le code ne doit plus être validé après effacement");
+    // String TestMail = "mailtestdev11@gmail.com";
+    // perId = bankingServices.createPerson("test mail", "MR mail", TestMail, "psw", "adress1");
+    // LOGGER.debug("NEW Person Created : {}", perId);
+    // assertTrue(perId != null);
+    // bankingServices.generateAndSendCode(TestMail);
+    // String Code = "0000";
+    // boolean Res = bankingServices.verifyCode(TestMail, Code);
+    // assertTrue(!Res);
+    //
+    // bankingServices.clearCode(TestMail);
+    //
+    // bankingServices.MailSender("test", TestMail, "try");
+    // LOGGER.debug("mail send ...");
+
+
+    String senderId =
+        bankingServices.createPerson("Sender", "Test", "sender@test.com", "psw", "adresse");
+    String receiverId =
+        bankingServices.createPerson("Receiver", "Test", "receiver@test.com", "psw", "adresse");
+    String senderBan = bankingServices.createNewBankAccount(senderId);
+    String receiverBan = bankingServices.createNewBankAccount(receiverId);
+
+    bankingServices.createDeposit(senderBan, BigDecimal.valueOf(1000.0));
+
+    boolean result = bankingServices.bankTransfer(receiverBan, senderBan, 500);
+    assertTrue(result, "Le virement doit réussir avec un solde suffisant");
+
+    result = bankingServices.bankTransfer(receiverBan, senderBan, 2000);
+    assertFalse(result, "Le virement doit échouer si le solde est insuffisant");
+
+    result = bankingServices.bankTransfer("FAUX_BAN", senderBan, 100);
+    assertFalse(result, "Le virement doit échouer si le compte destinataire n'existe pas");
+
   }
+
+
+  // PSWq
+  // @Test
+  // public void testGenerateVerifyAndClearCode() throws Exception {
+  // ResetCodeService resetCodeService = new ResetCodeService();
+  // String email = "test@mail.com";
+  // resetCodeService.generateAndSendCode(email);
+  //
+  // Field codesField = ResetCodeService.class.getDeclaredField("codes");
+  // codesField.setAccessible(true);
+  // @SuppressWarnings("unchecked")
+  // Map<String, Object> codes = (Map<String, Object>) codesField.get(resetCodeService);
+  // assertNotNull(codes.get(email), "L'entrée de code généré doit exister");
+  //
+  // Object resetCodeData = codes.get(email);
+  // Field codeField = resetCodeData.getClass().getDeclaredField("code");
+  // codeField.setAccessible(true);
+  // String code = (String) codeField.get(resetCodeData);
+  //
+  // assertTrue(resetCodeService.verifyCode(email, code), "Le code devrait être validé avec
+  // succès");
+  //
+  // assertFalse(resetCodeService.verifyCode(email, "000000"),
+  // "Un code erroné ne doit pas être validé");
+  //
+  // resetCodeService.clearCode(email);
+  // assertFalse(resetCodeService.verifyCode(email, code),
+  // "Le code ne doit plus être validé après effacement");
+  // ResetCodeService
+  // }
 }

@@ -178,6 +178,9 @@ export default function Account() {
               <div
                 key={account.id}
                 className="bg-white rounded-xl shadow-xl p-6 border-2 border-[#8EB4E3]/60 flex flex-col transition-shadow hover:shadow-2xl"
+                onClick={() => navigate(`/account/${account.id}`)}
+                title={t("Account.Your_Account")}
+                style={{ cursor: "pointer" }}
               >
                 <div className="flex items-center mb-2">
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-[#8EB4E3]/20 text-[#4A6FA5] mr-2">

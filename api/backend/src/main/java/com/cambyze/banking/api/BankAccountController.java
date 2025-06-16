@@ -25,14 +25,14 @@ import com.cambyze.banking.api.microservice.exceptions.OverdraftForbiddenExcepti
 import com.cambyze.banking.api.microservice.exceptions.RecordNotFoundException;
 import com.cambyze.banking.api.microservice.exceptions.SavingsLimitReachedException;
 import com.cambyze.banking.api.microservice.exceptions.TechnicalErrorException;
-import com.cambyze.banking.persistence.model.Account;
-import com.cambyze.banking.persistence.model.Constants;
-import com.cambyze.banking.persistence.model.Person;
 import com.cambyze.banking.services.AskOverdraftResponse;
 import com.cambyze.banking.services.BankingServices;
 import com.cambyze.banking.services.CreateDepositResponse;
 import com.cambyze.banking.services.CreateWithdrawResponse;
 import com.cambyze.banking.services.MonthlyBankStatement;
+import com.cambyze.banking.persistence.model.Account;
+import com.cambyze.banking.persistence.model.Constants;
+import com.cambyze.banking.persistence.model.Person;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -460,34 +460,33 @@ public class BankAccountController {
 //      return response;
 //    }
 //  }
-  @Autowired
-  private ResetCodeService resetCodeService;
-  
-  @PostMapping("/forgot-password")
-  public ResponseEntity<?> forgotPassword(@RequestParam String email) {
-      // vérifier si l'email existe si tu veux
-      resetCodeService.generateAndSendCode(email);
-      return ResponseEntity.ok().build();
-  }
-
-  @PostMapping("/verify-code")
-  public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> body) {
-      String email = body.get("email");
-      String code = body.get("code");
-      boolean valid = resetCodeService.verifyCode(email, code);
-      return valid ? ResponseEntity.ok().build() : ResponseEntity.status(400).build();
-  }
-
-  @PostMapping("/reset-password")
-  public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
-      String email = body.get("email");
-      String newPassword = body.get("password");
-
-      // Changer le mot de passe ici dans la base
-      resetCodeService.clearCode(email);
-      return ResponseEntity.ok().build();
-  }
-
+//  @Autowired
+//  private ResetCodeService resetCodeService;
+//  
+//  @PostMapping("/forgot-password")
+//  public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+//      // vérifier si l'email existe si tu veux
+//      resetCodeService.generateAndSendCode(email);
+//      return ResponseEntity.ok().build();
+//  }
+//
+//  @PostMapping("/verify-code")
+//  public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> body) {
+//      String email = body.get("email");
+//      String code = body.get("code");
+//      boolean valid = resetCodeService.verifyCode(email, code);
+//      return valid ? ResponseEntity.ok().build() : ResponseEntity.status(400).build();
+//  }
+//
+//  @PostMapping("/reset-password")
+//  public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+//      String email = body.get("email");
+//      String newPassword = body.get("password");
+//
+//      // Changer le mot de passe ici dans la base
+//      resetCodeService.clearCode(email);
+//      return ResponseEntity.ok().build();
+//  }
 
 
 }

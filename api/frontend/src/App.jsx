@@ -6,6 +6,7 @@ import Header from './components/Header.jsx';
 import LoginRegisterSelect from './components/LoginRegisterSelect.jsx';
 import Account from "./components/Account.jsx";
 import ForgotPsw from "./components/ForgotPsw.jsx";
+import AccountDetails from "./components/AccountDetails.jsx";
 export const AuthContext = createContext();
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <Route path="/Home" element={<HomePage />} />
           <Route path="/Account" element={<Account />} />
           <Route path="/ForgotPsw" element={<ForgotPsw />} />
+          <Route path="/account/:id" element={<AccountDetails />} />
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
         <Footer />
