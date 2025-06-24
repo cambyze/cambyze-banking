@@ -250,13 +250,13 @@ class ServicesApplicationTests {
 
     bankingServices.createDeposit(senderBan, BigDecimal.valueOf(1000.0));
 
-    boolean result = bankingServices.bankTransfer(receiverBan, senderBan, 500);
+    boolean result = bankingServices.bankTransfer(receiverBan, senderBan, BigDecimal.valueOf(500));
     assertTrue(result, "Le virement doit réussir avec un solde suffisant");
 
-    result = bankingServices.bankTransfer(receiverBan, senderBan, 2000);
+    result = bankingServices.bankTransfer(receiverBan, senderBan, BigDecimal.valueOf(2000));
     assertFalse(result, "Le virement doit échouer si le solde est insuffisant");
 
-    result = bankingServices.bankTransfer("FAUX_BAN", senderBan, 100);
+    result = bankingServices.bankTransfer("FAUX_BAN", senderBan, BigDecimal.valueOf(100));
     assertFalse(result, "Le virement doit échouer si le compte destinataire n'existe pas");
 
   }

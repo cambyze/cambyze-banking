@@ -1,6 +1,7 @@
 package com.cambyze.banking.services;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -360,7 +361,9 @@ public class BankingServices {
       return false;
     }
     List<Person> pers = persistenceServices.findPersonByMail(mail);
-    if (pers == null || pers.size() < 1) {
+    LOGGER.debug("pers :: {} ", pers);
+    // if (pers == null || pers.size() < 1 || pers.isEmpty()) {
+    if (pers == null || pers.isEmpty() || pers.get(0) == null || pers.get(0).getEmail() == null) {
       LOGGER.error("connection error mail is invalid 1: {} per: {}", mail, pers);
       return false;
     }
@@ -369,6 +372,7 @@ public class BankingServices {
       LOGGER.error("connection error mail is invalid 2: {} != {}", mail, pers.get(0).getEmail());
       return false;
     }
+    LOGGER.debug("pers list {}", pers);
     LOGGER.debug("Connected");
     return true;
   }
@@ -412,57 +416,60 @@ public class BankingServices {
    * 
    */
 
-  public Boolean bankTransfer(String receiver, String Sender, int amount) {
-    if (amount < 0) {
-      LOGGER.error("Amount must be positive");
-      return false;
+  public Boolean bankTransfer(String receiver, String sender, BigDecimal amount) {
+    if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+        LOGGER.error("Amount must be positive and non-null");
+        return false;
     }
-    if (receiver == null || receiver.isEmpty() || Sender == null || Sender.isEmpty()) {
-      LOGGER.error("Receiver or sender account is null or empty");
-      return false;
+    if (receiver == null || receiver.isEmpty() || sender == null || sender.isEmpty()) {
+        LOGGER.error("Receiver or sender account is null or empty");
+        return false;
     }
     try {
-      Account receiverAccount = persistenceServices.findBankAccountByBAN(receiver);
-      Account senderAccount = persistenceServices.findBankAccountByBAN(Sender);
+        // Arrondir le montant à deux chiffres après la virgule
+        BigDecimal roundedAmount = amount.setScale(2, RoundingMode.HALF_UP);
 
-      if (receiverAccount == null || receiverAccount.getBankAccountNumber() == null
-          || receiverAccount.getBankAccountNumber().isEmpty()) {
-        LOGGER.error("Receiver account does not exist: {}", receiver);
-        return false;
-      }
-      if (senderAccount == null || senderAccount.getBankAccountNumber() == null
-          || senderAccount.getBankAccountNumber().isEmpty()) {
-        LOGGER.error("Sender account does not exist: {}", Sender);
-        return false;
-      }
+        Account receiverAccount = persistenceServices.findBankAccountByBAN(receiver);
+        Account senderAccount = persistenceServices.findBankAccountByBAN(sender);
 
-      double available = senderAccount.getBalanceAmount().doubleValue()
-          + senderAccount.getOverdraftAmount().doubleValue();
-      if (amount > available) {
-        LOGGER.error("Insufficient funds for transfer. Available: {}, Requested: {}", available,
-            amount);
-        return false;
-      }
+        if (receiverAccount == null || receiverAccount.getBankAccountNumber() == null
+                || receiverAccount.getBankAccountNumber().isEmpty()) {
+            LOGGER.error("Receiver account does not exist: {}", receiver);
+            return false;
+        }
+        if (senderAccount == null || senderAccount.getBankAccountNumber() == null
+                || senderAccount.getBankAccountNumber().isEmpty()) {
+            LOGGER.error("Sender account does not exist: {}", sender);
+            return false;
+        }
 
-      CreateWithdrawResponse withdrawResponse = createWithdraw(Sender, BigDecimal.valueOf(amount));
-      if (!Constants.SERVICE_OK.equals(withdrawResponse.getReturnCode())) {
-        LOGGER.error("Withdraw failed for sender: {}", Sender);
-        return false;
-      }
+        BigDecimal available = senderAccount.getBalanceAmount().add(senderAccount.getOverdraftAmount());
+        if (roundedAmount.compareTo(available) > 0) {
+            LOGGER.error("Insufficient funds for transfer. Available: {}, Requested: {}", available,
+                    roundedAmount);
+            return false;
+        }
 
-      CreateDepositResponse depositResponse = createDeposit(receiver, BigDecimal.valueOf(amount));
-      if (!Constants.SERVICE_OK.equals(depositResponse.getReturnCode())) {
-        LOGGER.error("Deposit failed for receiver: {}", receiver);
-        return false;
-      }
+        CreateWithdrawResponse withdrawResponse = createWithdraw(sender, roundedAmount);
+        if (!Constants.SERVICE_OK.equals(withdrawResponse.getReturnCode())) {
+            LOGGER.error("Withdraw failed for sender: {}", sender);
+            return false;
+        }
 
-      LOGGER.debug("Transfer of {} from {} to {} succeeded", amount, Sender, receiver);
-      return true;
+        CreateDepositResponse depositResponse = createDeposit(receiver, roundedAmount);
+        if (!Constants.SERVICE_OK.equals(depositResponse.getReturnCode())) {
+            LOGGER.error("Deposit failed for receiver: {}", receiver);
+            return false;
+        }
+
+        LOGGER.debug("Transfer of {} from {} to {} succeeded", roundedAmount, sender, receiver);
+        return true;
     } catch (Exception e) {
-      LOGGER.error("Exception during bank transfer: {}", e.getMessage(), e);
-      return false;
+        LOGGER.error("Exception during bank transfer: {}", e.getMessage(), e);
+        return false;
     }
   }
+
 
 
   // TODO finir le mail

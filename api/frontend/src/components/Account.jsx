@@ -1,8 +1,9 @@
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../App";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import i18n from "../i18n";
 import { useTranslation } from 'react-i18next';
+import BankTransfer from "./BankTransfer";
 
 // Exemple de comptes (fallback si l'API ne répond pas)
 const exampleAccounts = [
@@ -23,6 +24,7 @@ const exampleAccounts = [
 export default function Account() {
   const { user, logout } = useContext(AuthContext);
   const [showModal, setShowModal] = useState(false);
+  const [ShowBankTransferModal, setShowBankTransferModal] = useState(false);
   const [userAccounts, setUserAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -105,7 +107,6 @@ export default function Account() {
     }
   };
 
-  // Fonction pour gérer la déconnexion
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -136,12 +137,6 @@ export default function Account() {
             {user.personId && (
               <div className="text-gray-400 text-xs mb-2">ID: {user.personId}</div>
             )}
-            {/* <button 
-              className="text-gray-400 hover:text-[#4A6FA5] text-sm"
-              onClick={handleLogout}
-            >
-              {t("Account.Logout_Button")}
-            </button> */}
           </div>
           <div className="mt-4 text-lg font-semibold text-gray-700">
             {t("Account.Welcome_desc")}
@@ -162,6 +157,15 @@ export default function Account() {
 
         {/* Titre pour les comptes réels */}
         <h2 className="text-xl font-bold text-[#4A6FA5] mb-4">{t("Account.Your_Account")} {user.personId ? `(ID: ${user.personId})` : ''}</h2>
+
+
+        <div className="mt-4 gap-6 justify-center flex flex-col">
+          <button
+            className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#8EB4E3] flex flex-col items-center justify-center cursor-pointer hover:shadow-2xl hover:border-solid transition-all text-3xl text-[#4A6FA5] font-bold"
+            onClick={() => navigate("/bank-transfer")} >
+            {t("Account.Bank_Transfer")}
+          </button>
+        </div>
 
         {/* Indicateur de chargement */}
         {loading && (
@@ -267,7 +271,7 @@ export default function Account() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-xs flex flex-col items-center">
-            <h3 className="text-xl font-bold text-[#4A6FA5] mb-6"> {t('Account.Create_New_Account')} Créer un nouveau compte</h3>
+            <h3 className="text-xl font-bold text-[#4A6FA5] mb-6"> {t('Account.Create_New_Account')}</h3>
             <button
               className="w-full mb-3 py-2 rounded-lg bg-[#e3eafc] text-[#4A6FA5] font-semibold hover:bg-[#d0dbf7] transition"
               onClick={() => {

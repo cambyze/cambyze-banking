@@ -32,6 +32,9 @@ export default function LoginRegisterSelect() {
         console.log(res);
         if (res.ok === true) {
           const success = await res.json();
+          if (res == null)
+            throw new Error("Échec de la connexion, réponse vide");
+          console.log("success: ", success);
           if (success) {
             const userData = {
               mail: success.mail,
