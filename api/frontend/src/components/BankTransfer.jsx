@@ -88,8 +88,8 @@ export default function BankTransfer() {
                 className="bg-white shadow-md rounded-xl p-8 mt-8 max-w-md mx-auto"
                 onSubmit={e => { e.preventDefault(); setStatus('idle'); }}
             >
-                <h3 className="text-2xl font-bold mb-6 text-gray-800">Virement interne</h3>
-                <label className="block mb-1 text-gray-500 text-sm">Compte émetteur</label>
+                <h3 className="text-2xl font-bold mb-6 text-gray-800">{t('Account.Internal_Transfer')}</h3>
+                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Emitter_Account')}</label>
                 <select
                     className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
                     value={emitterId}
@@ -98,14 +98,14 @@ export default function BankTransfer() {
                         if (e.target.value === receiverId) setEmitterId('');
                     }}
                 >
-                    <option value="">Sélectionner le compte émetteur</option>
+                    <option value="">{t('Account.Select_Emitter_Account')}</option>
                     {accounts.map(account => (
                         <option key={account.id} value={account.id} name='emitterId'>
                             {account.type} - {account.accountNumber} - {account.balance} €
                         </option>
                     ))}
                 </select>
-                <label className="block mb-1 text-gray-500 text-sm">Compte bénéficiaire</label>
+                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Receiver_Account')}</label>
                 <select
                     className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
                     name='receiverId'
@@ -113,7 +113,7 @@ export default function BankTransfer() {
                     onChange={e => setReceiverId(e.target.value)}
                     disabled={!emitterId}
                 >
-                    <option value="">Sélectionner le compte bénéficiaire</option>
+                    <option value="">{t('Account.Select_Receiver_Account')}</option>
                     {accounts
                         .filter(account => account.id !== emitterId)
                         .map(account => (
@@ -122,7 +122,7 @@ export default function BankTransfer() {
                             </option>
                         ))}
                 </select>
-                <label className="block mb-1 text-gray-500 text-sm">Montant</label>
+                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Amount')}</label>
                 <input
                     type="number"
                     name='amount'
@@ -135,7 +135,7 @@ export default function BankTransfer() {
                     onClick={handleBankTransfer}
                     disabled={!emitterId || !receiverId}
                 >
-                    Effectuer le virement
+                  {t('Account.Perform_Transfer')}
                 </button>
             </form>
         );
@@ -148,31 +148,31 @@ export default function BankTransfer() {
                 
                 onSubmit={e => { e.preventDefault(); setStatus('idle'); }}
             >
-                <h3 className="text-2xl font-bold mb-6 text-gray-800">Virement externe</h3>
-                <label className="block mb-1 text-gray-500 text-sm">Nom du bénéficiaire</label>
+                <h3 className="text-2xl font-bold mb-6 text-gray-800">{t('Account.External_Transfer')}</h3>
+                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Beneficiary_Name')}</label>
                 <input
                     type="text"
                     className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
                     name='emitterId'
                     onChange={e => setEmitterId(e.target.value)}
                 />
-                <label className="block mb-1 text-gray-500 text-sm">Compte émetteur</label>
+                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Emitter_Account')}</label>
                 <select className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
-                    <option value="">Sélectionner le compte émetteur</option>
+                    <option value="">{t('Account.Select_Emitter_Account')}</option>
                     {accounts.map(account => (
                         <option key={account.id} value={account.id}>
                             {account.type} - {account.accountNumber} - {account.balance} €
                         </option>
                     ))}
                 </select>
-                <label className="block mb-1 text-gray-500 text-sm">IBAN</label>
+                <label className="block mb-1 text-gray-500 text-sm">{t('Account.IBAN')}</label>
                 <input
                     name='receiverId'
                     type="text"
                     onChange={e => setAmount(e.target.value)}
                     className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
                 />
-                <label className="block mb-1 text-gray-500 text-sm">Montant</label>
+                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Amount')}</label>
                 <input
                     name='amount'
                     type="number"
@@ -183,7 +183,7 @@ export default function BankTransfer() {
                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
                     onClick={handleBankTransfer}
                 >
-                    Effectuer le virement
+                  {t('Account.Perform_Transfer')}
                 </button>
             </form>
         );
@@ -192,7 +192,7 @@ export default function BankTransfer() {
     return (
         <div className="min-h-screen bg-gray-50 py-10">
             <div className="max-w-xl mx-auto flex flex-col items-center">
-                <h2 className="text-3xl font-bold mb-8 text-gray-800">Effectuer un virement bancaire</h2>
+                <h2 className="text-3xl font-bold mb-8 text-gray-800">{t('Account.Perform_Bank_Transfer')}</h2>
                 <div className="flex gap-4 mb-8">
                     <button
                         className={`px-6 py-3 rounded-lg font-semibold transition ${
@@ -202,7 +202,7 @@ export default function BankTransfer() {
                         }`}
                         onClick={() => setStatus('personal')}
                     >
-                        Vers un compte personnel 1
+                      {t('Account.To_Personal_Account')}
                     </button>
                     <button
                         className={`px-6 py-3 rounded-lg font-semibold transition ${
@@ -212,7 +212,7 @@ export default function BankTransfer() {
                         }`}
                         onClick={() => setStatus('external')}
                     >
-                        Vers un compte externe
+                      {t('Account.To_External_Account')}
                     </button>
                 </div>
                 {Status === 'external' && handleExternalTransfer()}

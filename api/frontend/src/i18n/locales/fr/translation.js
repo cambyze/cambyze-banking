@@ -3,6 +3,7 @@ import HomePage from "./HomePage.json";
 import Aplication from "./Aplication.json";
 import LoginRegister from "./LoginRegister.json";
 import Account from "./Account.json";
+import BankTransfer from './BankTransfer.json';
 
 const translationFR = {
     HomePage,
@@ -10,6 +11,7 @@ const translationFR = {
     Aplication,
     LoginRegister,
     Account,
+    BankTransfer,  
 }
 
 export default translationFR;
