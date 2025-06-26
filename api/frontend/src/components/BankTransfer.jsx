@@ -166,13 +166,6 @@ export default function BankTransfer() {
                     name='emitterId'
                     onChange={e => setEmitterId(e.target.value)}
                 />
-                {/* <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.IBAN')}</label> */}
-                {/* <input
-                    name='receiverId'
-                    type="text"
-                    onChange={e => setAmount(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
-                /> */}
                 <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.Amount')}</label>
                 <input
                     name='amount'

@@ -78,10 +78,6 @@ class ServicesApplicationTests {
     assertTrue(la != null);
     assertTrue(la.size() > 1);
 
-    // String ban = bankingServices.createNewBankAccount(perId);
-    // LOGGER.debug("New BAN : {}", ban);
-    // assertTrue(ban.startsWith("CAMBYZEBANK"));
-
     CreateDepositResponse createDepositResponse =
         bankingServices.createDeposit(ban, BigDecimal.valueOf(1520.25));
     LOGGER.debug("New balance after the deposit : {}",
@@ -122,7 +118,6 @@ class ServicesApplicationTests {
     createDepositResponse = bankingServices.createDeposit(ban, BigDecimal.valueOf(4500.0));
     LOGGER.debug("Limit reached then return code : {}", createDepositResponse.getReturnCode());
     assertEquals(Constants.SAVINGS_LIMIT_REACHED, createDepositResponse.getReturnCode());
-
 
     // new Regular Bank Account
     ban = bankingServices.createNewBankAccount(perId);
