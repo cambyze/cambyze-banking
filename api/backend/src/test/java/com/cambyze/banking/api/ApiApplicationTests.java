@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
 import java.math.BigDecimal;
 
 @SpringBootTest
@@ -30,11 +32,17 @@ class ApiApplicationTests {
     String psw = "psw";
     String adress = "2 Pl. du Champ de Foire, 87160 Arnac-la-Poste";
     LOGGER.debug("--|Person|--");
-    // test creation of new "person"
-    mockMvc
+    MvcResult result = mockMvc
         .perform(post("/createPerson").param("name", name).param("firstName", firstName)
-            .param("mail", mail).param("psw", psw).param("adress", adress))
-        .andExpect(status().isOk());
+        .param("mail", mail).param("psw", psw).param("adress", adress))
+        .andReturn();
+    int status = result.getResponse().getStatus();
+    String content = result.getResponse().getContentAsString();
+    System.out.println("/createPerson status: " + status);
+    System.out.println("/createPerson response: " + content);
+    if (status != 200) {
+      throw new AssertionError("/createPerson failed with status: " + status + ", response: " + content);
+    }
 
     String personId = "CLI-00000001";
 
@@ -49,8 +57,8 @@ class ApiApplicationTests {
 
     // test deposit operation with BigDecimal
     mockMvc.perform(post("/createDeposit")
-        .param("ban", "BAN-00000001")
-        .param("amount", "123.45") // Pass amount as string compatible with BigDecimal
+        .param("ban", "CAMBYZEBANK-00000001")
+        .param("amount", "123.45") // Remplacer la virgule par un point
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 

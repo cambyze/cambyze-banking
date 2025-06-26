@@ -58,8 +58,8 @@ class ServicesApplicationTests {
     LOGGER.debug("mail exist {} : {}", "ccolomb@mail.com");
     assertTrue(log == true);
 
-    log = bankingServices.login("test@mail.com");
-    LOGGER.debug("mail d'ont exist {} : {}", "test@mail.com", log);
+    log = bankingServices.login("test1@mail.com");
+    LOGGER.debug("mail d'ont exist {} : {}", "test&@mail.com", log);
     assertTrue(log == false);
 
     String ban = bankingServices.createNewBankAccount(perId);

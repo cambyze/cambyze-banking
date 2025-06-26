@@ -483,12 +483,21 @@ public class BankAccountController {
 
   @Produces("application/json")
   @PostMapping("/BankTransfer")
-public boolean BankTransfer(@RequestParam("amount") BigDecimal amount, 
-                     @RequestParam("SendAccount") String SendAccount, 
-                     @RequestParam("ReceiveAccount") String ReceiveAccount) {
-//    if (amount < 0) {
-//        throw new InvalidAmountException("The amount must be positive");
-//    }
+  public boolean BankTransfer(
+    @RequestParam(value = "amount", required = false) BigDecimal amount, 
+    @RequestParam("SendAccount") String SendAccount, 
+    @RequestParam("ReceiveAccount") String ReceiveAccount) {
+    // Validate amount presence and value
+    if (amount == null) {
+      LOGGER.error("Amount parameter is missing or invalid");
+      return false;
+    }
+// public boolean BankTransfer(@RequestParam("amount") BigDecimal amount, 
+//                      @RequestParam("SendAccount") String SendAccount, 
+//                      @RequestParam("ReceiveAccount") String ReceiveAccount) {
+// //    if (amount < 0) {
+// //        throw new InvalidAmountException("The amount must be positive");
+// //    }
     if (amount.compareTo(BigDecimal.ZERO) < 0) {
       LOGGER.error("Amount must be positive");
       return false;

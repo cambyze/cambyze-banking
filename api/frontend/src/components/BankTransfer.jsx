@@ -33,7 +33,7 @@ export default function BankTransfer() {
           id: account.bankAccountNumber || 'N/A',
           bankName: 'Cambyze Bank',
           accountNumber: account.bankAccountNumber || 'N/A',
-          type: account.accountType === '1' ? t('Account.Banking') : t('Account.Saving'),
+          type: account.accountType === '1' ? t('BankTransfer.Banking') : t('BankTransfer.Saving'),
           balance: account.balanceAmount || 0,
           overdraft: account.overdraftAmount || 0,
       }))
@@ -42,7 +42,7 @@ export default function BankTransfer() {
             setError(null);
         } catch (err) {
             console.error('Error fetching accounts:', err);
-            setError(t('Account.Set_Error_Loading_Account'));
+            setError(t('BankTransfer.Set_Error_Loading_Account'));
         } finally {
             setLoading(false);
         }
@@ -65,20 +65,20 @@ export default function BankTransfer() {
                 if (!response.ok) {
                     throw new Error(`HTTP Error: ${response.status}`);
             }
-            alert(t('Account.Transfer_Success'));
+            alert(t('BankTransfer.Transfer_Success'));
             navigate('/Account');
             const result = await response.text();
             if (!response.ok || result.startsWith("Error")) {
-                alert(result || t('Account.Transfer_Error'));
-                setError(result || t('Account.Set_Error_Loading_Account'));
+                alert(result || t('BankTransfer.Transfer_Error'));
+                setError(result || t('BankTransfer.Set_Error_Loading_Account'));
             } else {
-                alert(result || t('Account.Transfer_Success'));
+                alert(result || t('BankTransfer.Transfer_Success'));
                 navigate('/Account');
             }
         } catch (error) {
             console.error('Error during bank transfer:', error);
-            alert(t('Account.Transfer_Error'));
-            setError(t('Account.Set_Error_Loading_Account'));
+            alert(t('BankTransfer.Transfer_Error'));
+            setError(t('BankTransfer.Set_Error_Loading_Account'));
         }
     }
 
@@ -88,8 +88,8 @@ export default function BankTransfer() {
                 className="bg-white shadow-md rounded-xl p-8 mt-8 max-w-md mx-auto"
                 onSubmit={e => { e.preventDefault(); setStatus('idle'); }}
             >
-                <h3 className="text-2xl font-bold mb-6 text-gray-800">{t('Account.Internal_Transfer')}</h3>
-                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Emitter_Account')}</label>
+                <h3 className="text-2xl font-bold mb-6 text-gray-800">{t('BankTransfer.Internal_Transfer')}</h3>
+                <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.Emitter_Account')}</label>
                 <select
                     className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
                     value={emitterId}
@@ -98,14 +98,14 @@ export default function BankTransfer() {
                         if (e.target.value === receiverId) setEmitterId('');
                     }}
                 >
-                    <option value="">{t('Account.Select_Emitter_Account')}</option>
+                    <option value="">{t('BankTransfer.Select_Emitter_Account')}</option>
                     {accounts.map(account => (
                         <option key={account.id} value={account.id} name='emitterId'>
                             {account.type} - {account.accountNumber} - {account.balance} €
                         </option>
                     ))}
                 </select>
-                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Receiver_Account')}</label>
+                <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.Receiver_Account')}</label>
                 <select
                     className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
                     name='receiverId'
@@ -113,7 +113,7 @@ export default function BankTransfer() {
                     onChange={e => setReceiverId(e.target.value)}
                     disabled={!emitterId}
                 >
-                    <option value="">{t('Account.Select_Receiver_Account')}</option>
+                    <option value="">{t('BankTransfer.Select_Receiver_Account')}</option>
                     {accounts
                         .filter(account => account.id !== emitterId)
                         .map(account => (
@@ -122,7 +122,7 @@ export default function BankTransfer() {
                             </option>
                         ))}
                 </select>
-                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Amount')}</label>
+                <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.Amount')}</label>
                 <input
                     type="number"
                     name='amount'
@@ -135,7 +135,7 @@ export default function BankTransfer() {
                     onClick={handleBankTransfer}
                     disabled={!emitterId || !receiverId}
                 >
-                  {t('Account.Perform_Transfer')}
+                  {t('BankTransfer.Perform_Transfer')}
                 </button>
             </form>
         );
@@ -148,42 +148,45 @@ export default function BankTransfer() {
                 
                 onSubmit={e => { e.preventDefault(); setStatus('idle'); }}
             >
-                <h3 className="text-2xl font-bold mb-6 text-gray-800">{t('Account.External_Transfer')}</h3>
-                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Beneficiary_Name')}</label>
-                <input
-                    type="text"
-                    className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
-                    name='emitterId'
-                    onChange={e => setEmitterId(e.target.value)}
-                />
-                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Emitter_Account')}</label>
+                <h3 className="text-2xl font-bold mb-6 text-gray-800">{t('BankTransfer.External_Transfer')}</h3>
+                <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.Beneficiary_Name')}</label>
+  
+                <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.Emitter_Account')}</label>
                 <select className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
-                    <option value="">{t('Account.Select_Emitter_Account')}</option>
+                    <option value="">{t('BankTransfer.Select_Emitter_Account')}</option>
                     {accounts.map(account => (
                         <option key={account.id} value={account.id}>
                             {account.type} - {account.accountNumber} - {account.balance} €
                         </option>
                     ))}
                 </select>
-                <label className="block mb-1 text-gray-500 text-sm">{t('Account.IBAN')}</label>
                 <input
+                    type="text"
+                    className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                    name='emitterId'
+                    onChange={e => setEmitterId(e.target.value)}
+                />
+                {/* <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.IBAN')}</label> */}
+                {/* <input
                     name='receiverId'
                     type="text"
                     onChange={e => setAmount(e.target.value)}
                     className="w-full p-3 border border-gray-200 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
-                />
-                <label className="block mb-1 text-gray-500 text-sm">{t('Account.Amount')}</label>
+                /> */}
+                <label className="block mb-1 text-gray-500 text-sm">{t('BankTransfer.Amount')}</label>
                 <input
                     name='amount'
                     type="number"
                     className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                    onChange={e => setAmount(e.target.value)}
                 />
                 <button
                     type="submit"
                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
                     onClick={handleBankTransfer}
+                    disabled={!emitterId || !receiverId}
                 >
-                  {t('Account.Perform_Transfer')}
+                  {t('BankTransfer.Perform_Transfer')}
                 </button>
             </form>
         );
@@ -192,7 +195,7 @@ export default function BankTransfer() {
     return (
         <div className="min-h-screen bg-gray-50 py-10">
             <div className="max-w-xl mx-auto flex flex-col items-center">
-                <h2 className="text-3xl font-bold mb-8 text-gray-800">{t('Account.Perform_Bank_Transfer')}</h2>
+                <h2 className="text-3xl font-bold mb-8 text-gray-800"> TEST {t('BankTransfer.Perform_Bank_Transfer')}</h2>
                 <div className="flex gap-4 mb-8">
                     <button
                         className={`px-6 py-3 rounded-lg font-semibold transition ${
@@ -202,7 +205,7 @@ export default function BankTransfer() {
                         }`}
                         onClick={() => setStatus('personal')}
                     >
-                      {t('Account.To_Personal_Account')}
+                      {t('BankTransfer.To_Personal_Account')}
                     </button>
                     <button
                         className={`px-6 py-3 rounded-lg font-semibold transition ${
@@ -212,7 +215,7 @@ export default function BankTransfer() {
                         }`}
                         onClick={() => setStatus('external')}
                     >
-                      {t('Account.To_External_Account')}
+                      {t('BankTransfer.To_External_Account')}
                     </button>
                 </div>
                 {Status === 'external' && handleExternalTransfer()}
