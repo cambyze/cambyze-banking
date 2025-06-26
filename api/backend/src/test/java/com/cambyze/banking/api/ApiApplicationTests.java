@@ -15,6 +15,61 @@ import java.math.BigDecimal;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+// class ApiApplicationTests {
+
+//   private static final Logger LOGGER = LoggerFactory.getLogger(ApiApplicationTests.class);
+
+//   @Autowired
+//   private MockMvc mockMvc;
+
+//   @Test
+//   public void testCreatePerson() throws Exception {
+//     String name = "Jack";
+//     String firstName = "Onils";
+//     String mail = "Jack.Onils@mail.com";
+//     String psw = "psw";
+//     String adress = "2 Pl. du Champ de Foire, 87160 Arnac-la-Poste";
+//     LOGGER.debug("--|Person|--");
+//     // test creation of new "person"
+//     mockMvc
+//         .perform(post("/createPerson").param("name", name).param("firstName", firstName)
+//             .param("mail", mail).param("psw", psw).param("adress", adress))
+//         .andExpect(status().isOk());
+
+//     String personId = "CLI-00000001";
+
+//     // test creation of a saving account
+//     mockMvc.perform(post("/createSavingsAccount").param("personId", personId)
+//         .contentType(MediaType.APPLICATION_JSON).content(""))
+//         .andExpect(status().isOk());
+//     // test creation of new bank account
+//     mockMvc.perform(post("/createBankAccount").param("personId", personId)
+//         .contentType(MediaType.APPLICATION_JSON).content(""))
+//         .andExpect(status().isOk());
+
+//     // test deposit operation with BigDecimal
+//     mockMvc.perform(post("/createDeposit")
+//         .param("ban", "BAN-00000001")
+//         .param("amount", "123.45") // Pass amount as string compatible with BigDecimal
+//         .contentType(MediaType.APPLICATION_JSON))
+//         .andExpect(status().isOk());
+
+//     // test login
+//     mockMvc.perform(post("/login").param("mail", mail)
+//         .contentType(MediaType.APPLICATION_JSON).content(""))
+//         .andExpect(status().isOk());
+
+//     mockMvc.perform(post("/login").param("mail", "falseMail")
+//         .contentType(MediaType.APPLICATION_JSON).content(""))
+//         .andExpect(status().isOk());
+//     // test return all bank accounts
+//     mockMvc.perform(get("/findBanByPerson").param("personId", personId)
+//         .contentType(MediaType.APPLICATION_JSON).content(""))
+//         .andExpect(status().isOk());
+//     mockMvc.perform(get("/findBanByPerson").param("personId", "falseID")
+//         .contentType(MediaType.APPLICATION_JSON).content(""))
+//         .andExpect(status().isOk());
+//   }
 class ApiApplicationTests {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ApiApplicationTests.class);
@@ -40,35 +95,23 @@ class ApiApplicationTests {
 
     // test creation of a saving account
     mockMvc.perform(post("/createSavingsAccount").param("personId", personId)
-        .contentType(MediaType.APPLICATION_JSON).content(""))
-        .andExpect(status().isOk());
-    // test creation of new bank account
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
+    // test cretation of new banck Account
     mockMvc.perform(post("/createBankAccount").param("personId", personId)
-        .contentType(MediaType.APPLICATION_JSON).content(""))
-        .andExpect(status().isOk());
-
-    // test deposit operation with BigDecimal
-    mockMvc.perform(post("/createDeposit")
-        .param("ban", "BAN-00000001")
-        .param("amount", "123.45") // Pass amount as string compatible with BigDecimal
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    // test login
-    mockMvc.perform(post("/login").param("mail", mail)
-        .contentType(MediaType.APPLICATION_JSON).content(""))
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
+    // test Login
+    mockMvc
+        .perform(
+            post("/login").param("mail", mail).contentType(MediaType.APPLICATION_JSON).content(""))
         .andExpect(status().isOk());
 
     mockMvc.perform(post("/login").param("mail", "falseMail")
-        .contentType(MediaType.APPLICATION_JSON).content(""))
-        .andExpect(status().isOk());
-    // test return all bank accounts
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
+    // test return all ban
     mockMvc.perform(get("/findBanByPerson").param("personId", personId)
-        .contentType(MediaType.APPLICATION_JSON).content(""))
-        .andExpect(status().isOk());
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
     mockMvc.perform(get("/findBanByPerson").param("personId", "falseID")
-        .contentType(MediaType.APPLICATION_JSON).content(""))
-        .andExpect(status().isOk());
+        .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
   }
 
   @Test

@@ -171,6 +171,35 @@ public class BankAccountController {
       responses = {@ApiResponse(description = "The new balance",
           content = @Content(mediaType = "BigDecimal"))})
 
+  // @PostMapping("/createDeposit")
+  // public BigDecimal createDeposit(@RequestParam(value = "ban") String ban,
+  //     @RequestParam(value = "amount") String amount) {
+  //   BigDecimal bigAmount;
+  //   try {
+  //     bigAmount = BigDecimal.valueOf(Double.parseDouble(amount));
+  //   } catch (NumberFormatException e) {
+  //     String msg = "Invalid amount: " + e.getMessage();
+  //     LOGGER.error(msg);
+  //     throw new TechnicalErrorException(msg);
+  //   }
+
+  //   CreateDepositResponse createDepositResponse = bankingServices.createDeposit(ban, bigAmount);
+  //   if (createDepositResponse != null && createDepositResponse.getNewBalance() != null
+  //       && createDepositResponse.getReturnCode().equals(Constants.SERVICE_OK)) {
+  //     LOGGER.debug("createDepositResponse.getNewBalance() : {}",
+  //         createDepositResponse.getNewBalance());
+  //     return createDepositResponse.getNewBalance();
+  //   } else {
+  //     if (createDepositResponse == null) {
+  //       String msg = "Technical pb when creating a new banking operation";
+  //       LOGGER.error(msg);
+  //       throw new TechnicalErrorException(msg);
+  //     } else {
+  //       throw functionalException(createDepositResponse.getReturnCode());
+  //     }
+  //   }
+  // }
+
   @PostMapping("/createDeposit")
   public BigDecimal createDeposit(@RequestParam(value = "ban") String ban,
       @RequestParam(value = "amount") String amount) {
@@ -199,7 +228,6 @@ public class BankAccountController {
       }
     }
   }
-
 
   @POST
   @Consumes("application/json")
