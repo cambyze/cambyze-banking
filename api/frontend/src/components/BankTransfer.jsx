@@ -142,7 +142,7 @@ export default function BankTransfer() {
     }
 
     function handleExternalTransfer() {
-        return (
+        return ( 
             <form
                 className="bg-white shadow-md rounded-xl p-8 mt-8 max-w-md mx-auto"
                 
