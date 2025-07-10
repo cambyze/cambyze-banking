@@ -7,24 +7,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Properties;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-// import org.springframework.mail.SimpleMailMessage;
-// import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
 import com.cambyze.banking.persistence.model.Operation;
 import com.cambyze.banking.persistence.model.Person;
 import com.cambyze.banking.persistence.services.PersistenceServices;
 import com.cambyze.banking.services.tools.MathTools;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Services to manage bank accounts
@@ -393,6 +396,7 @@ public class BankingServices {
   public Person findPersonByMail(String mail) {
     try {
       List<Person> pers = persistenceServices.findPersonByMail(mail);
+      String user = null;
       LOGGER.debug("==|person|==");
       for (Person person : pers) {
         LOGGER.debug("==|{} || {} |==", pers, person);
@@ -400,6 +404,9 @@ public class BankingServices {
           return person;
       }
       LOGGER.debug("==|person FIN|==");
+      if (user == null) {
+        return null;
+      }
     } catch (Exception e) {
       LOGGER.error("Error finding person by email: {}", e.getMessage());
       return null;
@@ -494,60 +501,34 @@ public boolean forgottenPsw(String mail) {
       return false;
     }
 
-    //String code = UUID.randomUUID().toString().substring(0, 6);
+    String code = UUID.randomUUID().toString().substring(0, 6);
   // // Person user = pers.get(0);
   // // ici generer le code et l'envoyer
    return true;
 }
 
-// public boolean RessetPassword(String mail, String psw , String newPsw) {
-//       if (mail == null || mail.isEmpty()) {
-//       LOGGER.error("Error, no mail, enter your mail to connect");
-//       return false;
-//     }
-//     List<Person> pers = persistenceServices.findPersonByMail(mail);
-//     if (pers == null || pers.isEmpty()) {
-//       LOGGER.error("error mail is invalid 1: {} per: {}", mail, pers);
-//       return false;
-//     }
-//     if(pers.get(0).getEmail() == mail && pers.get(0).getPsw() != psw) {
-//       LOGGER.error("error mail is invalid 2: {} per: {}", mail, pers);
-//       return false;
-//     }
-//     try {
-//       pers.get(0).setPsw(newPsw);
-//       LOGGER.debug("Password updated successfully for user: {}", mail);
-//       return true;
-//     } catch (Exception e) {
-//       LOGGER.error("Error updating password: {}", e.getMessage());
-//       return false;
-//     }
-// }
-
 public boolean RessetPassword(String mail, String psw , String newPsw) {
     LOGGER.debug("RessetPassword called with mail: {}, psw: {}, newPsw: {}", mail, psw, newPsw);
     if (mail == null || mail.isEmpty()) {
-        LOGGER.error("Error, no mail, enter your mail to connect. psw : {} / {}", psw, newPsw);
-        return false;
+      LOGGER.error("Error, no mail, enter your mail to connect");
+      return false;
     }
     List<Person> pers = persistenceServices.findPersonByMail(mail);
     if (pers == null || pers.isEmpty()) {
-        LOGGER.error("error mail is invalid 1: {} per: {}", mail, pers);
-        return false;
+      LOGGER.error("error mail is invalid 1: {} per: {}", mail, pers);
+      return false;
     }
-    if (!pers.get(0).getEmail().equals(mail) || !pers.get(0).getPsw().equals(psw)) {
-        LOGGER.error("error mail is invalid 2: {} / {} || per: {} / {}", mail, pers.get(0).getEmail(), psw, pers.get(0).getPsw());
-        return false;
+    if(pers.get(0).getEmail() == mail && pers.get(0).getPsw() != psw) {
+      LOGGER.error("error mail is invalid 2: {} per: {}", mail, pers);
+      return false;
     }
     try {
-        LOGGER.debug("Updating password for user: {} || {}", mail, psw);
-        pers.get(0).setPsw(newPsw);
-        persistenceServices.updatePerson(pers.get(0));
-        LOGGER.debug("Password updated successfully for user: {} || {}", mail, psw);
-        return true;
+      pers.get(0).setPsw(newPsw);
+      LOGGER.debug("Password updated successfully for user: {}", mail);
+      return true;
     } catch (Exception e) {
-        LOGGER.error("Error updating password: {}", e.getMessage());
-        return false;
+      LOGGER.error("Error updating password: {}", e.getMessage());
+      return false;
     }
 }
 
@@ -595,30 +576,32 @@ public boolean RessetPassword(String mail, String psw , String newPsw) {
 
 
 
-//   /**
-//    * SendMail
-//    * 
-//    * @param mail
-//    * @return Boolean
-//    */
-//   @Autowired
-// private JavaMailSender mailSender;
+  /**
+   * SendMail
+   * 
+   * @param mail
+   * @return Boolean
+   */
+  @Autowired
+  private JavaMailSender mailSender;
 
-// public boolean sendMail(String toEmail, String subject, String body) {
-//     try {
-//         SimpleMailMessage message = new SimpleMailMessage();
-//         message.setTo(toEmail);
-//         message.setSubject(subject);
-//         message.setText(body);
-//         mailSender.send(message);
-//         System.out.println("Email sent successfully");
-//         return true;
-//     } catch (Exception e) {
-//         System.err.println("Failed to send email: " + e.getMessage());
-//         e.printStackTrace();
-//         return false;
-//     }
-// } 
+  public boolean SendMail(String toEmail, String subject, String body) {
+    SimpleMailMessage message = new SimpleMailMessage();
+    try {
+        message.setTo(toEmail);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+        LOGGER.debug("Email sent successfully to: {}", toEmail);
+        return true;
+    } catch (MailAuthenticationException e) {
+        LOGGER.error("Authentication failed while sending email: {}", e.getMessage());
+        return false;
+    } catch (Exception e) {
+        LOGGER.error("Failed to send email due to unexpected error: {}", e.getMessage(), e);
+        return false;
+    }
+  }
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -635,20 +618,4 @@ public boolean RessetPassword(String mail, String psw , String newPsw) {
       return encoder.matches(plainPassword, hashedPassword);
   }
 
-  // @Bean
-  // public JavaMailSender getJavaMailSender() {
-  //     JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-  //     mailSender.setHost("sandbox.smtp.mailtrap.io");
-  //     mailSender.setPort(587);
-  //     mailSender.setUsername("<your-username>");
-  //     mailSender.setPassword("<your-password>");
-
-  //     Properties props = mailSender.getJavaMailProperties();
-  //     props.put("mail.transport.protocol", "smtp");
-  //     props.put("mail.smtp.auth", "true");
-  //     props.put("mail.smtp.starttls.enable", "true");
-  //     props.put("mail.smtp.ssl.trust", "sandbox.smtp.mailtrap.io");
-
-  //     return mailSender;
-  // }
 }

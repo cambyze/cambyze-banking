@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
 
-@SpringBootTest
+@SpringBootTest()
 class ServicesApplicationTests {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ServicesApplicationTests.class);
@@ -25,9 +25,8 @@ class ServicesApplicationTests {
   void testServices() {
     LOGGER.debug("Test services");
 
-
     boolean isOk = bankingServices.isValidEmail("testmail.com");
-    LOGGER.debug("mail is ok : {}", isOk);
+    LOGGER.debug("mail is ok : {} for input '{}'", isOk, "testmail.com");
     assertTrue(!isOk);
 
     String perId = bankingServices.createPerson("christof", "colomb", "ccolomb", "psw", "adress0");
@@ -48,7 +47,7 @@ class ServicesApplicationTests {
 
     perId2 = bankingServices.createPerson("Marie", "Curie", "Mcurie@mail.com", "psw", "adress3");
     LOGGER.debug("Mails Test2: {}", perId2);
-    assertTrue(perId != null);
+    assertTrue(perId2 != null);
 
     LOGGER.debug("test mail {} is valid : {}", "ccolomb@mail.com",
         bankingServices.login("ccolomb@mail.com"));
@@ -179,7 +178,6 @@ class ServicesApplicationTests {
         bk.getOperations().size());
     assertEquals(2, bk.getOperations().size());
 
-
     // Test a long term account
     ban = bankingServices.createNewBankAccount(perId);
     CreateDepositResponse cdr = bankingServices.createSampleOperations(ban);
@@ -194,46 +192,6 @@ class ServicesApplicationTests {
     assertEquals(6, bk.getOperations().size());
 
     bankingServices.findPersonByMail("ccolomb@mail.com");
-
-    // TODO : fix PSW
-    // // PSW
-    // ResetCodeService resetCodeService = new ResetCodeService();
-    // String email = "test@mail.com";
-    // resetCodeService.generateAndSendCode(email);
-    //
-    // Field codesField = ResetCodeService.class.getDeclaredField("codes");
-    // codesField.setAccessible(true);
-    // @SuppressWarnings("unchecked")
-    // Map<String, Object> codes = (Map<String, Object>) codesField.get(resetCodeService);
-    // assertNotNull(codes.get(email), "L'entrée de code généré doit exister");
-    //
-    // Object resetCodeData = codes.get(email);
-    // Field codeField = resetCodeData.getClass().getDeclaredField("code");
-    // codeField.setAccessible(true);
-    // String code = (String) codeField.get(resetCodeData);
-    //
-    // assertTrue(resetCodeService.verifyCode(email, code), "Le code devrait être validé avec
-    // succès");
-    //
-    // assertFalse(resetCodeService.verifyCode(email, "000000"),
-    // "Un code erroné ne doit pas être validé");
-    //
-    // resetCodeService.clearCode(email);
-    // assertFalse(resetCodeService.verifyCode(email, code),
-    // "Le code ne doit plus être validé après effacement");
-    // String TestMail = "mailtestdev11@gmail.com";
-    // perId = bankingServices.createPerson("test mail", "MR mail", TestMail, "psw", "adress1");
-    // LOGGER.debug("NEW Person Created : {}", perId);
-    // assertTrue(perId != null);
-    // bankingServices.generateAndSendCode(TestMail);
-    // String Code = "0000";
-    // boolean Res = bankingServices.verifyCode(TestMail, Code);
-    // assertTrue(!Res);
-    //
-    // bankingServices.clearCode(TestMail);
-    //
-    // bankingServices.MailSender("test", TestMail, "try");
-    // LOGGER.debug("mail send ...");
 
 
     String senderId =
@@ -254,9 +212,46 @@ class ServicesApplicationTests {
     result = bankingServices.bankTransfer("FAUX_BAN", senderBan, BigDecimal.valueOf(100));
     assertFalse(result, "Le virement doit échouer si le compte destinataire n'existe pas");
 
+
+    LOGGER.debug("Test RessetPassword");
+    String email = "john.doe@gmail.com";
+    String newPassword = "password123";
+    String oldPassword = "psw";
+
+    Boolean resetResult = bankingServices.RessetPassword(email, oldPassword, newPassword);
+    assertTrue(resetResult, "Password reset should succeed");
+
+    String email2 = "WrongMail@mail.com";
+    Boolean resetResult2 = bankingServices.RessetPassword(email2, oldPassword, newPassword);
+    assertFalse(resetResult2, "Password reset should fail for non-existing email");
+
+    String falseOldPassword = "wrongPassword";
+    Boolean resetResult3 = bankingServices.RessetPassword(email, falseOldPassword, newPassword);
+    assertFalse(resetResult3, "Password reset should fail for incorrect old password");
+
+
+    // Test password hashing and verification
+    LOGGER.debug("Test password hashing and verification");
+    String plainPassword = "securePassword123";
+    String hashedPassword = BankingServices.hashPassword(plainPassword);
+
+    LOGGER.debug("Hashed password: {}", hashedPassword);
+    assertTrue(BankingServices.checkPassword(plainPassword, hashedPassword), "Password verification should succeed");
+
+    String wrongPassword = "wrongPassword123";
+    assertFalse(BankingServices.checkPassword(wrongPassword, hashedPassword), "Password verification should fail for incorrect password");
+
+
+    // LOGGER.debug("SEND MAIL Start !!");
+    // boolean MailResult = bankingServices.SendMail(
+    //   "mailpr0ed0uard@gmail.com", 
+    //   "Test Subject",            
+    //   "Ceci est un test d'envoi de mail." 
+    // );
+    // assertTrue(MailResult, "Email should be sent successfully");
   }
 
-
+// TODO : fix PSW
   // PSWq
   // @Test
   // public void testGenerateVerifyAndClearCode() throws Exception {
@@ -286,4 +281,5 @@ class ServicesApplicationTests {
   // "Le code ne doit plus être validé après effacement");
   // ResetCodeService
   // }
+
 }

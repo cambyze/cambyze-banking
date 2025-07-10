@@ -337,4 +337,15 @@ public class PersistenceServices {
         ba.getBankAccountNumber());
     return ba.getBankAccountNumber();
   }
+
+   /**
+  * Update an existing Person in the database
+  * 
+  * @param person The person object with updated details
+  */
+  public void updatePerson(Person person) {
+    LOGGER.debug("Updating person: {}", person);
+    personRepository.save(person);
+    LOGGER.debug("Person updated successfully: {}", person);
+  }
 }

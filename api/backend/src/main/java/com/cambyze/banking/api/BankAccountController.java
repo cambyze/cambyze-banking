@@ -25,14 +25,15 @@ import com.cambyze.banking.api.microservice.exceptions.OverdraftForbiddenExcepti
 import com.cambyze.banking.api.microservice.exceptions.RecordNotFoundException;
 import com.cambyze.banking.api.microservice.exceptions.SavingsLimitReachedException;
 import com.cambyze.banking.api.microservice.exceptions.TechnicalErrorException;
+import com.cambyze.banking.persistence.model.Account;
+import com.cambyze.banking.persistence.model.Constants;
+import com.cambyze.banking.persistence.model.Person;
 import com.cambyze.banking.services.AskOverdraftResponse;
 import com.cambyze.banking.services.BankingServices;
 import com.cambyze.banking.services.CreateDepositResponse;
 import com.cambyze.banking.services.CreateWithdrawResponse;
 import com.cambyze.banking.services.MonthlyBankStatement;
-import com.cambyze.banking.persistence.model.Account;
-import com.cambyze.banking.persistence.model.Constants;
-import com.cambyze.banking.persistence.model.Person;
+// import com.cambyze.banking.services.api.MailService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -74,6 +75,9 @@ public class BankAccountController {
 
   // @Autowired
   private BankingServices bankingServices;
+
+  // @Autowired
+  // private MailService mailService;
 
   @POST
   @Consumes("application/json")
@@ -373,7 +377,8 @@ public class BankAccountController {
           required = false),
       parameters = {
           @Parameter(required = true, description = "List<Account>", example = "CLI-00000000")},
-      responses = {@ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))})
+      responses = {
+          @ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))})
 
 
   @Produces("application/json")
@@ -392,141 +397,194 @@ public class BankAccountController {
     return laccount;
   }
 
-//  @PostMapping("/login2")
-//  public Map<String, Object> login2(@RequestParam("mail") String mail, @RequestParam("psw") String psw) {
-//      Map<String, Object> response = new HashMap<>();
-//      try {
-//          if (mail == null || mail.isEmpty()) {
-//              response.put("authenticated", false);
-//              response.put("error", "Mail is empty");
-//              return response;
-//          }
-//
-//          // Vérifie si la personne existe avec ce mail
-//          Person person = bankingServices.findPersonByMail(mail);
-//          
-//          if (person == null || !person.getPsw().equals(psw)) {
-//              response.put("authenticated", false);
-//              response.put("error", "Wrong password or person not found");
-//              return response;
-//          }
-//
-//          // Authentification réussie
-//          response.put("authenticated", true);
-//          response.put("personId", person.getId());
-//          response.put("firstName", person.getFirstName());
-//          response.put("lastName", person.getName());
-//          response.put("email", person.getEmail());
-//          response.put("adress", person.getAdress() );
-//          return response;
-//
-//      } catch (Exception e) {
-//          LOGGER.error("Error during login process: {}", e.getMessage());
-//          response.put("authenticated", false);
-//          response.put("error", "Internal server error");
-//          return response;
-//      }
-//  }
+  // @PostMapping("/login2")
+  // public Map<String, Object> login2(@RequestParam("mail") String mail, @RequestParam("psw")
+  // String psw) {
+  // Map<String, Object> response = new HashMap<>();
+  // try {
+  // if (mail == null || mail.isEmpty()) {
+  // response.put("authenticated", false);
+  // response.put("error", "Mail is empty");
+  // return response;
+  // }
+  //
+  // // Vérifie si la personne existe avec ce mail
+  // Person person = bankingServices.findPersonByMail(mail);
+  //
+  // if (person == null || !person.getPsw().equals(psw)) {
+  // response.put("authenticated", false);
+  // response.put("error", "Wrong password or person not found");
+  // return response;
+  // }
+  //
+  // // Authentification réussie
+  // response.put("authenticated", true);
+  // response.put("personId", person.getId());
+  // response.put("firstName", person.getFirstName());
+  // response.put("lastName", person.getName());
+  // response.put("email", person.getEmail());
+  // response.put("adress", person.getAdress() );
+  // return response;
+  //
+  // } catch (Exception e) {
+  // LOGGER.error("Error during login process: {}", e.getMessage());
+  // response.put("authenticated", false);
+  // response.put("error", "Internal server error");
+  // return response;
+  // }
+  // }
+
+
   @PostMapping("/login2")
-  public Map<String, Object> login2(@RequestParam("mail") String mail, @RequestParam("psw") String psw) {
-      Map<String, Object> response = new HashMap<>();
-      try {
-          if (mail == null || mail.isEmpty()) {
-              response.put("authenticated", false);
-              response.put("error", "Mail is empty");
-              return response;
-          }
-
-          Person person = bankingServices.findPersonByMail(mail);
-          
-          boolean isValidPerson = bankingServices.login(mail);
-          if (!isValidPerson) {
-              LOGGER.error("Login failed for mail: {}", mail);
-              response.put("authenticated", false);
-              response.put("error", "Person not found");
-              return null;
-          }
-
-          if (person == null || !person.getPsw().equals(psw)) {
-              response.put("authenticated", false);
-              response.put("error", "Wrong password or person not found");
-              return response;
-          }
-
-          response.put("authenticated", true);
-          response.put("personId", person.getId());
-          response.put("firstName", person.getFirstName());
-          response.put("lastName", person.getName());
-          response.put("email", person.getEmail());
-          response.put("adress", person.getAdress());
-          return response;
-      } catch (Exception e) {
-          LOGGER.error("Error during login process: {}", e.getMessage());
-          response.put("authenticated", false);
-          response.put("error", "Internal server error");
-          return response;
+  public Map<String, Object> login2(@RequestParam("mail") String mail,
+      @RequestParam("psw") String psw) {
+    Map<String, Object> response = new HashMap<>();
+    try {
+      if (mail == null || mail.isEmpty()) {
+        response.put("authenticated", false);
+        response.put("error", "Mail is empty");
+        return response;
       }
+
+      Person person = bankingServices.findPersonByMail(mail);
+
+      boolean isValidPerson = bankingServices.login(mail);
+      if (!isValidPerson) {
+        LOGGER.error("Login failed for mail: {}", mail);
+        response.put("authenticated", false);
+        response.put("error", "Person not found");
+        return null;
+      }
+
+      if (person == null || !person.getPsw().equals(psw)) {
+        response.put("authenticated", false);
+        response.put("error", "Wrong password or person not found");
+        return response;
+      }
+
+      response.put("authenticated", true);
+      response.put("personId", person.getId());
+      response.put("firstName", person.getFirstName());
+      response.put("lastName", person.getName());
+      response.put("email", person.getEmail());
+      response.put("adress", person.getAdress());
+      return response;
+    } catch (Exception e) {
+      LOGGER.error("Error during login process: {}", e.getMessage());
+      response.put("authenticated", false);
+      response.put("error", "Internal server error");
+      return response;
+    }
   }
-  
+
   @POST
   @Consumes("application/json")
-  @Operation(summary = "send the amount set by user from the selected account to the selected account",
+  @Operation(
+      summary = "send the amount set by user from the selected account to the selected account",
       description = "Send the selected amount from a selected account tou a sellected account",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           description = "No request body needed,  parameters: amount, account from, account for",
-          required =true),
+          required = true),
       parameters = {@Parameter(required = true, description = "amount", example = "150"),
-                    @Parameter(required = true, description = "sendAccount", example = "CAMBYZEBANK-00000001"),
-                    @Parameter(required = true, description = "recieveAccount", example = "CAMBYZEBANK-00000002")},
+          @Parameter(required = true, description = "sendAccount",
+              example = "CAMBYZEBANK-00000001"),
+          @Parameter(required = true, description = "recieveAccount",
+              example = "CAMBYZEBANK-00000002")},
       responses = {
           @ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))})
 
   @Produces("application/json")
   @PostMapping("/BankTransfer")
-  public boolean BankTransfer(
-    @RequestParam(value = "amount", required = false) BigDecimal amount, 
-    @RequestParam("SendAccount") String SendAccount, 
-    @RequestParam("ReceiveAccount") String ReceiveAccount) {
+  public boolean BankTransfer(@RequestParam(value = "amount", required = false) BigDecimal amount,
+      @RequestParam("SendAccount") String SendAccount,
+      @RequestParam("ReceiveAccount") String ReceiveAccount) {
     // Validate amount presence and value
     if (amount == null) {
       LOGGER.error("Amount parameter is missing or invalid");
       return false;
     }
-// public boolean BankTransfer(@RequestParam("amount") BigDecimal amount, 
-//                      @RequestParam("SendAccount") String SendAccount, 
-//                      @RequestParam("ReceiveAccount") String ReceiveAccount) {
-// //    if (amount < 0) {
-// //        throw new InvalidAmountException("The amount must be positive");
-// //    }
+    // public boolean BankTransfer(@RequestParam("amount") BigDecimal amount,
+    // @RequestParam("SendAccount") String SendAccount,
+    // @RequestParam("ReceiveAccount") String ReceiveAccount) {
+    // // if (amount < 0) {
+    // // throw new InvalidAmountException("The amount must be positive");
+    // // }
     if (amount.compareTo(BigDecimal.ZERO) < 0) {
       LOGGER.error("Amount must be positive");
       return false;
     }
     if (SendAccount == null || ReceiveAccount == null) {
-        throw new InvalidBANException("SendAccount or ReceiveAccount is null");
+      throw new InvalidBANException("SendAccount or ReceiveAccount is null");
     }
     if (SendAccount.equals(ReceiveAccount)) {
-        throw new InvalidOperationTypeException("SendAccount and ReceiveAccount cannot be the same");
+      throw new InvalidOperationTypeException("SendAccount and ReceiveAccount cannot be the same");
     }
 
     boolean transfer = bankingServices.bankTransfer(ReceiveAccount, SendAccount, amount);
     if (!transfer) {
-        //throw new InsufficientBalanceException("Insufficient funds for transfer");
-        LOGGER.debug("Insufficient funds for transfer");
-        return false;
+      // throw new InsufficientBalanceException("Insufficient funds for transfer");
+      LOGGER.debug("Insufficient funds for transfer");
+      return false;
     }
     LOGGER.debug("Transfer Success!!");
     return true;
-}
-  // @PostMapping("/BankTransfer")
-  // public boolean login(@RequestParam("amount") int amount, @RequestParam("SendAccount") String SendAccount, @RequestParam("ReceiveAccount") String ReceiveAccount) {
-  //     if(amount < 0 || SendAccount == null || ReceiveAccount == null || SendAccount == ReceiveAccount)
-  //       return false;
-  //     boolean transfer = bankingServices.bankTransfer(ReceiveAccount, SendAccount , amount);
-  //     if (transfer == false) {
-  //       return false;
-  //     }
-  //     return true;
-  //   }
+  }
 
+  @Produces("application/json")
+  @PostMapping("/resetPassword") // Changed from "/BankTransfer" to "/resetPassword"
+  public boolean RessetPassword(@RequestParam(value = "mail") String mail,
+      @RequestParam(value = "psw") String psw,
+      @RequestParam(value = "newPsw") String newPsw) {
+    if (mail == null || mail.isEmpty()) {
+      LOGGER.error("Error, no mail, enter your mail to connect. psw : {} / {}", psw, newPsw);
+      return false;
+    }
+    boolean reset = bankingServices.RessetPassword(mail, psw, newPsw);
+    if (!reset) {
+      LOGGER.error("Error resetting password for mail: {}", mail);
+      return false;
+    }
+    return true;
+  }
+
+
+  // @PostMapping("/BankTransfer")
+  // public boolean login(@RequestParam("amount") int amount, @RequestParam("SendAccount") String
+  // SendAccount, @RequestParam("ReceiveAccount") String ReceiveAccount) {
+  // if(amount < 0 || SendAccount == null || ReceiveAccount == null || SendAccount ==
+  // ReceiveAccount)
+  // return false;
+  // boolean transfer = bankingServices.bankTransfer(ReceiveAccount, SendAccount , amount);
+  // if (transfer == false) {
+  // return false;
+  // }
+  // return true;
+  // }
+
+  // @POST
+  // @Consumes("application/json")
+  // @Produces("application/json")
+  // @Path("/sendMailToUser")
+  // @Operation(
+  // summary = "Envoie un mail à l'utilisateur ciblé",
+  // description = "Envoie un mail à l'utilisateur ciblé avec sujet et message personnalisés"
+  // )
+  // @PostMapping("/sendMailToUser")
+  // public Map<String, Object> sendMailToUser(
+  // @RequestParam("to") String to,
+  // @RequestParam("subject") String subject,
+  // @RequestParam("body") String body) {
+  // Map<String, Object> response = new HashMap<>();
+  // try {
+  // mailService.sendResetCodeEmail(to, body); // ou mailService.sendSupportMail("Service", to,
+  // body);
+  // response.put("success", true);
+  // response.put("message", "Mail envoyé à " + to);
+  // } catch (Exception e) {
+  // LOGGER.error("Erreur lors de l'envoi du mail : {}", e.getMessage());
+  // response.put("success", false);
+  // response.put("message", "Erreur lors de l'envoi du mail : " + e.getMessage());
+  // }
+  // return response;
+  // }
 }

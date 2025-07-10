@@ -278,6 +278,80 @@ export default function HomePage() {
           </p>
         </div>
       </section>
+          {/* Formulaire de test pour /sendMailToUser */}
+      <div className="max-w-lg mx-auto my-12 p-6 bg-white rounded-xl shadow border">
+        <h3 className="text-xl font-semibold mb-4 text-center">Test envoi d'email (API /sendMailToUser)</h3>
+        <SendMailTestForm />
+      </div>
     </div>
+  );
+}
+
+// Formulaire de test pour /sendMailToUser
+function SendMailTestForm() {
+  const [to, setTo] = useState("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setResult(null);
+    try {
+      const params = new URLSearchParams({ to, subject, body }).toString();
+      const res = await fetch("/sendMailToUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params,
+      });
+      const data = await res.json();
+      setResult(data);
+    } catch (err) {
+      setResult({ success: false, message: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form className="space-y-3" onSubmit={handleSend}>
+      <input
+        type="email"
+        className="w-full px-3 py-2 rounded border"
+        placeholder="Destinataire (to)"
+        value={to}
+        onChange={e => setTo(e.target.value)}
+        required
+      />
+      <input
+        type="text"
+        className="w-full px-3 py-2 rounded border"
+        placeholder="Sujet"
+        value={subject}
+        onChange={e => setSubject(e.target.value)}
+        required
+      />
+      <textarea
+        className="w-full px-3 py-2 rounded border"
+        placeholder="Message"
+        value={body}
+        onChange={e => setBody(e.target.value)}
+        required
+      />
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+      >
+        {loading ? "Envoi en cours..." : "Envoyer l'email"}
+      </button>
+      {result && (
+        <div className={`mt-3 text-center ${result.success ? "text-green-600" : "text-red-600"}`}>
+          {result.message}
+        </div>
+      )}
+    </form>
   );
 }
