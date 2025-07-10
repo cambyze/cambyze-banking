@@ -73,7 +73,6 @@
 		</dependency>
 	</dependencies>
 
-
 	<build>
 		<finalName>banking</finalName>
 		<plugins>
@@ -181,5 +180,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
