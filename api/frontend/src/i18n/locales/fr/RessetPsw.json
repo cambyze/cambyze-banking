@@ -1,0 +1,12 @@
+{
+    "Reset_Password_Title": "Réinitialiser le mot de passe",
+    "Passwords_Do_Not_Match": "Les mots de passe ne correspondent pas",
+    "Password_Reset_Success": "Mot de passe réinitialisé avec succès",
+    "Password_Reset_Failed": "Échec de la réinitialisation du mot de passe",
+    "Network_Error": "Erreur réseau",
+    "Password_Label": "Mot de passe actuel",
+    "New_Password_Label": "Nouveau mot de passe",
+    "Confirm_Password_Label": "Confirmer le mot de passe",
+    "Submitting_Button": "En cours...",
+    "Reset_Password_Button": "Réinitialiser le mot de passe"
+}

@@ -1,0 +1,12 @@
+{
+    "Reset_Password_Title": "Reset password",
+    "Passwords_Do_Not_Match": "Passwords do not match",
+    "Password_Reset_Success": "Password reset successfully",
+    "Password_Reset_Failed": "Password reset failed",
+    "Network_Error": "Network error",
+    "Password_Label": "Current password",
+    "New_Password_Label": "New password",
+    "Confirm_Password_Label": "Confirm password",
+    "Submitting_Button": "Submitting...",
+    "Reset_Password_Button": "Reset password"
+}

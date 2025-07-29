@@ -1,0 +1,9 @@
+{
+  "LoginRegister": {
+    "Login_Form_Forget_Password": "Mot de passe oublié ?",
+    "Login_Form_Email": "e-mail"
+  },
+  "Reset_Description": "Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.",
+  "Sending": "Envoi en cours…",
+  "Send_Reset_Link": "Envoyer le lien de réinitialisation"
+}

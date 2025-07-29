@@ -1,0 +1,9 @@
+{
+  "LoginRegister": {
+    "Login_Form_Forget_Password": "Forgot Password ?",
+    "Login_Form_Email": "Email Address"
+  },
+  "Reset_Description": "Enter your email address to receive a reset link.",
+  "Sending": "Sending…",
+  "Send_Reset_Link": "Send Reset Link"
+}
