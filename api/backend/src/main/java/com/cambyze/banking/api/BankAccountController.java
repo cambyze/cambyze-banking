@@ -1,6 +1,10 @@
 package com.cambyze.banking.api;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -8,6 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +26,9 @@ import com.cambyze.banking.api.microservice.exceptions.OverdraftForbiddenExcepti
 import com.cambyze.banking.api.microservice.exceptions.RecordNotFoundException;
 import com.cambyze.banking.api.microservice.exceptions.SavingsLimitReachedException;
 import com.cambyze.banking.api.microservice.exceptions.TechnicalErrorException;
+import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
+import com.cambyze.banking.persistence.model.Person;
 import com.cambyze.banking.services.AskOverdraftResponse;
 import com.cambyze.banking.services.BankingServices;
 import com.cambyze.banking.services.CreateDepositResponse;
@@ -37,9 +44,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
-import com.cambyze.banking.persistence.model.Account;
-import java.util.List;
-import java.util.Collections;
+
 /**
  * REST API controller for the management of the bank accounts
  * 
@@ -48,7 +53,7 @@ import java.util.Collections;
  * @see <a href="https://cambyze.com">Cambyze</a>
  * 
  */
-@OpenAPIDefinition(
+  @OpenAPIDefinition(
     info = @Info(title = "Cambyze banking service", version = "0.0",
         description = "Services to banking accounts",
         termsOfService = "https://cambyze.com/termsofservice/",
@@ -57,40 +62,38 @@ import java.util.Collections;
         contact = @Contact(url = "https://cambyze.com/", name = "Cambyze support",
             email = "support@cambyze.com")),
     servers = {@Server(description = "Cambyze server", url = "https://cambyze.com/banking-api")})
-@RestController
-public class BankAccountController {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountController.class);
+  @RestController
+  public class BankAccountController {
 
-  public BankAccountController(BankingServices bankingServices) {
-    super();
-    this.bankingServices = bankingServices;
-  }
-  
+    private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountController.class);
 
-  // @Autowired
-  private BankingServices bankingServices;
+    private final BankingServices bankingServices;
+
+    public BankAccountController(BankingServices bankingServices) {
+      super();
+      this.bankingServices = bankingServices;
+    }
 
   @POST
   @Consumes("application/json")
   @Produces("application/json")
   @Operation(summary = "Create a bank account",
       description = "Create a bank account and return its bank account number",
-      
+
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           description = "No request body needed", required = false,
           content = @Content(mediaType = "application/json",
               contentSchema = @Schema(implementation = String.class))),
       parameters = {
-          @Parameter(required = true, description = "Person id", example = "CLI-00000001")
-      },
+          @Parameter(required = true, description = "Person id", example = "CLI-00000001")},
       responses = {@ApiResponse(description = "The new bank account number",
           content = @Content(mediaType = "String"))})
 
-  
+
   @Path("/createBankAccount")
   @PostMapping("/createBankAccount")
-  public String createBankAccount(@RequestParam(value = "personId") String personId) {   
+  public String createBankAccount(@RequestParam(value = "personId") String personId) {
     String ban = bankingServices.createNewBankAccount(personId);
     if (ban != null && !ban.isEmpty()) {
       LOGGER.info("New created account: {}", ban);
@@ -135,8 +138,7 @@ public class BankAccountController {
           content = @Content(mediaType = "application/json",
               contentSchema = @Schema(implementation = String.class))),
       parameters = {
-              @Parameter(required = true, description = "Person id", example = "CLI-00000001")
-      },
+          @Parameter(required = true, description = "Person id", example = "CLI-00000001")},
       responses = {@ApiResponse(description = "The new bank account number",
           content = @Content(mediaType = "String"))})
 
@@ -213,7 +215,6 @@ public class BankAccountController {
           @Parameter(required = true, description = "Withdraw amount", example = "120.26")},
       responses = {@ApiResponse(description = "The new balance",
           content = @Content(mediaType = "BigDecimal"))})
-  //@Path("/createWithdraw")
   @PostMapping("/createWithdraw")
   public BigDecimal createWithdraw(@RequestParam(value = "ban") String ban,
       @RequestParam(value = "amount") String amount) {
@@ -254,7 +255,7 @@ public class BankAccountController {
           example = "CAMBYZEBANK-2")},
       responses = {@ApiResponse(description = "The overdraft amount",
           content = @Content(mediaType = "BigDecimal"))})
-  //@Path("/requestOverdraft")
+  // @Path("/requestOverdraft")
   @PostMapping("/requestOverdraft")
   public BigDecimal requestOverdraft(@RequestParam(value = "ban") String ban) {
 
@@ -298,30 +299,34 @@ public class BankAccountController {
       throw new TechnicalErrorException(msg);
     }
   }
-  
-  
+
   @POST
   @Consumes("application/json")
-  @Operation(summary = "Create a new Person",
-      description = "Create a new person ",
+  @Operation(summary = "Create a new Person", description = "Create a new person",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           description = "No request body needed, you have to use the required parameters: name, firstName, mail",
           required = false),
-          parameters = {
-              @Parameter(name = "name", required = true, description = "Last name of the person", example = "Doe"),
-              @Parameter(name = "firstName", required = true, description = "First name of the person", example = "John"),
-              @Parameter(name = "mail", required = true, description = "Email address of the person", example = "john.doe@example.com")
-          },
-          example = "Louis", "Defunes", "Louis.Defunes@mail.com")},
-      responses = {@ApiResponse(description = "boolean",
-          content = @Content(mediaType = "boolean"))})
-  
+      parameters = {
+          @Parameter(name = "name", required = true, description = "Last name of the person",
+              example = "Doe"),
+          @Parameter(name = "firstName", required = true, description = "First name of the person",
+              example = "John"),
+          @Parameter(name = "email", required = true, description = "Email address of the person",
+              example = "john.doe@example.com"),
+          @Parameter(name = "psw", required = true, description = "the User password",
+              example = "MySuperPassw0rdIsSafe100%"),
+          @Parameter(name = "adress", required = true, description = "the User adress",
+              example = "8 rue Sainte-Anne, 75001 Paris.")},
+      responses = {
+          @ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))})
   @Produces("application/json")
   @Path("/createPerson")
   @PostMapping("/createPerson")
   public String createPerson(@RequestParam(value = "name") String name,
-      @RequestParam(value = "firstName") String firstName, @RequestParam(value = "mail") String mail) {
-    String per = bankingServices.createPerson(name, firstName, mail);
+      @RequestParam(value = "firstName") String firstName,
+      @RequestParam(value = "mail") String mail, @RequestParam(value = "psw") String psw,
+      @RequestParam(value = "adress") String adress) {
+    String per = bankingServices.createPerson(name, firstName, mail, psw, adress);
     if (per != null && !per.isEmpty()) {
       LOGGER.info("New created Person: {}", per);
       return per;
@@ -332,7 +337,6 @@ public class BankAccountController {
     }
   }
 
-  
   @POST
   @Consumes("application/json")
   @Operation(summary = "Send if the user is logged",
@@ -340,52 +344,221 @@ public class BankAccountController {
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           description = "No request body needed, you have to use the required parameters: mail",
           required = false),
-      parameters = {@Parameter(required = true, description = "login mail",
-          example = "user.mail")},
-      responses = {@ApiResponse(description = "boolean",
-          content = @Content(mediaType = "boolean"))})
+      parameters = {@Parameter(required = true, description = "login mail", example = "user.mail")},
+      responses = {
+          @ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))})
 
   @Produces("application/json")
   @PostMapping("/login")
-  public boolean login(
-      @RequestParam(value = "mail") String mail) {
-      if(mail == null || mail.isEmpty()) {
-        String msg = "mail field was empty";
-        LOGGER.error("MSG : {}", msg);
-        return false;
-       }
-       boolean login = bankingServices.login(mail);
-       return login;
+  public boolean login(@RequestParam(value = "mail") String mail) {
+    if (mail == null || mail.isEmpty()) {
+      String msg = "mail field was empty";
+      LOGGER.error("MSG : {}", msg);
+      return false;
+    }
+    boolean login = bankingServices.login(mail);
+    if (!login) {
+      LOGGER.error("Login failed for mail: {}", mail);
+      return false;
+    }
+    return login;
   }
 
-  
-  
-  @Get
   @Consumes("application/json")
   @Operation(summary = "send all account for a Person",
       description = "Send a list of all account linked to Person by personId",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           description = "No request body needed, you have to use the required parameters: personId",
           required = false),
-      parameters = {@Parameter(required = true, description = "List<Account>",
-          example = "CLI-00000000")},
-      responses = {@ApiResponse(description = "List<Account>",
-          content = @Content(mediaType = "List<Account>"))})
+      parameters = {
+          @Parameter(required = true, description = "List<Account>", example = "CLI-00000000")},
+      responses = {
+          @ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))})
+
 
   @Produces("application/json")
   @GetMapping("/findBanByPerson")
   public List<Account> findBanByPerson(@RequestParam(value = "personId") String personId) {
-      if (personId == null || personId.isEmpty()) {
-          LOGGER.debug("LIST ACCOUNT IS EMPTY");
-          return Collections.emptyList();
-      }
+    if (personId == null || personId.isEmpty()) {
+      LOGGER.debug("LIST ACCOUNT IS EMPTY");
+      return Collections.emptyList();
+    }
 
-      List<Account> laccount = bankingServices.findBanByPerson(personId);
-      if (laccount.isEmpty()) {
-          LOGGER.debug("Find Account List is empty");
-          return Collections.emptyList();
-      }
-      return laccount;
+    List<Account> laccount = bankingServices.findBanByPerson(personId);
+    if (laccount.isEmpty()) {
+      LOGGER.debug("Find Account List is empty");
+      return Collections.emptyList();
+    }
+    return laccount;
   }
 
+  @PostMapping("/login2")
+  public Map<String, Object> login2(@RequestParam("mail") String mail,
+      @RequestParam("psw") String psw) {
+    Map<String, Object> response = new HashMap<>();
+    try {
+      if (mail == null || mail.isEmpty()) {
+        response.put("authenticated", false);
+        response.put("error", "Mail is empty");
+        return response;
+      }
+
+      Person person = bankingServices.findPersonByMail(mail);
+
+      boolean isValidPerson = bankingServices.login(mail);
+      if (!isValidPerson) {
+        LOGGER.error("Login failed for mail: {}", mail);
+        response.put("authenticated", false);
+        response.put("error", "Person not found");
+        return null;
+      }
+
+      if (person == null || !person.getPsw().equals(psw)) {
+        response.put("authenticated", false);
+        response.put("error", "Wrong password or person not found");
+        return response;
+      }
+
+      response.put("authenticated", true);
+      response.put("personId", person.getId());
+      response.put("firstName", person.getFirstName());
+      response.put("lastName", person.getName());
+      response.put("email", person.getEmail());
+      response.put("adress", person.getAdress());
+      return response;
+    } catch (Exception e) {
+      LOGGER.error("Error during login process: {}", e.getMessage());
+      response.put("authenticated", false);
+      response.put("error", "Internal server error");
+      return response;
+    }
+  }
+
+  @POST
+  @Consumes("application/json")
+  @Operation(
+      summary = "send the amount set by user from the selected account to the selected account",
+      description = "Send the selected amount from a selected account tou a sellected account",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "No request body needed,  parameters: amount, account from, account for",
+          required = true),
+      parameters = {@Parameter(required = true, description = "amount", example = "150"),
+          @Parameter(required = true, description = "sendAccount",
+              example = "CAMBYZEBANK-00000001"),
+          @Parameter(required = true, description = "recieveAccount",
+              example = "CAMBYZEBANK-00000002")},
+      responses = {
+          @ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))})
+
+  @Produces("application/json")
+  @PostMapping("/BankTransfer")
+  public boolean BankTransfer(@RequestParam(value = "amount", required = false) BigDecimal amount,
+      @RequestParam("SendAccount") String SendAccount,
+      @RequestParam("ReceiveAccount") String ReceiveAccount) {
+    if (amount == null) {
+      LOGGER.error("Amount parameter is missing or invalid");
+      return false;
+    }
+    // public boolean BankTransfer(@RequestParam("amount") BigDecimal amount,
+    // @RequestParam("SendAccount") String SendAccount,
+    // @RequestParam("ReceiveAccount") String ReceiveAccount) {
+    // // if (amount < 0) {
+    // // throw new InvalidAmountException("The amount must be positive");
+    // // }
+    if (amount.compareTo(BigDecimal.ZERO) < 0) {
+      LOGGER.error("Amount must be positive");
+      return false;
+    }
+    if (SendAccount == null || ReceiveAccount == null) {
+      throw new InvalidBANException("SendAccount or ReceiveAccount is null");
+    }
+    if (SendAccount.equals(ReceiveAccount)) {
+      throw new InvalidOperationTypeException("SendAccount and ReceiveAccount cannot be the same");
+    }
+
+    boolean transfer = bankingServices.bankTransfer(ReceiveAccount, SendAccount, amount);
+    if (!transfer) {
+      // throw new InsufficientBalanceException("Insufficient funds for transfer");
+      LOGGER.debug("Insufficient funds for transfer");
+      return false;
+    }
+    LOGGER.debug("Transfer Success!!");
+    return true;
+  }
+
+  @Produces("application/json")
+  @PostMapping("/resetPassword") // Changed from "/BankTransfer" to "/resetPassword"
+  public boolean RessetPassword(@RequestParam(value = "mail") String mail,
+      @RequestParam(value = "psw") String psw,
+      @RequestParam(value = "newPsw") String newPsw) {
+    if (mail == null || mail.isEmpty()) {
+      LOGGER.error("Error, no mail, enter your mail to connect. psw : {} / {}", psw, newPsw);
+      return false;
+    }
+    boolean reset = bankingServices.RessetPassword(mail, psw, newPsw);
+    if (!reset) {
+      LOGGER.error("Error resetting password for mail: {}", mail);
+      return false;
+    }
+    return true;
+  }
+
+    @POST
+  @PostMapping("/sendMail")
+  public Map<String, Object> sendMailToUser(
+      @RequestParam("to") String to,
+      @RequestParam("subject") String subject,
+      @RequestParam("text") String body) {
+      Map<String, Object> response = new HashMap<>();
+      LOGGER.info("Sending mail to: {}, subject: {}, body: {}", to, subject, body);
+      
+      bankingServices.sendEmail(to, subject, body);
+
+      if (true) {
+          response.put("Try Mail Send", true);
+          response.put("message", "Mail tes sent to " + to);
+      } 
+      return response;
+  }
+
+  @POST
+  @Consumes("application/json")
+  @Produces("application/json")
+  @PostMapping("/forgottenPsw")
+  public boolean forgottenPsw(@RequestParam(value = "mail") String mail)
+  {
+    LOGGER.info("Forgotten password request for mail: {}", mail);
+    if (mail == null || mail.isEmpty()) {
+      LOGGER.error("Error, no mail, enter your mail to connect.");
+      return false;
+    }
+    boolean reset = bankingServices.forgottenPsw(mail);
+    if (!reset) {
+      LOGGER.error("Error resetting password for mail: {}", mail);
+      return false;
+    }
+    return true;
+  }  
+
+  @POST
+  @Consumes("application/json")
+  @Produces("application/json")
+  @PostMapping("/PswUpdate")
+  public boolean PswUpdate(@RequestParam(value = "mail") String mail,
+      @RequestParam(value = "psw") String psw,
+      @RequestParam(value = "newPsw") String newPsw)
+  {
+    LOGGER.info("Forgotten password request for mail: {}", mail);
+    if (mail == null || mail.isEmpty() || psw == null || psw.isEmpty() || newPsw == null || newPsw.isEmpty()) {
+      LOGGER.error("Error, no mail, enter your mail to connect. psw : {} / {}", psw, newPsw);
+      return false;
+    }
+    boolean reset = bankingServices.RessetPassword(mail, psw, newPsw);
+    if (!reset) {
+      LOGGER.error("Error resetting password for mail: {}", mail);
+      return false;
+    }
+    sendMailToUser(mail, "reset password", "Your password has been reset successfully. Please log in with your new password.");
+    return true;
+  }  
 }

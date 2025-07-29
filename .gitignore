@@ -45,3 +45,7 @@ out/
 *.bak
 *.swp
 *~
+
+.bundle
+
+node_modules/

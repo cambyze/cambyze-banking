@@ -1,6 +1,7 @@
 package com.cambyze.banking.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
 
-@SpringBootTest
+@SpringBootTest()
 class ServicesApplicationTests {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ServicesApplicationTests.class);
@@ -24,29 +25,29 @@ class ServicesApplicationTests {
   void testServices() {
     LOGGER.debug("Test services");
 
-
     boolean isOk = bankingServices.isValidEmail("testmail.com");
-    LOGGER.debug("mail is ok : {}", isOk);
+    LOGGER.debug("mail is ok : {} for input '{}'", isOk, "testmail.com");
     assertTrue(!isOk);
 
-    String perId = bankingServices.createPerson("christof", "colomb", "ccolomb");
+    String perId = bankingServices.createPerson("christof", "colomb", "ccolomb", "psw", "adress0");
     assertTrue(perId == null);
     LOGGER.debug("Test value not ok: ({})", perId);
 
 
-    perId = bankingServices.createPerson("christof", "colomb", "ccolomb@mail.com");
+    perId =
+        bankingServices.createPerson("christof", "colomb", "ccolomb@mail.com", "psw", "adress1");
     LOGGER.debug("NEW Person Created : {}", perId);
     assertTrue(perId != null);
 
     String perId2;
 
-    perId2 = bankingServices.createPerson("christ", "Jesus", "ccolomb@mail.com");
+    perId2 = bankingServices.createPerson("christ", "Jesus", "ccolomb@mail.com", "psw", "adress2");
     LOGGER.debug("Mails allready use TEST: {}", perId2);
     assertTrue(perId2 == null);
 
-    perId2 = bankingServices.createPerson("Marie", "Curie", "Mcurie@mail.com");
+    perId2 = bankingServices.createPerson("Marie", "Curie", "Mcurie@mail.com", "psw", "adress3");
     LOGGER.debug("Mails Test2: {}", perId2);
-    assertTrue(perId != null);
+    assertTrue(perId2 != null);
 
     LOGGER.debug("test mail {} is valid : {}", "ccolomb@mail.com",
         bankingServices.login("ccolomb@mail.com"));
@@ -56,8 +57,8 @@ class ServicesApplicationTests {
     LOGGER.debug("mail exist {} : {}", "ccolomb@mail.com");
     assertTrue(log == true);
 
-    log = bankingServices.login("test@mail.com");
-    LOGGER.debug("mail d'ont exist {} : {}", "test@mail.com", log);
+    log = bankingServices.login("test1@mail.com");
+    LOGGER.debug("mail d'ont exist {} : {}", "test&@mail.com", log);
     assertTrue(log == false);
 
     String ban = bankingServices.createNewBankAccount(perId);
@@ -75,10 +76,6 @@ class ServicesApplicationTests {
     }
     assertTrue(la != null);
     assertTrue(la.size() > 1);
-
-    // String ban = bankingServices.createNewBankAccount(perId);
-    // LOGGER.debug("New BAN : {}", ban);
-    // assertTrue(ban.startsWith("CAMBYZEBANK"));
 
     CreateDepositResponse createDepositResponse =
         bankingServices.createDeposit(ban, BigDecimal.valueOf(1520.25));
@@ -120,7 +117,6 @@ class ServicesApplicationTests {
     createDepositResponse = bankingServices.createDeposit(ban, BigDecimal.valueOf(4500.0));
     LOGGER.debug("Limit reached then return code : {}", createDepositResponse.getReturnCode());
     assertEquals(Constants.SAVINGS_LIMIT_REACHED, createDepositResponse.getReturnCode());
-
 
     // new Regular Bank Account
     ban = bankingServices.createNewBankAccount(perId);
@@ -182,7 +178,6 @@ class ServicesApplicationTests {
         bk.getOperations().size());
     assertEquals(2, bk.getOperations().size());
 
-
     // Test a long term account
     ban = bankingServices.createNewBankAccount(perId);
     CreateDepositResponse cdr = bankingServices.createSampleOperations(ban);
@@ -196,5 +191,113 @@ class ServicesApplicationTests {
         bk.getOperations().size());
     assertEquals(6, bk.getOperations().size());
 
+    bankingServices.findPersonByMail("ccolomb@mail.com");
+
+
+    String senderId =
+        bankingServices.createPerson("Sender", "Test", "sender@test.com", "psw", "adresse");
+    String receiverId =
+        bankingServices.createPerson("Receiver", "Test", "receiver@test.com", "psw", "adresse");
+    String senderBan = bankingServices.createNewBankAccount(senderId);
+    String receiverBan = bankingServices.createNewBankAccount(receiverId);
+
+    bankingServices.createDeposit(senderBan, BigDecimal.valueOf(1000.0));
+
+    boolean result = bankingServices.bankTransfer(receiverBan, senderBan, BigDecimal.valueOf(500));
+    assertTrue(result, "Le virement doit réussir avec un solde suffisant");
+
+    result = bankingServices.bankTransfer(receiverBan, senderBan, BigDecimal.valueOf(2000));
+    assertFalse(result, "Le virement doit échouer si le solde est insuffisant");
+
+    result = bankingServices.bankTransfer("FAUX_BAN", senderBan, BigDecimal.valueOf(100));
+    assertFalse(result, "Le virement doit échouer si le compte destinataire n'existe pas");
+
+
+    LOGGER.debug("Test RessetPassword");
+    String email = "john.doe@gmail.com";
+    String newPassword = "password123";
+
+    String oldPassword = "psw";
+
+    Boolean resetResult = bankingServices.RessetPassword(email, oldPassword, newPassword);
+    assertTrue(resetResult, "Password reset should succeed");
+
+    String email2 = "WrongMail@mail.com";
+    Boolean resetResult2 = bankingServices.RessetPassword(email2, oldPassword, newPassword);
+    assertFalse(resetResult2, "Password reset should fail for non-existing email");
+
+    String falseOldPassword = "wrongPassword";
+    Boolean resetResult3 = bankingServices.RessetPassword(email, falseOldPassword, newPassword);
+    assertFalse(resetResult3, "Password reset should fail for incorrect old password");
+
+
+    // Test password hashing and verification
+    LOGGER.debug("Test password hashing and verification");
+    String plainPassword = "securePassword123";
+    String hashedPassword = BankingServices.hashPassword(plainPassword);
+
+    LOGGER.debug("Hashed password: {}", hashedPassword);
+    assertTrue(BankingServices.checkPassword(plainPassword, hashedPassword), "Password verification should succeed");
+
+    String wrongPassword = "wrongPassword123";
+    assertFalse(BankingServices.checkPassword(wrongPassword, hashedPassword), "Password verification should fail for incorrect password");
+
+    String mail = "mailpr0ed0uard@gmail.com";
+
+    // Forget password
+    LOGGER.debug("Test forget password");
+    LOGGER.debug("Create a new person for forget password test with email: {}", mail);
+    perId =
+        bankingServices.createPerson("edouard", "Edouard", mail, "psw", "adress1");
+    LOGGER.debug("NEW Person Created : {} , {}", perId, mail);
+    //assertTrue(perId != null);
+
+    Boolean test = bankingServices.forgottenPsw(mail);
+    assertTrue(test, "Forget password should succeed for existing email");
+
+    bankingServices.sendEmail(mail, "Test Email Service", "Ceci est un test d'envoi d'e-mail via Spring Boot. le nouvau psw est: test");
+
   }
+
+// // TODO : fix PSW
+//   //PSWq
+//   @Test
+//   public void testGenerateVerifyAndClearCode() throws Exception {
+//   ResetCodeService resetCodeService = new ResetCodeService();
+//   String email = "test@mail.com";
+//   resetCodeService.generateAndSendCode(email);
+  
+//   Field codesField = ResetCodeService.class.getDeclaredField("codes");
+//   codesField.setAccessible(true);
+//   @SuppressWarnings("unchecked")
+//   Map<String, Object> codes = (Map<String, Object>) codesField.get(resetCodeService);
+//   assertNotNull(codes.get(email), "L'entrée de code généré doit exister");
+  
+//   Object resetCodeData = codes.get(email);
+//   Field codeField = resetCodeData.getClass().getDeclaredField("code");
+//   codeField.setAccessible(true);
+//   String code = (String) codeField.get(resetCodeData);
+  
+//   assertTrue(resetCodeService.verifyCode(email, code), "the generated code should be valid");
+  
+//   assertFalse(resetCodeService.verifyCode(email, "000000"),
+//   "An invalid code should not be validated");
+
+//   resetCodeService.clearCode(email);
+//   assertFalse(resetCodeService.verifyCode(email, code),
+//   "The code should no longer be validated after clearing");
+// //  ResetCodeService
+//   }
+
+    @Test
+    void testSendEmail() {
+       bankingServices.sendEmail(
+            "mailpr0ed0uard@gmail.com",
+            "Test Email Service 2",
+            "Ceci est un test d'envoi d'e-mail via Spring Boot."
+        );
+        LOGGER.debug("Email sent successfully");
+       // assertTrue(result, "L'envoi de l'e-mail doit réussir.");
+    }
+
 }

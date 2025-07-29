@@ -30,7 +30,8 @@ class PersistenceApplicationTests {
   @Test
   void testPersonServices() {
     LOGGER.debug("[testPersonServices] Test services");
-    String personId = persistenceServices.createNewPerson("DOE", "John", "john.doe@gmail.com");
+    String personId =
+        persistenceServices.createNewPerson("DOE", "John", "john.doe@gmail.com", "psw", "adress");
     LOGGER.debug("[testPersonServices] New client: {}", personId);
     assertNotNull(personId);
     assertTrue(personId.startsWith("CLI-"));
@@ -46,7 +47,8 @@ class PersistenceApplicationTests {
   @Test
   void testAccountServices() {
     LOGGER.debug("[testAccountServices] Test Services");
-    String personId = persistenceServices.createNewPerson("DOE", "John", "john.doe2@gmail.com");
+    String personId =
+        persistenceServices.createNewPerson("DOE", "John", "john.doe2@gmail.com", "psw", "adress2");
     Person per = persistenceServices.findPersonByid(personId);
     String ban = persistenceServices.createNewBankAccount(personId);
     LOGGER.debug(
@@ -76,7 +78,8 @@ class PersistenceApplicationTests {
     persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
         Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(100.0));
     assertTrue(opId == String.valueOf(Constants.INVALID_BANK_ACCOUNT));
-    String personId = persistenceServices.createNewPerson("DOE", "John", "john.doe25@gmail.com");
+    String personId = persistenceServices.createNewPerson("DOE", "John", "john.doe25@gmail.com",
+        "psw", "adress3");
     String ban = persistenceServices.createNewBankAccount(personId);
     ba = persistenceServices.findBankAccountByBAN(ban);
     if (ba != null) {
@@ -87,7 +90,7 @@ class PersistenceApplicationTests {
 
       opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
           Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(100.0));
-      LOGGER.debug("[testOperationServices] First success with Operation id: " + opId);
+      LOGGER.debug("[testOperationServices] First success with Operation id: {}", opId);
       assertNotNull(opId);
       opId = persistenceServices.createNewBankingOperation(ba, LocalDate.now(),
           Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(1050.36));
@@ -107,26 +110,26 @@ class PersistenceApplicationTests {
 
   @Test
   void testOverdraftServices() {
-    LOGGER.debug("[testOverdraftServices] Test overdraft Services");
-    String personId = persistenceServices.createNewPerson("BARBIE", "Ken", "ken.barbie@gmail.com");
+    LOGGER.debug("f");
+    String personId = persistenceServices.createNewPerson("BARBIE", "Ken", "ken.barbie@gmail.com",
+        "psw", "adress");
     String ban = persistenceServices.createNewBankAccount(personId);
     Account ba = persistenceServices.findBankAccountByBAN(ban);
     persistenceServices.createOverdraft(ba, BigDecimal.valueOf(1500.0));
     ba = persistenceServices.findBankAccountByBAN(ban);
-    LOGGER.debug("[testOverdraftServices] overdraft amount: " + ba.getOverdraftAmount());
+    LOGGER.debug("[testOverdraftServices] overdraft amount: {} ", ba.getOverdraftAmount());
     assertTrue(ba.getOverdraftAmount().equals(BigDecimal.valueOf(1500.0)));
   }
 
   @Test
   void testSavingsServices() {
     LOGGER.debug("[testSavingsServices] Test savings Services");
-    String personId = persistenceServices.createNewPerson("BARBIE", "Ken", "ken89@gmail.com");
+    String personId =
+        persistenceServices.createNewPerson("BARBIE", "Ken", "ken89@gmail.com", "psw", "adress");
     String ban = persistenceServices.createSavingsAccount(personId);
     Account ba = persistenceServices.findBankAccountByBAN(ban);
     LOGGER.debug("[testSavingsServices] New saving account + " + ba.getBankAccountNumber()
         + " type = " + ba.getAccountType());
     assertEquals(ba.getAccountType(), Constants.ACCOUNT_TYPE_SAVINGS);
   }
-
-
 }

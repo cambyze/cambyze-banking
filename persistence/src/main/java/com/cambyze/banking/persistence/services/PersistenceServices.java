@@ -52,9 +52,10 @@ public class PersistenceServices {
    * 
    * @return userId
    */
-  public String createNewPerson(String name, String firstName, String email) {
-    LOGGER.debug("Create New Person with name: {}, firstName: {}, email: {}", name, firstName,
-        email);
+  public String createNewPerson(String name, String firstName, String email, String psw,
+      String adress) {
+    LOGGER.debug("Create New Person with name: {}, firstName: {}, email: {}, psw: {}, adress: {}",
+        name, firstName, email, psw, adress);
     Person per = new Person();
     long seq = sequenceGeneratorService.getNextSequence("person");
     String externalRef = String.format("CLI-%08d", seq);
@@ -62,6 +63,8 @@ public class PersistenceServices {
     per.setName(name);
     per.setFirstName(firstName);
     per.setEmail(email);
+    per.setPsw(psw);
+    per.setAdress(adress);
     personRepository.save(per);
     LOGGER.debug("New person created: {}", per);
     return per.getPersonId();
@@ -335,6 +338,14 @@ public class PersistenceServices {
     return ba.getBankAccountNumber();
   }
 
-
-
+   /**
+  * Update an existing Person in the database
+  * 
+  * @param person The person object with updated details
+  */
+  public void updatePerson(Person person) {
+    LOGGER.debug("Updating person: {}", person);
+    personRepository.save(person);
+    LOGGER.debug("Person updated successfully: {}", person);
+  }
 }
