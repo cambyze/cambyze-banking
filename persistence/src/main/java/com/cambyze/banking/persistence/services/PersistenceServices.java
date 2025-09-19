@@ -13,6 +13,7 @@ import com.cambyze.banking.persistence.dao.BankingOperationRepository;
 import com.cambyze.banking.persistence.dao.PersonAccountRepository;
 import com.cambyze.banking.persistence.dao.PersonRepository;
 import com.cambyze.banking.persistence.model.Account;
+import com.cambyze.banking.persistence.model.Adresse;
 import com.cambyze.banking.persistence.model.Constants;
 import com.cambyze.banking.persistence.model.Operation;
 import com.cambyze.banking.persistence.model.Person;
@@ -46,25 +47,38 @@ public class PersistenceServices {
     this.sequenceGeneratorService = sequenceGeneratorService;
     this.personRepository = personRepository;
   }
+  
 
   /*
    * create a new Person
    * 
    * @return userId
    */
+  // public String createNewPerson(String name, String firstName, String email, String psw,
+  //     String adress) {
   public String createNewPerson(String name, String firstName, String email, String psw,
-      String adress) {
+                              String street, String city, String state, String country, String secondaryAddress) {
     LOGGER.debug("Create New Person with name: {}, firstName: {}, email: {}, psw: {}, adress: {}",
-        name, firstName, email, psw, adress);
+        name, firstName, email, psw, street + ", " + city + ", " + state + ", " + country);
     Person per = new Person();
-    long seq = sequenceGeneratorService.getNextSequence("person");
-    String externalRef = String.format("CLI-%08d", seq);
-    per.setId(externalRef);
+    // long seq = sequenceGeneratorService.getNextSequence("person");
+    // String externalRef = String.format("CLI-%08d", seq);
+    String ibanKey = new BanGenerator(sequenceGeneratorService).generateNewBan();
+    LOGGER.debug("Generated IBAN Key: {}", ibanKey);
+    // per.setId(externalRef);
+    per.setId(ibanKey);
     per.setName(name);
     per.setFirstName(firstName);
     per.setEmail(email);
     per.setPsw(psw);
-    per.setAdress(adress);
+    // per.setAdress(adress);
+    Adresse adresse = new Adresse();
+    adresse.setStreet(street);
+    adresse.setCity(city);
+    adresse.setState(state);
+    adresse.setCountry(country);
+    adresse.setSecondaryAddress(secondaryAddress);
+    per.setAdress(adresse);
     personRepository.save(per);
     LOGGER.debug("New person created: {}", per);
     return per.getPersonId();
@@ -184,6 +198,10 @@ public class PersistenceServices {
       long seq = sequenceGeneratorService.getNextSequence("bank_account_number");
       String externalRef = String.format("CAMBYZEBANK-%08d", seq);
       ba.setBankAccountNumber(externalRef);
+      // Ajout de 10 si le type de compte est ACCOUNT_TYPE_BANK
+      if (Constants.ACCOUNT_TYPE_BANK.equals(ba.getAccountType())) {
+        ba.setBalanceAmount(ba.getBalanceAmount().add(BigDecimal.valueOf(10.0)));
+      }
       bankAccountRepository.save(ba);
       return ba.getBankAccountNumber();
     } else {
@@ -348,4 +366,59 @@ public class PersistenceServices {
     personRepository.save(person);
     LOGGER.debug("Person updated successfully: {}", person);
   }
+
+  /**
+   * See Profile of a Person by their ID
+   * @param personId The ID of the person
+   * @return The Person object if found, otherwise null
+   */
+  public Person seeProfileById(String personId) {
+    LOGGER.debug("Finding person by ID: {}", personId);
+    return personRepository.findById(personId).orElse(null);
+  }
+
+  /**
+   * update Profile of a Person
+   * @param person The Person object with updated details
+   * @return The updated Person object
+   */
+
+  public Person updateProfile(String personId, String name, String firstName, String email, String psw,
+                              String street, String city, String state, String country, String secondaryAddress) {
+    LOGGER.debug("Updating profile for person: {}, {}", personId, name);
+    Person person = personRepository.findByPersonIdIgnoreCase(personId);
+    if (person == null) {
+      LOGGER.error("Person with ID {} not found for update.", personId);
+      return null;
+    }
+    person.setName(name);
+    person.setFirstName(firstName);
+    person.setEmail(email);
+    person.setPsw(psw);
+    Adresse adresse = new Adresse();
+    adresse.setStreet(street);
+    adresse.setCity(city);
+    adresse.setState(state);
+    adresse.setCountry(country);
+    adresse.setSecondaryAddress(secondaryAddress);
+    person.setAdress(adresse);
+    return personRepository.save(person);
+  }
+
+  /*
+   * overdraft Update
+   * 
+   */
+  public boolean updateOverdraftAmount(String bankAccountNumber, int newOverdraftAmount) {
+    Account account = bankAccountRepository.findByBankAccountNumberIgnoreCase(bankAccountNumber);
+    if (account != null) {
+        account.setOverdraftAmount(BigDecimal.valueOf(newOverdraftAmount));
+        bankAccountRepository.save(account);
+        LOGGER.debug("Overdraft updated for BAN {}: {}", bankAccountNumber, newOverdraftAmount);
+        return true;
+    } else {
+        LOGGER.error("No account found for BAN: {}", bankAccountNumber);
+        return false;
+    }
+  } 
 }

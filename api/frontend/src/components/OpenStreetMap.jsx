@@ -3,7 +3,8 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
 import { useTranslation } from 'react-i18next';
-
+import PinBG from '../assets/PinBg.png';
+import L from 'leaflet';
 
 const LocationPicker = ({ setPosition }) => {
   useMapEvents({
@@ -18,9 +19,13 @@ const AddressModal = ({ isOpen, onRequestClose, onAddressSelected }) => {
   const { t } = useTranslation();
   const [position, setPosition] = useState(null);
   const [address, setAddress] = useState("");
+  const [allAddress, setAllAddress] = useState([]);
   const [manualAddress, setManualAddress] = useState("");
   const [manualCity, setManualCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState("");
+  const [streetNumber, setStreetNumber] = useState("");
+  const [secondaryAddress, setSecondaryAddress] = useState("");
   const [suggestions, setSuggestions] = useState([]);
     
 
@@ -36,10 +41,15 @@ const AddressModal = ({ isOpen, onRequestClose, onAddressSelected }) => {
       });
       const data = res.data;
       setAddress(data.display_name);
+      setAllAddress(data);
+      console.log("Reverse geocoding result:", data);
+      // setAddress(data.address);
       if (data.address) {
-        setManualAddress(data.address.road || "");
+        setManualAddress((data.address.house_number || "")+(data.address.house_number || "") + " " + (data.address.road || ""));
         setManualCity(data.address.city || data.address.town || data.address.village || "");
+        setCountry(data.address.country || "");
         setPostalCode(data.address.postcode || "");
+        setStreetNumber(data.address.house_number || "");
       }
     } catch (err) {
       console.error("Erreur lors du reverse geocoding :", err);
@@ -63,13 +73,20 @@ const AddressModal = ({ isOpen, onRequestClose, onAddressSelected }) => {
     }
   };
 
+  const customIcon = L.icon({
+    iconUrl: PinBG,
+    iconSize: [30, 40], // adapte à la taille de ton image
+    iconAnchor: [15, 40], // position de la pointe du marqueur
+  });
+
+
   const handleSuggestionClick = (place) => {
     const lat = parseFloat(place.lat);
     const lon = parseFloat(place.lon);
     const display = place.display_name;
 
     setManualAddress(place.address.road || "");
-    setManualCity(place.address.city || place.address.town || place.address.village || "");
+    setManualCity((place.address.city || place.address.town || place.address.village || ""));
     setPostalCode(place.address.postcode || "");
     setPosition({ lat, lng: lon });
     setAddress(display);
@@ -84,17 +101,36 @@ const AddressModal = ({ isOpen, onRequestClose, onAddressSelected }) => {
     return () => clearTimeout(timer);
   }, [manualAddress, manualCity, postalCode]);
 
-  const handleConfirm = () => {
-    const finalAddress = address || `${manualAddress}, ${postalCode}, ${manualCity}`;
-    if (position || (manualAddress && manualCity && postalCode)) {
-      onAddressSelected({
-        lat: position?.lat ?? null,
-        lon: position?.lng ?? null,
-        address: finalAddress,
-      });
-      onRequestClose();
-    }
-  };
+const handleConfirm = () => {
+  const streetWithNumber = `${streetNumber ? streetNumber + ' ' : ''}${manualAddress}`.trim();
+  const formattedFull = [streetWithNumber, postalCode, manualCity, country].filter(Boolean).join(', ');
+  const finalAddress = formattedFull;
+  if (position || (manualAddress && manualCity && postalCode)) {
+    onAddressSelected({
+      lat: position?.lat ?? null,
+      lon: position?.lng ?? null,
+      country: country,
+      city: manualCity,
+      postcode: postalCode,
+      street: streetWithNumber,
+      address: finalAddress, 
+      full: formattedFull,  
+    });
+    onRequestClose();
+  }
+};
+  // const handleConfirm = () => {
+  //   const finalAddress = address || `${manualAddress}, ${postalCode}, ${manualCity}`;
+  //   if (position || (manualAddress && manualCity && postalCode)) {
+  //     onAddressSelected({
+  //       lat: position?.lat ?? null,
+  //       lon: position?.lng ?? null,
+  //       address: finalAddress,
+  //     });
+  //     Fulladdress(finalAddress);
+  //     onRequestClose();
+  //   }
+  // };
 
   if (!isOpen) return null;
 
@@ -128,7 +164,7 @@ const AddressModal = ({ isOpen, onRequestClose, onAddressSelected }) => {
                 await fetchAddress(latlng.lat, latlng.lng);
               }}
             />
-            {position && <Marker position={position} />}
+            {position && <Marker position={position} icon={customIcon} />}
           </MapContainer>
         </div>
 

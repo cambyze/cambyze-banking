@@ -1,0 +1,16 @@
+{
+  "resetPsw": {
+    "title": "Réinitialisation du mot de passe",
+    "description": "Veuillez entrer votre adresse e-mail et un nouveau mot de passe.",
+    "LoginRegister": {
+      "Login_Form_Email": "Adresse e-mail",
+      "Login_Form_Password": "Nouveau mot de passe",
+      "Login_Form_ConfirmPassword": "Confirmez le mot de passe"
+    },
+    "RessetPswButton": "Réinitialiser le mot de passe",
+    "successMessage": "Votre mot de passe a été réinitialisé avec succès !",
+    "Les mots de passe ne correspondent pas ou sont trop courts": "Les mots de passe ne correspondent pas ou sont trop courts.",
+    "Échec de la réinitialisation": "Échec de la réinitialisation du mot de passe.",
+    "Erreur réseau": "Une erreur réseau s'est produite. Veuillez réessayer."
+  }
+}

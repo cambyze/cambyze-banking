@@ -1,0 +1,21 @@
+{
+  "BankTransfer": {
+    "Title": "Virement Bancaire",
+    "Subtitle": "Transférez de l'argent entre les comptes",
+    "Personal_Transfer": "Virement Personnel",
+    "External_Transfer": "Virement Externe",
+    "Emitter_Account": "Compte Émetteur",
+    "Receiver_Account": "Compte Récepteur",
+    "Amount": "Montant",
+    "Perform_Transfer": "Effectuer le Virement",
+    "Transfer_Success": "Virement réussi !",
+    "Transfer_Error": "Échec du virement. Veuillez réessayer.",
+    "Select_Emitter": "Sélectionnez un compte émetteur",
+    "Select_Receiver": "Sélectionnez un compte récepteur",
+    "Selected_Emitter": "Émetteur Sélectionné",
+    "Selected_Receiver": "Récepteur Sélectionné",
+    "Balance": "Solde",
+    "Close": "Fermer",
+    "Set_Error_Loading_Account": "Erreur lors du chargement des comptes."
+  }
+}

@@ -31,10 +31,13 @@ class PersistenceApplicationTests {
   void testPersonServices() {
     LOGGER.debug("[testPersonServices] Test services");
     String personId =
-        persistenceServices.createNewPerson("DOE", "John", "john.doe@gmail.com", "psw", "adress");
+        // persistenceServices.createNewPerson("DOE", "John", "john.doe@gmail.com", "psw", "adress");
+                persistenceServices.createNewPerson("DOE", "John", "john.doe@gmail.com", "psw", "123 rue de Paris", "Paris", "75000", "France"
+                ,"");
+
     LOGGER.debug("[testPersonServices] New client: {}", personId);
     assertNotNull(personId);
-    assertTrue(personId.startsWith("CLI-"));
+    assertTrue(personId.startsWith("FR"));
     Person per = persistenceServices.findPersonByid(personId);
     assertNotNull(per);
     per = persistenceServices.findPersonByid("0");
@@ -48,7 +51,11 @@ class PersistenceApplicationTests {
   void testAccountServices() {
     LOGGER.debug("[testAccountServices] Test Services");
     String personId =
-        persistenceServices.createNewPerson("DOE", "John", "john.doe2@gmail.com", "psw", "adress2");
+           persistenceServices.createNewPerson(
+      "DOE", "John", "john.doe@gmail.com", "psw",
+      "123 rue de Paris", "Paris", "75000", "France", ""
+      );
+        // persistenceServices.createNewPerson("DOE", "John", "john.doe2@gmail.com", "psw", "adress2");
     Person per = persistenceServices.findPersonByid(personId);
     String ban = persistenceServices.createNewBankAccount(personId);
     LOGGER.debug(
@@ -79,7 +86,7 @@ class PersistenceApplicationTests {
         Constants.OPERATION_TYPE_DEPOSIT, BigDecimal.valueOf(100.0));
     assertTrue(opId == String.valueOf(Constants.INVALID_BANK_ACCOUNT));
     String personId = persistenceServices.createNewPerson("DOE", "John", "john.doe25@gmail.com",
-        "psw", "adress3");
+        "psw", "123 rue de Paris", "Paris", "75000", "France", "");
     String ban = persistenceServices.createNewBankAccount(personId);
     ba = persistenceServices.findBankAccountByBAN(ban);
     if (ba != null) {
@@ -111,8 +118,10 @@ class PersistenceApplicationTests {
   @Test
   void testOverdraftServices() {
     LOGGER.debug("f");
-    String personId = persistenceServices.createNewPerson("BARBIE", "Ken", "ken.barbie@gmail.com",
-        "psw", "adress");
+    String personId = 
+      // persistenceServices.createNewPerson("BARBIE", "Ken", "ken.barbie@gmail.com", "psw", "adress");
+      persistenceServices.createNewPerson("BARBIE", "Ken", "ken.barbie@gmail.com", "psw", "adress",
+          "456 rue de la paix", "Lyon", "69000", "France");
     String ban = persistenceServices.createNewBankAccount(personId);
     Account ba = persistenceServices.findBankAccountByBAN(ban);
     persistenceServices.createOverdraft(ba, BigDecimal.valueOf(1500.0));
@@ -125,11 +134,48 @@ class PersistenceApplicationTests {
   void testSavingsServices() {
     LOGGER.debug("[testSavingsServices] Test savings Services");
     String personId =
-        persistenceServices.createNewPerson("BARBIE", "Ken", "ken89@gmail.com", "psw", "adress");
+        // persistenceServices.createNewPerson("BARBIE", "Ken", "ken89@gmail.com", "psw", "adress");
+                persistenceServices.createNewPerson("BARBIE", "Ken", "ken89@gmail.com", "psw",
+                "456 rue de la paix", "Lyon", "69000", "France", "");
     String ban = persistenceServices.createSavingsAccount(personId);
     Account ba = persistenceServices.findBankAccountByBAN(ban);
     LOGGER.debug("[testSavingsServices] New saving account + " + ba.getBankAccountNumber()
         + " type = " + ba.getAccountType());
     assertEquals(ba.getAccountType(), Constants.ACCOUNT_TYPE_SAVINGS);
+  }
+
+  @Test
+  void ServiceUpdatePerson() {
+    LOGGER.debug("[ServiceUpdatePerson] Test update person Services");
+    String personId =
+        // persistenceServices.createNewPerson("MARTIN", "Paul", "paul.martin@gmail.com", "psw", "adress");
+        persistenceServices.createNewPerson("Paolini", "Christopher", "christopher.paolini@gmail.com",
+            "psw", "789 avenue des Champs", "Marseille", "13000", "France", "");
+    Person per = persistenceServices.findPersonByid(personId);
+    assertNotNull(per);
+    assertEquals(per.getName(), "Paolini");
+    assertEquals(per.getFirstName(), "Christopher");
+    assertEquals(per.getEmail(), "christopher.paolini@gmail.com");
+    assertEquals(per.getAdress().getStreet(), "789 avenue des Champs");
+    assertEquals(per.getAdress().getCity(), "Marseille");
+    assertEquals(per.getAdress().getState(), "13000");
+    assertEquals(per.getAdress().getCountry(), "France");
+
+    Person updatedPer = persistenceServices.updateProfile(
+    personId,
+    "Paolini",
+    "Christopher",
+    "christopher.paolini@gmail.com",
+    "psw",
+    "789 avenue des Champs",
+    "New York",
+    "13000",
+    "US",
+    ""
+);
+
+Person person = persistenceServices.seeProfileById(personId);
+    LOGGER.debug("[ServiceUpdatePerson] Person updated: {}", persistenceServices.seeProfileById(personId));
+    LOGGER.debug("[ServiceUpdatePerson] seeProfileById Person updated: {}", person);
   }
 }

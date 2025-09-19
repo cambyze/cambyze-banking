@@ -15,6 +15,7 @@ export default function LoginRegisterSelect() {
     const [passwordError, setPasswordError] = useState("");
     const [addressModalOpen, setAddressModalOpen] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
+    const [address, setAddress] = useState({});
     const location = useLocation();
 
     useEffect(() => {
@@ -70,6 +71,12 @@ export default function LoginRegisterSelect() {
           firstName: data.firstName,
           lastName: data.lastName,
           personId: data.personId,
+          psw: password,
+          Street:  data.streetNumber || "" + data.street || "",
+          city: data.city || "",
+          state: data.postalCode || "",
+          country: data.country || "",
+          secondaryAddress: data.secondaryAddress || "",
         };
       
         login(userData);
@@ -93,7 +100,13 @@ export default function LoginRegisterSelect() {
       const email = formData.get("email");
       const password = formData.get("password"); 
       const checkPassword = formData.get("CheckPassword");
-      const address = selectedAddress ? selectedAddress.address : "";
+    // Extraction des champs d'adresse depuis l'objet address (rempli par AddressModal)
+    const street = address?.road || "";
+    const streetNumber = address?.house_number || address?.streetNumber || "";
+    const city = address?.city || address?.town || address?.village || "";
+    const state = address?.state || "";
+    const country = address?.country || "";
+    const secondaryAddress = address?.full || selectedAddress || "";
 
       if (password !== checkPassword) {
          setPasswordError(t('LoginRegister.Passwords_Do_Not_Match'));
@@ -107,19 +120,22 @@ export default function LoginRegisterSelect() {
         return;
       }
 
-
       try {
         console.log("adresse: ", address);
         const res = await fetch("/createPerson", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({ 
-            firstName: firstName, 
-            name: lastName,
-            mail: email,
-            psw: password,
-            adress: address,
-          }).toString(),
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ 
+                firstName: firstName, 
+                name: lastName,
+                mail: email,
+                psw: password,
+                Street: streetNumber + " " + street,
+                city: city,
+                state: state,
+                country: country,
+                secondaryAddress: secondaryAddress
+            }).toString(),
         });
         
         if (res.ok) {
@@ -190,7 +206,6 @@ export default function LoginRegisterSelect() {
                         </button>
                     </div>
 
-                    {/* Display the form based on the selected button*/}
                     {selected === "login" ? (
                         <div>
                           <form className="space-y-4 animate-fade-in" onSubmit={handleSubmitLogin}>
@@ -259,18 +274,35 @@ export default function LoginRegisterSelect() {
                                     onClick={() => setAddressModalOpen(true)}
                                     className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-left text-sm focus:ring-2 focus:ring-[#4A6FA5] outline-none"
                                 >
-                                    {selectedAddress ? selectedAddress.address : t('LoginRegister.Register_Form_Address') }
+                                    {/* {selectedAddress ? selectedAddress : t('LoginRegister.Register_Form_Address') } */}
                                 </button>
                                 {addressModalOpen && (
                                     <AddressModal
                                         isOpen={addressModalOpen}
                                         onRequestClose={() => setAddressModalOpen(false)}
                                         onAddressSelected={(data) => {
-                                            setSelectedAddress(data);
+                                            setSelectedAddress(data.full);
                                             setAddressModalOpen(false);
+                                            setAddress(data);
                                         }}
                                     />
                                 )}
+                                {/* {console.log(
+                                //   "selectedAddress: ", address,
+                                  " test LOGIN GET DATA : ",
+                                  address?.city || "\n-----| A |------\n",
+                                  " - ",
+                                  address?.postcode || "",
+                                  " - ",
+                                  address?.country || "",
+                                    // " - ", address?.town || "",
+                                    " - ", address?.city || "",
+                                    " - ", address?.address || "",
+                                    " - ", address?.streetNumber || "",
+                                    " - ", address?.road || "",
+                                    " - ", address?.full || "NOPE",
+                                    "selectedAddress: ", selectedAddress
+                                )} */}
                             </div>
                             <input
                                 type="email"
@@ -329,49 +361,3 @@ export default function LoginRegisterSelect() {
         </div>
     );
 }
-
-
-// const handleSubmitLogin = async (e) => {
-    //   e.preventDefault();
-    //   setStatus("authenticating");
-    //   const form = e.target;
-    //   const formData = new FormData(form);
-    //   const email = formData.get("email");
-    //   const password = formData.get("password");
-      
-    //   try {
-    //     const res = await fetch("/login2", {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    //       body: new URLSearchParams({ mail: email, psw: password }).toString(),
-    //     });
-    //     console.log(res);
-    //     if (res.ok === true) {
-    //       const success = await res.json();
-    //       if (res == null)
-    //         throw new Error("Échec de la connexion, réponse vide");
-    //       console.log("success: ", success);
-    //       if (success) {
-    //         const userData = {
-    //           mail: success.mail,
-    //           firstName: success.firstName,
-    //           lastName: success.lastName, 
-    //           personId: success.personId,
-    //         };
-            
-    //         login(userData);
-    //         setStatus("authenticated");
-    //         form.reset();
-    //         navigate("/Account");
-    //       } else  {
-    //         console.error("Échec de la connexion");
-    //         throw new Error("Email non reconnu");
-    //       }
-    //     } else {
-    //       throw new Error(await res.text());
-    //     }
-    //   } catch (err) {
-    //     console.error("LogIn erro ", err);
-    //     setStatus("error");
-    //   }
-    // };

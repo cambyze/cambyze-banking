@@ -36,6 +36,7 @@
       "sendError": "Failed to send email. Please try again."
     },
     "address.title": "find us",
-    "abbout_us":"About us",
-    "abbout_us_desc":"Cambyze Bank is here to support you in your projects."
+    "address.openMap": "Open in Maps",
+    "about_us":"About us",
+    "about_us_desc":"Cambyze Bank is here to support you in your projects."
 }

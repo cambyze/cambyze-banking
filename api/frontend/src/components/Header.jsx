@@ -100,6 +100,14 @@ export default function Header() {
                               </ul>
                             )}
                           </div>
+                          <div className="flex items-center space-x-4">
+                                <button
+                                    className="px-4 py-1.5 rounded-full bg-[#4A6FA5]/10 hover:bg-[#4A6FA5]/20 text-[#4A6FA5] font-medium transition-colors"
+                                    onClick={() => navigate("/testServices")}
+                                >
+                                    testservices
+                                </button>
+                            </div>
                         </li>
                         <li>
                             {user ? (

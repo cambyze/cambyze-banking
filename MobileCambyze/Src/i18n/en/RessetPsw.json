@@ -1,0 +1,14 @@
+{
+  "resetPsw": {
+    "title": "Password Reset",
+    "description": "Please enter your email address and a new password.",
+    "Login_Form_Email": "Email address",
+    "Login_Form_Password": "New password",
+    "Login_Form_ConfirmPassword": "Confirm password",
+    "RessetPswButton": "Reset Password",
+    "successMessage": "Your password has been successfully reset!",
+    "Les mots de passe ne correspondent pas ou sont trop courts": "Passwords do not match or are too short.",
+    "Échec de la réinitialisation": "Password reset failed.",
+    "Erreur réseau": "A network error occurred. Please try again."
+  }
+}

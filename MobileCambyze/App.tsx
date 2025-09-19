@@ -5,21 +5,24 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import {useEffect, useState, createContext}  from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Footer from './Src/Component/Footer';
 import HomePage from './Src/Screens/HomePage';
 import Test from './Src/Screens/test';
 import LoginRegister from './Src/Screens/LoginRegister';
 import Header from './Src/Component/Header';
-import 'react-native-reanimated';
-import SideMenu from './Src/Component/SideMenu';
 import Account from './Src/Screens/Account';
+import ForgotPsw from './Src/Screens/ForgotPsw';
+import BankTransfer from './Src/Screens/BankTransfer';
+import ResetPassword from './Src/Screens/RessetPsw';
+import 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
 export const AuthContext = createContext<{ user: any; login: (user: any) => void; logout: () => void }>({
-  //user: null,
-  user: { firstName: "John", lastName: "Doe", email: "", personId: "12345" },
-  login: () => {},
+  user: null,
+  // user: { firstName: "", lastName: "", email: "", personId: "" },
+  login: () => { },
   logout: () => {},
 });
+
 export const LanguageContext = createContext<{ language: string; setLanguage: (lang: string) => void }>({
   language: 'fr',
   setLanguage: () => {},
@@ -31,18 +34,33 @@ function App() {
   const [user, setUser] = useState(null);
   const [language, setLanguage] = useState('fr');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [visibleScreens, setVisibleScreens] = useState(false);
+  const login = (userData: any) => setUser(userData);
+  const logout = () => setUser(null);
+  const { t } = useTranslation("NavMenu");
 
   useEffect(() => {
     const loadUser = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
-        if (savedUser) setUser(JSON.parse(savedUser));
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+          setVisibleScreens(true);
+        }
       } catch (e) {
         console.error('Failed to load user', e);
       }
     };
     loadUser();
   }, []);
+
+  useEffect(() => {
+    if (user && user !== null) {
+      setVisibleScreens(true);
+    } else {
+      setVisibleScreens(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     const saveUser = async () => {
@@ -59,8 +77,6 @@ function App() {
     saveUser();
   }, [user]);
 
-  const login = (userData: any) => setUser(userData);
-  const logout = () => setUser(null);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -100,10 +116,31 @@ function App() {
 
   const navigationView = (
     <Drawer.Navigator initialRouteName="HomePage">
-      <Drawer.Screen name="HomePage" component={HomePage} options={{ headerShown: false }} />
-      <Drawer.Screen name="Test" component={Test} options={{ headerShown: false }} />
-      <Drawer.Screen name="LoginRegister" component={LoginRegister} options={{ headerShown: false }} />
-      <Drawer.Screen name="Account" component={Account} options={{ headerShown: false }} />
+
+          <Drawer.Screen name="HomePage" component={HomePage} 
+            options={{ headerShown: false , 
+            drawerLabel: t("home"),  }} />
+          {/* connected */}
+          <Drawer.Screen name="Account" component={Account} 
+            options={{ headerShown: false, drawerItemStyle: visibleScreens ?  {} : { display: 'none' }, 
+            drawerLabel: t("account")  }} />
+          <Drawer.Screen name="BankTransfer" component={BankTransfer} 
+            options={{ headerShown: false, drawerItemStyle: visibleScreens ?  {} : { display: 'none' }, 
+            drawerLabel: t("BankTransfer") }} />
+          <Drawer.Screen name="ResetPassword" component={ResetPassword} 
+            options={{ headerShown: false  , drawerItemStyle: visibleScreens ?  {} : { display: 'none' }, 
+            drawerLabel: t("resetPsw") }} />
+
+          {/* not connected */}
+          <Drawer.Screen name="Test" component={Test} options={{ headerShown: false , 
+              drawerItemStyle: visibleScreens ? { display: 'none' } : {}, 
+              drawerLabel: t("navigation.test") }} />
+          <Drawer.Screen name="LoginRegister" component={LoginRegister} 
+            options={{ headerShown: false  , drawerItemStyle: visibleScreens ? { display: 'none' } : {}, 
+            drawerLabel: t("loginRegister") }} />
+          <Drawer.Screen name="ForgotPsw" component={ForgotPsw} 
+            options={{ headerShown: false , drawerItemStyle: visibleScreens ? { display: 'none' } : {}, 
+            drawerLabel: t("forgotPsw") }} />
     </Drawer.Navigator>
   );
 
@@ -119,9 +156,8 @@ function App() {
           <LanguageContext.Provider value={{ language, setLanguage }}>
             <View style={styles.container}>
               <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-                <SideMenu isOpen={isDrawerOpen} toggleMenu={toggleDrawer} />
+                {/* <SideMenu isOpen={isDrawerOpen} toggleMenu={toggleDrawer} /> */}
                   {navigationView}
-              {/* <Footer /> */}
             </View>
           </LanguageContext.Provider>
         </NavigationContainer>

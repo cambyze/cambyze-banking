@@ -1,0 +1,9 @@
+{
+  "title": "Réinitialiser le mot de passe",
+  "description": "Entrez votre adresse e-mail pour recevoir un lien de réinitialisation du mot de passe.",
+  "emailLabel": "E-mail",
+  "RessetPswButton": "Réinitialiser le mot de passe",
+  "successMessage": "nouveau mot de passe envoyé par e-mail. veuiller le changer. apres vous être connecté.",
+  "errorMessage": "Une erreur s'est produite lors de l'envoi du lien. Veuillez réessayer.",
+  "EmailPlaceHolder": "adresse e-mail"
+}

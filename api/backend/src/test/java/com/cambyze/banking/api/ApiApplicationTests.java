@@ -4,6 +4,7 @@ package com.cambyze.banking.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import javax.ws.rs.core.MediaType;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,12 @@ class ApiApplicationTests {
     String firstName = "Onils";
     String mail = "Jack.Onils@mail.com";
     String psw = "psw";
-    String adress = "adress";
+    // String adress = "adress";
+    String Street = "8 rue Sainte-Anne";
+    String city = "Paris";
+    String state = "75001";
+    String country = "France";
+    String secondaryAddress = "Bat A, Appt 25";
     LOGGER.debug("--|Person|--");
     // test creation of new "person"
     mockMvc.perform(post("/createPerson")
@@ -40,10 +46,16 @@ class ApiApplicationTests {
             .param("firstName", firstName)
             .param("mail", mail)
             .param("psw", psw)
-            .param("adress", adress))
+            // .param("adress", adress)
+            .param("Street", Street)
+            .param("city", city)
+            .param("state", state)
+            .param("country", country)
+            .param("secondaryAddress", secondaryAddress))
             .andExpect(status().isOk());
 
-    String personId = "CLI-00000001";
+    // String personId = "CLI-00000001";
+    String personId = "FR5099999000100000000000157";
     // test creation of a saving account
     mockMvc.perform(post("/createSavingsAccount").param("personId", personId)
         .contentType(MediaType.APPLICATION_JSON).content(""))
@@ -75,12 +87,30 @@ class ApiApplicationTests {
     mockMvc.perform(get("/findBanByPerson").param("personId", "falseID")
         .contentType(MediaType.APPLICATION_JSON).content(""))
         .andExpect(status().isOk());
+
+    // mockMvc.perform(get("/seeProfile").param("personId", personId)
+    //     .contentType(MediaType.APPLICATION_JSON))
+    //     .andExpect(status().isOk());
+
+    MvcResult result = mockMvc.perform(get("/seeProfile").param("personId", personId)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+
+String responseContent = result.getResponse().getContentAsString();
+System.out.println("seeProfile response 3 : " + responseContent);
+
+    mockMvc.perform(post("/updateProfile").param("personId", personId)
+        .param("name", "NewName")
+        .param("firstName", "NewFirstName")
+        .param("mail", "NewMail"));
   }
 
   @Test
   void testOperations() throws Exception {
     // test with bank account creation
-    String id = "CLI-00000001";
+    // String id = "CLI-00000001";
+    String id = "FR5099999000100000000000157";
     mockMvc.perform(post("/createBankAccount").param("personId", id)).andExpect(status().isOk());
     // Test createDeposit without parameters
     String ban = "";
@@ -139,7 +169,8 @@ class ApiApplicationTests {
         .andExpect(status().isOk());
 
 // test find bank account by person ID
-    String personId = "CLI-00000001";
+    // String personId = "CLI-00000001";
+    String personId = "FR5099999000100000000000157";
     mockMvc.perform(get("/findBanByPerson").param("personId", personId)
         .contentType(MediaType.APPLICATION_JSON).content("")).andExpect(status().isOk());
 
@@ -224,6 +255,12 @@ class ApiApplicationTests {
         .param("subject", "Bank API Test")
         .param("text", "Test send mail Banckend API"));
     LOGGER.debug("Back send mail end");  
+
+    mockMvc.perform(post("/updateOverdraftAmount")
+        .param("ban", "CAMBYZEBANK-00000018")
+        .param("newOverdraftAmount", "777"))
+        .andExpect(status().isOk());
+
   }
     @Test
     void testSendMail() throws Exception {

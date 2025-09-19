@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.cambyze.banking.persistence.model.Account;
 import com.cambyze.banking.persistence.model.Constants;
+import com.cambyze.banking.persistence.model.Person;
 
 @SpringBootTest()
 class ServicesApplicationTests {
@@ -29,23 +30,23 @@ class ServicesApplicationTests {
     LOGGER.debug("mail is ok : {} for input '{}'", isOk, "testmail.com");
     assertTrue(!isOk);
 
-    String perId = bankingServices.createPerson("christof", "colomb", "ccolomb", "psw", "adress0");
+    String perId = bankingServices.createPerson("christof", "colomb", "ccolomb", "psw", "Rue1", "City1", "13000", "FR", ""  );
     assertTrue(perId == null);
     LOGGER.debug("Test value not ok: ({})", perId);
 
 
     perId =
-        bankingServices.createPerson("christof", "colomb", "ccolomb@mail.com", "psw", "adress1");
+        bankingServices.createPerson("christof", "colomb", "ccolomb@mail.com", "psw", "Rue1", "City1", "13000", "FR", "" );
     LOGGER.debug("NEW Person Created : {}", perId);
     assertTrue(perId != null);
 
     String perId2;
 
-    perId2 = bankingServices.createPerson("christ", "Jesus", "ccolomb@mail.com", "psw", "adress2");
+    perId2 = bankingServices.createPerson("christ", "Jesus", "ccolomb@mail.com", "psw", "Rue2", "City2", "13000", "FR", "" );
     LOGGER.debug("Mails allready use TEST: {}", perId2);
     assertTrue(perId2 == null);
 
-    perId2 = bankingServices.createPerson("Marie", "Curie", "Mcurie@mail.com", "psw", "adress3");
+    perId2 = bankingServices.createPerson("Marie", "Curie", "Mcurie@mail.com", "psw", "Rue3", "City3", "13000", "FR", "" );
     LOGGER.debug("Mails Test2: {}", perId2);
     assertTrue(perId2 != null);
 
@@ -120,7 +121,7 @@ class ServicesApplicationTests {
 
     // new Regular Bank Account
     ban = bankingServices.createNewBankAccount(perId);
-    oldBalance = 0.0;
+    oldBalance = 10.0;
     LOGGER.debug("New BAN : {}", ban);
     assertTrue(ban.startsWith("CAMBYZEBANK"));
 
@@ -151,7 +152,7 @@ class ServicesApplicationTests {
 
     // new Bank Account
     ban = bankingServices.createNewBankAccount(perId);
-    oldBalance = 0.0;
+    oldBalance = 10.0;
     LOGGER.debug("New BAN : {}", ban);
     assertTrue(ban.startsWith("CAMBYZEBANK"));
 
@@ -195,9 +196,9 @@ class ServicesApplicationTests {
 
 
     String senderId =
-        bankingServices.createPerson("Sender", "Test", "sender@test.com", "psw", "adresse");
+        bankingServices.createPerson("Sender", "Test", "sender@test.com", "psw", "adresse", "City", "13000", "FR", "");
     String receiverId =
-        bankingServices.createPerson("Receiver", "Test", "receiver@test.com", "psw", "adresse");
+        bankingServices.createPerson("Receiver", "Test", "receiver@test.com", "psw", "adresse", "City", "13000", "FR", "");
     String senderBan = bankingServices.createNewBankAccount(senderId);
     String receiverBan = bankingServices.createNewBankAccount(receiverId);
 
@@ -248,7 +249,7 @@ class ServicesApplicationTests {
     LOGGER.debug("Test forget password");
     LOGGER.debug("Create a new person for forget password test with email: {}", mail);
     perId =
-        bankingServices.createPerson("edouard", "Edouard", mail, "psw", "adress1");
+        bankingServices.createPerson("edouard", "Edouard", mail, "psw", "adress1", "City1", "13000", "FR", "");
     LOGGER.debug("NEW Person Created : {} , {}", perId, mail);
     //assertTrue(perId != null);
 
@@ -257,37 +258,12 @@ class ServicesApplicationTests {
 
     bankingServices.sendEmail(mail, "Test Email Service", "Ceci est un test d'envoi d'e-mail via Spring Boot. le nouvau psw est: test");
 
+    Person upr = bankingServices.updateProfile(perId, "Edouard", "Brosse", mail, "newPsw", "NewStreet", "NewCity", "13000", "FR", "");
+    // assertEquals(Constants.SERVICE_OK, upr, "Profile update should succeed"); 
+
+    Person person = bankingServices.seeProfileById(perId);
+    LOGGER.debug("[ServiceUpdatePerson] seeProfileById Person updated: {}", person);
   }
-
-// // TODO : fix PSW
-//   //PSWq
-//   @Test
-//   public void testGenerateVerifyAndClearCode() throws Exception {
-//   ResetCodeService resetCodeService = new ResetCodeService();
-//   String email = "test@mail.com";
-//   resetCodeService.generateAndSendCode(email);
-  
-//   Field codesField = ResetCodeService.class.getDeclaredField("codes");
-//   codesField.setAccessible(true);
-//   @SuppressWarnings("unchecked")
-//   Map<String, Object> codes = (Map<String, Object>) codesField.get(resetCodeService);
-//   assertNotNull(codes.get(email), "L'entrée de code généré doit exister");
-  
-//   Object resetCodeData = codes.get(email);
-//   Field codeField = resetCodeData.getClass().getDeclaredField("code");
-//   codeField.setAccessible(true);
-//   String code = (String) codeField.get(resetCodeData);
-  
-//   assertTrue(resetCodeService.verifyCode(email, code), "the generated code should be valid");
-  
-//   assertFalse(resetCodeService.verifyCode(email, "000000"),
-//   "An invalid code should not be validated");
-
-//   resetCodeService.clearCode(email);
-//   assertFalse(resetCodeService.verifyCode(email, code),
-//   "The code should no longer be validated after clearing");
-// //  ResetCodeService
-//   }
 
     @Test
     void testSendEmail() {

@@ -1,0 +1,9 @@
+{
+    "title": "Reset Password",
+    "description": "Enter your email address to receive a password reset link.",
+    "emailLabel": "Email",
+    "RessetPswButton": "Reset Password",
+    "successMessage": "A new password has been sent to your email. Please change it after logging in.",
+    "errorMessage": "An error occurred while sending the link. Please try again.",
+    "EmailPlaceHolder": "email address"
+}

@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import "nativewind";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Test() {
   const [showSplash, setShowSplash] = useState(true);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setShowSplash(true);
+    }, [])
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -1,0 +1,8 @@
+{
+    "home": "Accueil",
+    "account": "Compte",
+    "BankTransfer": "Virement Bancaire",
+    "loginRegister": "Connexion / Inscription",
+    "resetPsw": "Réinitialiser le mot de passe",
+    "forgotPsw": "Mot de passe oublié"
+}

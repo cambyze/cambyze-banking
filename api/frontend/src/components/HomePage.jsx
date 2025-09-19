@@ -4,13 +4,33 @@ import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
+import L from 'leaflet';
+import PinBG from '../assets/PinBg.png';
+
+const customIcon = L.icon({
+  iconUrl: PinBG,
+  iconSize: [30, 40], 
+  iconAnchor: [15, 40],
+});
+
 
 function Carousel() {
   const { t } = useTranslation();
+
   const items = [
     { 
       title: t('HomePage.carousel.availability_Title'), 
       desc: t('HomePage.carousel.availability_Desc'),
+      color: "bg-blue-100 text-blue-600",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    },
+    { 
+      title: t('HomePage.carousel.New_Account_Gift_Title'), 
+      desc: t('HomePage.carousel.New_Account_Gift_Desc'),
       color: "bg-blue-100 text-blue-600",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -146,7 +166,7 @@ export default function HomePage() {
           <button
             title="test "
             className="inline-block px-8 py-3 bg-[#8EB4E3] text-white text-lg font-medium rounded-lg shadow hover:bg-blue-500 transition-colors"
-            onClick={() => navigate("/Regiser")}
+            onClick={() => navigate("/Register")}
           >
             {t('HomePage.Get_New_Account')}
           </button>
@@ -199,7 +219,7 @@ export default function HomePage() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
-          <Marker position={[selectedAddress.lat, selectedAddress.lon]} />
+          <Marker position={[selectedAddress.lat, selectedAddress.lon]} icon={customIcon}/>
           </MapContainer>
         </div>
       </div>

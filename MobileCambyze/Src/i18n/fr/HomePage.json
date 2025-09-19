@@ -36,6 +36,7 @@
       "sendError": "Échec de l'envoi de l'email. Veuillez réessayer."
     },
     "address.title": "nous trouver",
+    "address.openMap": "Ouvrir dans Maps",
     "abbout_us":"À propos de nous",
     "abbout_us_desc":"Cambyze Bank est là pour vous accompagner dans vos projets."
 }

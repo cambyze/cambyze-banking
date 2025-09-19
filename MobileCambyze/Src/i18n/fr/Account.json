@@ -1,0 +1,22 @@
+{
+  "not_Connected_Title": "Non connecté",
+  "not_Connected_Description": "Veuillez vous connecter pour accéder à votre compte !!",
+  "login_Register_Button": "Connexion/Inscription",
+  "noAccountsAvailable": "Aucun compte disponible.",
+  "welcomeMessage": "Bienvenue sur votre compte",
+  "createAccountButton": "Créer un nouveau compte",
+  "createAccountModalTitle": "Créer un nouveau compte",
+  "savingAccountButton": "Compte d'épargne",
+  "cancelButton": "Annuler",
+  "errorLoadingAccounts": "Erreur lors du chargement des comptes.",
+  "unableToCreateAccount": "Impossible de créer un compte. Veuillez réessayer.",
+  "accountTypeBanking": "Bancaire",
+  "accountTypeSaving": "Épargne",
+  "accountBalance": "Solde :",
+  "accountOverdraft": "Découvert :",
+  "accountDetails": "Détails du compte",
+  "NoOperationsFound": "Aucune opération trouvée.",
+  "LastAccountOperations": "Dernières opérations du compte",
+  "ChangePasswordButton": "Changer le mot de passe",
+  "BankTransferButton": "Virement bancaire"
+}

@@ -24,5 +24,8 @@
         "terms": "Terms of Use",
         "and": "and our",
         "privacy": "Privacy Policy"
-    }
+    },
+    "selected_address":"Selected address:",
+    "No_Address_Selected":"Please select an address",
+    "openMap":"select an address on the map"
 }

@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -315,18 +316,33 @@ import io.swagger.v3.oas.annotations.servers.Server;
               example = "john.doe@example.com"),
           @Parameter(name = "psw", required = true, description = "the User password",
               example = "MySuperPassw0rdIsSafe100%"),
-          @Parameter(name = "adress", required = true, description = "the User adress",
-              example = "8 rue Sainte-Anne, 75001 Paris.")},
+          @Parameter(name = "Street", required = true, description = "the User adress",
+              example = "8 rue Sainte-Anne, 75001 Paris."),
+          @Parameter(name = "city", required = false, description = "the User city",
+              example = "Paris"),
+          @Parameter(name = "state", required = false, description = "the User state",
+              example = "Ile de France"),
+          @Parameter(name = "country", required = false, description = "the User country",
+              example = "France"),
+          @Parameter(name = "secondaryAddress", required = false,
+              description = "the User secondary address", example = "Bat A, Appt 25")
+      },
       responses = {
           @ApiResponse(description = "boolean", content = @Content(mediaType = "boolean"))})
   @Produces("application/json")
   @Path("/createPerson")
   @PostMapping("/createPerson")
-  public String createPerson(@RequestParam(value = "name") String name,
+  public String createPerson(
+      @RequestParam(value = "name") String name,
       @RequestParam(value = "firstName") String firstName,
-      @RequestParam(value = "mail") String mail, @RequestParam(value = "psw") String psw,
-      @RequestParam(value = "adress") String adress) {
-    String per = bankingServices.createPerson(name, firstName, mail, psw, adress);
+      @RequestParam(value = "mail") String mail,
+      @RequestParam(value = "psw") String psw,
+      @RequestParam(value = "Street") String street,
+      @RequestParam(value = "city", required = false) String city,
+      @RequestParam(value = "state", required = false) String state,
+      @RequestParam(value = "country", required = false) String country,
+      @RequestParam(value = "secondaryAddress", required = false) String secondaryAddress) {
+    String per = bankingServices.createPerson(name, firstName, mail, psw, street, city, state, country, secondaryAddress);
     if (per != null && !per.isEmpty()) {
       LOGGER.info("New created Person: {}", per);
       return per;
@@ -561,4 +577,91 @@ import io.swagger.v3.oas.annotations.servers.Server;
     sendMailToUser(mail, "reset password", "Your password has been reset successfully. Please log in with your new password.");
     return true;
   }  
+
+@GET
+@Consumes("application/json")
+@Produces("application/json")
+@GetMapping("/seeProfile")
+  public Person getProfile(@RequestParam(value = "personId") String personId) {
+      LOGGER.info("Get profile request for personId: {}", personId);
+      if (personId == null || personId.isEmpty()) {
+          LOGGER.error("Error, no personId provided.");
+          return null;
+      }
+      Person person = bankingServices.seeProfileById(personId);
+      if (person == null) {
+          LOGGER.error("Error retrieving profile for personId: {}", personId);
+          return null;
+      }
+      return person;
+  }
+
+  @POST
+  @Consumes("application/json")
+  @Produces("application/json")
+  @PostMapping("/updateProfile")
+  public boolean updateProfile(@RequestParam(value = "personId") String personId,
+      @RequestParam(value = "name") String name,
+      @RequestParam(value = "firstName") String firstName,
+      @RequestParam(value = "mail") String mail,
+      @RequestParam(value = "psw") String psw,
+      @RequestParam(value = "Street") String street,
+      @RequestParam(value = "city", required = false) String city,
+      @RequestParam(value = "state", required = false) String state,
+      @RequestParam(value = "country", required = false) String country,
+      @RequestParam(value = "secondaryAddress", required = false) String secondaryAddress
+      )
+  {
+    LOGGER.info("Update profile request for personId: {}", personId);
+    if (personId == null || personId.isEmpty()) {
+      LOGGER.error("Error, no personId provided.");
+      return false;
+    }
+    Person updatedPerson = bankingServices.updateProfile(personId, name, firstName, 
+      mail, psw, street, city, state, country, secondaryAddress);
+    if (updatedPerson == null) {
+      LOGGER.error("Error updating profile for personId: {}", personId);
+      return false;
+    }
+    return true;
+  }
+
+  @POST
+  @Consumes("application/json")
+  @Produces("application/json")
+  @Operation(
+    summary = "Update overdraft amount",
+    description = "Update the overdraft amount for a given bank account number (ban)",
+    requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = "No request body needed, you have to use the required parameters: ban (the bank account number) & newOverdraftAmount (the new overdraft amount)",
+      required = false
+    ),
+    parameters = {
+      @Parameter(required = true, description = "Bank Account Number", example = "CAMBYZEBANK-2"),
+      @Parameter(required = true, description = "New overdraft amount", example = "500")
+    },
+    responses = {
+      @ApiResponse(description = "true if updated, false otherwise", content = @Content(mediaType = "boolean"))
+    }
+  )
+  @PostMapping("/updateOverdraftAmount")
+  public boolean updateOverdraftAmount(
+    @RequestParam(value = "ban") String ban,
+    @RequestParam(value = "newOverdraftAmount") int newOverdraftAmount) {
+    if (ban == null || ban.isEmpty()) {
+      LOGGER.error("Error, no ban provided.");
+      return false;
+    }
+    if (newOverdraftAmount < 0) {
+      LOGGER.error("Error, newOverdraftAmount must be non-negative.");
+      return false;
+    }
+    boolean updated = bankingServices.updateOverdraft(ban, newOverdraftAmount);
+    if (!updated) {
+      LOGGER.error("Error updating overdraft amount for ban: {}", ban);
+      return false;
+    }
+    return true;
+  }
+  
 }

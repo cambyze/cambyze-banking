@@ -1,0 +1,22 @@
+{
+  "not_Connected_Title": "Not Connected",
+  "not_Connected_Description": "Please log in to access your account !!",
+  "login_Register_Button": "Login/Register",
+  "noAccountsAvailable": "No accounts available.",
+  "welcomeMessage": "Welcome to your account",
+  "createAccountButton": "Create New Account",
+  "createAccountModalTitle": "Create New Account",
+  "savingAccountButton": "Saving Account",
+  "cancelButton": "Cancel",
+  "errorLoadingAccounts": "Error loading accounts.",
+  "unableToCreateAccount": "Unable to create account. Please try again.",
+  "accountTypeBanking": "Banking",
+  "accountTypeSaving": "Saving",
+  "accountBalance": "Balance:",
+  "accountOverdraft": "Overdraft:",
+  "accountDetails": "Account Details",
+  "NoOperationsFound": "No operations found.",
+  "LastAccountOperations": "Last Account Operations",
+  "ChangePasswordButton": "Change Password",
+  "BankTransferButton": "Bank Transfer"
+}

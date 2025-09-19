@@ -11,46 +11,68 @@ import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../App";
 import { useTranslation } from "react-i18next";
 import colors from "../Constants/colors";
+import Map from "./Map"; // Import Map component
 // import AddressModal from "./OpenStreetMap"; // Désactivé (commenté)
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function LoginRegisterSelect() {
   const { t } = useTranslation("loginRegister");
   const navigation = useNavigation();
   const { login } = useContext(AuthContext);
+  const [MapSelected, setMapSelected] = useState(false);
 
-  // Sélection login / register
+  // login / register
   const [selected, setSelected] = useState("register");
   const [status, setStatus] = useState("idle");
   const [passwordError, setPasswordError] = useState("");
 
-  // Champs Login
+  //  Login
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  // Champs Register
+  // Register
   const [registerFirstName, setRegisterFirstName] = useState("");
   const [registerLastName, setRegisterLastName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerCheckPassword, setRegisterCheckPassword] = useState("");
+  const [address, setAddress] = useState("");
 
-  // Partie adresse désactivée
-  // const [addressModalOpen, setAddressModalOpen] = useState(false);
-  // const [selectedAddress, setSelectedAddress] = useState(null);
+// reset form on change screen
+  useFocusEffect( React.useCallback(() => {
+      setLoginEmail("");
+      setLoginPassword("");
+      setRegisterFirstName("");
+      setRegisterLastName("");
+      setRegisterEmail("");
+      setRegisterPassword("");
+      setRegisterCheckPassword("");
+      setAddress("");
+      setStatus("idle");
+      setPasswordError("");
+      setSelected("register");
+    }, [])
+  );
 
   const handleSubmitLogin = async ({ email, password }) => {
     setStatus("authenticating");
     try {
-      const res = await fetch("/login2", {
+      const res = await fetch("http://localhost:8080/login2", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ mail: email, psw: password }).toString(),
       });
+      console.log("Trying to fetch:", `http://localhost:8080/login2?mail=ccolomb@mail.com&psw=psw`);
 
       if (!res.ok) throw new Error(await res.text());
       const success = await res.json();
       if (!success) throw new Error("Email non reconnu");
-
+      console.log("Login successful:", success, success.personId, success.mail, success.firstName, success.lastName);
+      if (success.authenticated === false){ 
+        console.log("Login failed: ");
+        throw new Error("Mot de passe incorrect");
+      }
+      console.log("Login successful:", success , success.personId, success.mail, success.firstName, success.lastName);
       login({
         mail: success.mail,
         firstName: success.firstName,
@@ -80,10 +102,10 @@ export default function LoginRegisterSelect() {
       return;
     }
 
-    const address = ""; // Adress empty since OSM disabled
-
     try {
-      const res = await fetch("/createPerson", {
+      const ipAdress = "localhost:8080";
+      const res = await 
+      fetch("http://" + ipAdress + "/createPerson", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -198,6 +220,16 @@ export default function LoginRegisterSelect() {
         onChangeText={setRegisterCheckPassword}
         secureTextEntry
       />
+      <Text style={styles.footerText}>
+        {address !== "" ? t("selected_address") : t("No_Address_Selected")} {address}
+      </Text>
+      {/* --------------------------------------- */}
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={() => setMapSelected(!MapSelected)}
+              >
+                <Text style={styles.secondaryButtonText}>{t("openMap")}</Text>
+              </TouchableOpacity>
       {passwordError !== "" && (
         <Text style={styles.error}>{passwordError}</Text>
       )}
@@ -282,8 +314,10 @@ export default function LoginRegisterSelect() {
         <Text style={styles.link}>
           {t("Condition_Of_Use.privacy")}
         </Text>
-        .
+
       </Text>
+
+      <Map isOpen={MapSelected} onClose={() => setMapSelected(false)} onAddressChange={setAddress} />
     </ScrollView>
   );
 }
@@ -299,12 +333,12 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 32,
     fontWeight: "800",
-    color: "#4A6FA5",
+    color: colors.primary,
     marginBottom: 8,
   },
   subHeader: {
     fontSize: 18,
-    color: "#4A4A4A",
+    color: colors.subHeaderText,
     marginBottom: 20,
     textAlign: "center",
   },
@@ -359,6 +393,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
+   secondaryButton: {
+      backgroundColor: colors.SecondaryButtonBackground,
+      padding: 12,
+      borderRadius: 6,
+      alignItems: "center",
+    },
   buttonDisabled: {
     backgroundColor: colors.ButtonDisabled,
   },

@@ -100,8 +100,6 @@ const leafletHTML = `
 </html>
 `;
 
-
-
   const sendMail = async () => {
     setLoading(true);
     try {
@@ -257,7 +255,7 @@ const styles = StyleSheet.create({
     padding: 20,
     marginHorizontal: 10,
     borderRadius: 10,
-    shadowColor: "#000",
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,

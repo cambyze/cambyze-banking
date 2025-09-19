@@ -9,6 +9,8 @@ import ForgotPsw from "./components/ForgotPsw.jsx";
 import AccountDetails from "./components/AccountDetails.jsx";
 import BankTransfer from "./components/BankTransfer.jsx";
 import ResetPassword from "./components/RessetPsw.jsx";
+import TestServices from "./components/TestServices.jsx";
+import Profile from "./components/Profile.jsx";
 export const AuthContext = createContext();
 
 function App() {
@@ -42,6 +44,8 @@ function App() {
           <Route path="/account/:id" element={<AccountDetails />} />
           <Route path="/bank-transfer" element={<BankTransfer />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
+          <Route path="/testServices" element={<TestServices />} />
+          <Route path="/profile" element={<Profile />} />
           {/* <Route path="/forget-password" element={<ForgetPassword />} /> */}
           <Route path="*" element={<div><text>404 Not Found</text></div>} />
         </Routes>

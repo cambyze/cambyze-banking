@@ -139,6 +139,9 @@ export default function Account() {
           <div className="mt-4 text-lg font-semibold text-gray-700">
             {t("Account.Welcome_desc")}
           </div>
+          <button className="mt-4 px-6 py-2 bg-white text-[#4A6FA5] rounded-lg hover:bg-[#f0f4fa] transition" onClick={ () => navigate("/profile") }>
+            {t("Account.View_Profile")}
+          </button>
           <div className="text-gray-500 text-sm">{t("Account.Manage_Your_Account")} </div>
           <button
             className="mt-4 px-6 py-2 bg-white text-[#4A6FA5] rounded-lg hover:bg-[#] transition"
